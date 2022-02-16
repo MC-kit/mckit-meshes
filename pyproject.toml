@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "mckit-meshes"
 version = "0.1.0"
-description = "\"Python tools to work with MCNP meshtallies and weight meshes.\""
+description = "Python tools to work with MCNP meshtallies and weight meshes."
 authors = ["dvp2015 <dmitri_portnov@yahoo.com>"]
 license = "MIT"
 homepage = "https://github.com/MC-kit/mckit-meshes"
@@ -41,6 +41,8 @@ numpy = "^1.21.4"
 xarray = "^0.21.1"
 h5netcdf = "^0.13.1"
 multipledispatch = "^0.6.0"
+pyevtk = "^1.4.1"
+toolz = "^0.11.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.0.1"

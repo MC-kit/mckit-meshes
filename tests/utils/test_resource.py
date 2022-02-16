@@ -10,7 +10,7 @@ THIS_FILENAME = Path(__file__).name
     "package, resource, expected",
     [
         (None, THIS_FILENAME, THIS_FILENAME),
-        ("tests", "data/Ag-1.json", "data/Ag-1.json"),
+        ("tests", "data/ng-2.3.5.ps", "data/ng-2.3.5.ps"),
     ],
 )
 def test_filename_resolver(package, resource, expected):
