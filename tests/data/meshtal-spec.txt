@@ -1,0 +1,26 @@
+fc14    === WW generation mesh for neutrons
+fmesh14:n
+        geom=cyl
+        axs=0 0 2000 vec=1800 0 -1500
+        origin=0 0 -1500
+        imesh=300 800 1000 1800
+        iints=2 10 2 1
+        jmesh=950 1150 1300 1500 2100 3500
+        jints=1 8 5 2 2 1
+        kmesh=0.055556 0.94444 1
+        kints=5 1 5
+        emesh=1e-08 2e-08 5e-08 7e-08 1e-07
+              1e-06 1e-05 1e-04 0.001 0.01
+              0.1   1     5     15    20
+fc24    === WW generation mesh for photons
+fmesh24:p
+        geom=cyl
+        axs=0 0 2000 vec=1800 0 -1500
+        origin=0 0 -1500
+        imesh=300 800 1000 1800
+        iints=2 10 2 1
+        jmesh=950 1150 1300 1500 2100 3500
+        jints=1 8 5 2 2 1
+        kmesh=0.055556 0.94444 1
+        kints=5 1 5
+        emesh=100
