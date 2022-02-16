@@ -34,10 +34,9 @@ import abc
 
 from dataclasses import dataclass
 
+import mckit_meshes.utils as ut
 import numpy as np
 import numpy.linalg as linalg
-
-import mckit_meshes.utils as ut
 
 from mckit_meshes.utils.cartesian_product import cartesian_product
 
@@ -328,7 +327,7 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
         px, py, pz = (
             point - self.origin
         )  # TODO dvp: apply local_coordinates instead of the following
-        l1_square = px ** 2 + py ** 2
+        l1_square = px**2 + py**2
         l1 = np.sqrt(l1_square)  # distance to origin from point projection on z=0 plane
         assert 0.0 < l1
         # Terms of integration of L^2 in cylindrical coordinates

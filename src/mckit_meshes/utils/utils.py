@@ -1,4 +1,4 @@
-from typing import Callable, Iterable, Any, TextIO
+from typing import Any, Callable, Iterable, TextIO
 
 import sys
 

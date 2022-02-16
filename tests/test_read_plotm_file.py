@@ -1,13 +1,11 @@
 import datetime as dt
 
-import numpy as np
-
-from numpy.testing import assert_almost_equal, assert_array_almost_equal
-
-import pytest
 import mckit_meshes.read_plotm_file as rpf
+import numpy as np
+import pytest
 
 from mckit_meshes.utils.testing import a
+from numpy.testing import assert_almost_equal, assert_array_almost_equal
 
 
 @pytest.fixture(scope="module")
@@ -81,7 +79,7 @@ def test_first_page_from_contour_file_meta_info_is_complete(test_file):
             0,
             a(100, 100),
         ),
-    ]
+    ],
 )
 def test_convert_to_real_coordinates(msg, lines, expected, x, y, scale):
     page = rpf.Page(

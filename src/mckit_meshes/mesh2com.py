@@ -1,12 +1,7 @@
 import sys
 
 
-def mesh2com(
-    xbins,
-    ybins,
-    zbins,
-    out=sys.stdout
-):
+def mesh2com(xbins, ybins, zbins, out=sys.stdout):
     """
     Prints content for mcnp com file to plot crossections over mesh
     voxels centers and with normals in x, y and z directions.
@@ -18,8 +13,8 @@ def mesh2com(
     extent = ybins[-1] - ybins[0], zbins[-1] - zbins[0]
     extent = max(*extent)
     extent = extent, extent
-    origin_y , origin_z = 0.5 * (ybins[-1] + ybins[0]), 0.5 * (zbins[-1] + zbins[0])
-    xmids = 0.5*(xbins[:-1] + xbins[1:])
+    origin_y, origin_z = 0.5 * (ybins[-1] + ybins[0]), 0.5 * (zbins[-1] + zbins[0])
+    xmids = 0.5 * (xbins[:-1] + xbins[1:])
     for x in xmids:
         command = ""
         if not current_basis or current_basis != basis:
@@ -39,8 +34,8 @@ def mesh2com(
     extent = xbins[-1] - xbins[0], zbins[-1] - zbins[0]
     extent = max(*extent)
     extent = extent, extent
-    origin_x , origin_z = 0.5 * (xbins[-1] + xbins[0]), 0.5 * (zbins[-1] + zbins[0])
-    ymids = 0.5*(ybins[:-1] + ybins[1:])
+    origin_x, origin_z = 0.5 * (xbins[-1] + xbins[0]), 0.5 * (zbins[-1] + zbins[0])
+    ymids = 0.5 * (ybins[:-1] + ybins[1:])
     for y in ymids:
         command = ""
         if not current_basis or current_basis != basis:
@@ -60,8 +55,8 @@ def mesh2com(
     extent = xbins[-1] - xbins[0], ybins[-1] - ybins[0]
     extent = max(*extent)
     extent = extent, extent
-    origin_x , origin_y = 0.5 * (xbins[-1] + xbins[0]), 0.5 * (ybins[-1] + ybins[0])
-    zmids = 0.5*(zbins[:-1] + zbins[1:])
+    origin_x, origin_y = 0.5 * (xbins[-1] + xbins[0]), 0.5 * (ybins[-1] + ybins[0])
+    zmids = 0.5 * (zbins[:-1] + zbins[1:])
     for z in zmids:
         command = ""
         if not current_basis or current_basis != basis:
@@ -77,4 +72,3 @@ def mesh2com(
         if command:
             print(command, file=out)
     print("end", file=out)
-

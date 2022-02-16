@@ -1,4 +1,4 @@
-from typing import Iterator, List, TextIO, Generator
+from typing import Generator, Iterator, List, TextIO
 
 import datetime as dt
 import re

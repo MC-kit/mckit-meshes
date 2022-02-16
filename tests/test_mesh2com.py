@@ -1,7 +1,7 @@
 import numpy as np
 
-from six import StringIO
 from mckit_meshes.mesh2com import *
+from six import StringIO
 
 
 def test_mesh2com_simple_cube():
@@ -14,7 +14,7 @@ file all
 basis 0 1 0 0 0 1 extent 2.0 2.0 origin 0.0 0.0 0.0
 basis 1 0 0 0 0 1 extent 2.0 2.0
 basis 1 0 0 0 1 0 extent 2.0 2.0
-end 
+end
 """.strip()
     assert expected == out.getvalue().strip()
     out.close()
@@ -32,7 +32,7 @@ basis 0 1 0 0 0 1 extent 2.0 2.0 origin -0.5 0.0 0.0
  origin 0.5 0.0 0.0
 basis 1 0 0 0 0 1 extent 2.0 2.0 origin 0.0 0.0 0.0
 basis 1 0 0 0 1 0 extent 2.0 2.0
-end 
+end
 """.strip()
     assert expected == out.getvalue().strip()
     out.close()
@@ -54,7 +54,7 @@ basis 1 0 0 0 0 1 extent 10.0 10.0 origin 0.0 -1.5 0.0
  origin 0.0 0.5 0.0
  origin 0.0 1.5 0.0
 basis 1 0 0 0 1 0 extent 10.0 10.0 origin 0.0 0.0 0.0
-end 
+end
 """.strip()
     assert expected == out.getvalue().strip()
     out.close()
@@ -76,7 +76,7 @@ basis 1 0 0 0 1 0 extent 10.0 10.0 origin 0.0 0.0 -1.5
  origin 0.0 0.0 -0.5
  origin 0.0 0.0 0.5
  origin 0.0 0.0 1.5
-end 
+end
 """.strip()
     assert expected == out.getvalue().strip()
     out.close()
