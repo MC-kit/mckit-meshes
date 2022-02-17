@@ -1,6 +1,5 @@
-"""
-Functions for rebinning histogram-like distributions.
-"""
+"""Functions for rebinning histogram-like distributions."""
+
 # TODO: DVP: implement propagation in result the indexes computed on shrink
 # for reuse in FMesh.shrink for equivalent grids or alike
 
@@ -9,11 +8,18 @@ from typing import Tuple
 import collections.abc
 import gc
 import itertools
+import platform
 
 import numpy as np
 
-from mckit_meshes.utils.no_daemon_process import Pool
 from numpy import ndarray
+
+if platform.system() == "Linux":
+    from mckit_meshes.utils.no_daemon_process import Pool
+else:
+    Pool = None
+
+# TODO
 
 __all__ = [
     "interpolate",
@@ -196,7 +202,7 @@ def rebin_nd(
     except StopIteration:
         return a
 
-    if a.size > external_process_threshold:
+    if Pool is not None and a.size > external_process_threshold:
         recursion_res = Pool(processes=1).apply(
             rebin_nd, args=(a, rebin_spec, assume_sorted)
         )
