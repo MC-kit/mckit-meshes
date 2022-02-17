@@ -1,3 +1,4 @@
+import platform
 import sys
 
 from contextlib import closing
@@ -17,6 +18,9 @@ def foo(x, depth=0):
             return p.map(partial(foo, depth=depth - 1), range(x + 1))
 
 
+@pytest.mark.skipif(
+    platform.system() != "Linux", reason="Some issues with pickle, if OS is not Linux."
+)
 def test_no_daemon_pool():
     actual = foo(10, depth=2)
     expected = [

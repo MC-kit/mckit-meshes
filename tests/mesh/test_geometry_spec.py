@@ -74,7 +74,7 @@ def test_cartesian_local_coordinates():
 def test_cylinder_local_coordinates(points, origin, expected):
     cylinder = CylinderGeometrySpec(a(1, 2, 3), a(4, 5, 6), a(0, 0.5, 1), origin=origin)
     actual = cylinder.local_coordinates(points)
-    assert np.array_equal(expected, actual)
+    assert_array_almost_equal(expected, actual)
 
 
 def test_boundaries():

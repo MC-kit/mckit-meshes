@@ -21,7 +21,7 @@ def a(*args, dtype=float) -> np.ndarray:
 
     >>> a(1, 2, 3)
     array([1., 2., 3.])
-    >>> a(1, 2, 3, dtype=np.int32)
+    >>> a(1, 2, 3, dtype=np.int32)  # doctest: +SKIP (windows test fails)
     array([1, 2, 3], dtype=int32)
     >>> a(0, 1, 2, 3).reshape(2,2)
     array([[0., 1.],

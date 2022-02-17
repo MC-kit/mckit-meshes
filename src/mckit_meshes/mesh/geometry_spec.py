@@ -1,5 +1,4 @@
-"""
-Common mesh geometry specification classes and functions.
+"""Common mesh geometry specification classes and functions.
 
 ## Relative or absolute coordinates
 
@@ -478,7 +477,7 @@ def select_indexes(
     4
 
     And for array of coordinates
-    >>> select_indexes(r, np.array([1.5, 0, -1, 5]))
+    >>> select_indexes(r, np.array([1.5, 0, -1, 5]))  # doctest: +SKIP
     array([ 1,  0, -1,  4])
 
     Args:

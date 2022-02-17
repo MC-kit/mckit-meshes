@@ -3,13 +3,13 @@ from typing import Any, Callable, Final, Optional, Union
 import warnings
 
 import matplotlib
+import mckit_meshes.read_plotm_file as rpf
 import numpy as np
 
 from matplotlib import cm, collections, colors, patches
 from matplotlib import pyplot as plt
 from matplotlib.path import Path as PlotPath
-from mckit_meshes.mcnp import read_plotm_file as rpf
-from mckit_meshes.ploting import BriefTicksAroundOneTicker
+from mckit_meshes.plotting import BriefTicksAroundOneTicker
 
 SetupAxesStrategyType = Callable[[plt.Axes], None]
 
