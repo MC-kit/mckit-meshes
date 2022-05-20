@@ -48,7 +48,6 @@ import logging
 from pathlib import Path
 
 import mckit_meshes.mesh.geometry_spec as gc
-import mckit_meshes.utils as ut
 import mckit_meshes.utils.no_daemon_process as ndp
 import mckit_meshes.utils.rebin as rebin
 import numpy as np
@@ -568,10 +567,7 @@ class FMesh(object):
             key = data_name + " E={0:.4e}".format(e)
             cell_data[key] = self.data[i, :, :, :]
         name = data_name + " total"
-        # if six.PY2:
-        #     name = name.encode("ascii", "ignore")
         cell_data[name] = np.sum(self.data, axis=0)
-
         gridToVTK(filename, self.ibins, self.jbins, self.kbins, cellData=cell_data)
 
     # noinspection PyUnresolvedReferences

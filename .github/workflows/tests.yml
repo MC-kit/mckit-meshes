@@ -26,7 +26,6 @@ jobs:
     name: "Python ${{ matrix.python-version }} on ${{ matrix.os }}"
     runs-on: ${{ matrix.os }}
     if: |
-      !startsWith(github.event.head_commit.message, 'bump:') &&
       !contains(github.event.head_commit.message, '[skip_ci]')
     strategy:
       fail-fast: false
@@ -40,8 +39,8 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           architecture: x64
-      - name: Checkout submodules
-        run: git submodule update --init --recursive --depth=1
+      # - name: Checkout submodules
+        # run: git submodule update --init --recursive --depth=1
       - name: Install nox and nox-poetry
         run: pip install --constraint=.github/workflows/constraints.txt nox nox-poetry
       - name: Install poetry
