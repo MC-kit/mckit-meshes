@@ -428,22 +428,20 @@ class FMesh(object):
         )
         return totals, rel_error
 
-    def save_2_npz(self, filename: Union[str, Path] = None) -> None:
+    def save_2_npz(self, filename: Path, override: bool = False) -> None:
         """Writes this object to numpy npz file_.
 
         Args:
-            filename : {str,Path}
+            filename:
                 Filename to which the object is saved. If file_ is a
                 file-object, then the filename is unchanged. If file_ is a string,
                 a .npz extension will be appended to the file_ name if it does not
                 already have one. By default, the name of file_ is the tally name.
         """
-        if filename is None:
-            filename = f"{self.name}.npz"
-        if isinstance(filename, str):
-            filename = Path(filename)
         if not filename.suffix == ".npz":
             filename = filename.with_suffix(".npz")
+        if filename.exists() and not override:
+            raise FileExistsError(filename)
         kwd = dict(
             meta=np.array(
                 [FMesh.NPZ_MARK, FMesh.NPZ_FORMAT, self.name, self.kind],
@@ -1255,25 +1253,27 @@ def _find_words_after(f, *keywords: str) -> List[str]:
 
 def m_2_npz(
     stream: TextIO,
+    prefix: Path,
+    *,
     name_select=lambda _: True,
     tally_select=lambda _: True,
-    prefix: str = "",
     suffix: str = "",
     mesh_file_info=None,
+    override: bool = False,
 ):
     """Splits the tallies from the mesh file into separate npz files.
 
     Args:
         stream: File with MCNP mesh tallies
+        prefix: Prefix for separate mesh files names
         name_select: function(int)->bool
             Filter fmesh by names
         tally_select: function(FMesh)->bool
             Filter fmesh by content.
-        prefix: str
-            Prefix for separate mesh files names
         suffix: srt
             Prefix for separate mesh files names
         mesh_file_info: structure to store meshtal file header info: nps.
+        override: allow to override already existing files (default: not allowed - raise exception)
 
     Returns:
         total:  Total number of files created
@@ -1287,7 +1287,7 @@ def m_2_npz(
         mesh_file_info.nps = nps
 
     for t in iter_meshtal(stream, name_select=name_select, tally_select=tally_select):
-        t.save_2_npz(prefix + str(t.name) + suffix)
+        t.save_2_npz(prefix / (str(t.name) + suffix), override=override)
         total += 1
 
     return total
