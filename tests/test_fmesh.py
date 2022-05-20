@@ -2,7 +2,6 @@ import os
 
 from collections import namedtuple
 from copy import copy
-from io import StringIO
 from pathlib import Path
 
 import numpy as np
@@ -10,7 +9,6 @@ import pytest
 
 from mckit_meshes.fmesh import FMesh, iter_meshtal, m_2_npz, merge_tallies, read_meshtal
 from mckit_meshes.mesh.geometry_spec import CartesianGeometrySpec
-from mckit_meshes.utils.resource import path_resolver
 from mckit_meshes.utils.testing import a
 from numpy.testing import assert_almost_equal, assert_array_equal
 
@@ -126,8 +124,8 @@ def test_m_2_npz(tmp_path, simple_bins):
     )
     m2 = copy(m1)
     m2.name = 2
-    tfn = str(tmp_path / "fmesh.m")
-    with open(tfn, "w") as fid:
+    tfn = tmp_path / "fmesh.m"
+    with tfn.open("w") as fid:
         fid.write("timestamp\n")
         fid.write("problem title\n")
         fid.write(
@@ -136,18 +134,18 @@ def test_m_2_npz(tmp_path, simple_bins):
         m1.save_2_mcnp_mesh(fid)
         m2.save_2_mcnp_mesh(fid)
     # now use already opened file
-    m_2_npz(Path(tfn).open(), lambda name_: name_ == 14)
-    npz = "14.npz"
-    assert os.path.exists(npz)
-    assert not os.path.exists("2.npz")
+    m_2_npz(tfn.open(), tmp_path, name_select=lambda name_: name_ == 14)
+    npz = tmp_path / "14.npz"
+    assert npz.exists()
+    assert not (tmp_path / "2.npz").exists()
     actual = FMesh.load_npz(npz)
     assert actual == m1
     os.remove(npz)
-    prefix = str(tmp_path / "out/")
-    m_2_npz(Path(tfn).open(), prefix=prefix)
-    npz_index = {prefix + "14.npz": m1, prefix + "2.npz": m2}
+    prefix = tmp_path / "out"
+    m_2_npz(tfn.open(), prefix=prefix)
+    npz_index = {prefix / "14.npz": m1, prefix / "2.npz": m2}
     for npz in npz_index.keys():
-        assert os.path.exists(npz)
+        assert npz.exists()
         actual = FMesh.load_npz(npz)
         assert actual == npz_index[npz]
         os.remove(npz)
@@ -169,7 +167,7 @@ def test_m_2_npz_with_comment(tmp_path, simple_bins):
     )
     m2 = copy(m1)
     m2.name = 2
-    tfn = str(tmp_path / "fmesh.m")
+    tfn = tmp_path / "fmesh.m"
     with open(tfn, "w") as fid:
         fid.write("timestamp\n")
         fid.write("problem title\n")
@@ -179,16 +177,16 @@ def test_m_2_npz_with_comment(tmp_path, simple_bins):
         m1.save_2_mcnp_mesh(fid)
         m2.save_2_mcnp_mesh(fid)
     # now use already opened file
-    m_2_npz(Path(tfn).open(), lambda name_: name_ == 14)
-    npz = "14.npz"
-    assert os.path.exists(npz)
-    assert not os.path.exists("2.npz")
+    m_2_npz(tfn.open(), tmp_path, name_select=lambda name_: name_ == 14)
+    npz = tmp_path / "14.npz"
+    assert npz.exists()
+    assert not (tmp_path / "2.npz").exists()
     actual = FMesh.load_npz(npz)
     assert actual == m1
     os.remove(npz)
-    prefix = str(tmp_path / "out/")
-    m_2_npz(Path(tfn).open(), prefix=prefix)
-    npz_index = {prefix + "14.npz": m1, prefix + "2.npz": m2}
+    prefix = tmp_path / "out/"
+    m_2_npz(tfn.open(), prefix=prefix)
+    npz_index = {prefix / "14.npz": m1, prefix / "2.npz": m2}
     for npz in npz_index.keys():
         assert os.path.exists(npz)
         actual = FMesh.load_npz(npz)

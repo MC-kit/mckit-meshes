@@ -462,6 +462,7 @@ class FMesh(object):
             kwd["origin"] = np.array(self._geometry_spec.origin)
             kwd["axis"] = np.array(self._geometry_spec.axs)
 
+        filename.parent.mkdir(parents=True, exist_ok=True)
         np.savez_compressed(str(filename), **kwd)
 
     @classmethod
