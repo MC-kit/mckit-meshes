@@ -43,6 +43,7 @@ h5netcdf = ">=1.0.0"
 multipledispatch = "^0.6.0"
 pyevtk = "^1.4.1"
 toolz = "^0.11.2"
+loguru = "^0.6.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.0.1"
