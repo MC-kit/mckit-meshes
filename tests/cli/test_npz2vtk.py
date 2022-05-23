@@ -32,29 +32,26 @@ def test_with_prefix(tmp_path, runner, data):
     assert output_path.exists()
 
 
-# def test_multiple_files(tmp_path, runner, data):
-#     original = data / "1.m"
-#     input1 = tmp_path / "1.m"
-#     shutil.copy(original, input1)
-#     input2 = tmp_path / "2.m"
-#     shutil.copy(original, input2)
-#     prefix = tmp_path / "some_npz"
-#     result = runner.invoke(
-#         mckit_meshes,
-#         args=["npz2vtk", "-p", prefix, str(input1), str(input2)],
-#         catch_exceptions=False,
-#     )
-#     assert result.exit_code == 0
-#     # prefix = Path(prefix)
-#     for i in [1, 2]:
-#         assert (
-#             prefix / f"{i}"
-#         ).exists(), """When multiple mesh files are specified the tallies should be distributed
-#              to different directories named as the mesh files"""
-#         output_path = prefix / f"{i}" / "1004.npz"
-#         assert output_path.exists()
-#
-#
+def test_multiple_files(tmp_path, runner, data):
+    inputs = []
+    for i in [1004, 2004]:
+        original = data / f"{i}.npz"
+        shutil.copy(original, tmp_path)
+        inputs.append(str(tmp_path / f"{i}.npz"))
+    prefix = tmp_path / "some_vtk"
+    result = runner.invoke(
+        mckit_meshes,
+        args=["npz2vtk", "-p", str(prefix), *inputs],
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0
+    # prefix = Path(prefix)
+    for i in [1004, 2004]:
+        assert (
+            prefix / f"{i}.vtr"
+        ).exists(), """When multiple npz files are specified the vtk files should be created for every one."""
+
+
 # def test_without_prefix(cd_tmpdir, runner, source):
 #     result = runner.invoke(
 #         mckit_meshes, args=["npz2vtk", str(source)], catch_exceptions=False
