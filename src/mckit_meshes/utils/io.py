@@ -1,8 +1,13 @@
 """Output utilities."""
+from __future__ import annotations
+
+import typing as t
 
 from typing import Any, Iterable, TextIO
 
 import sys
+
+from pathlib import Path
 
 
 def print_cols(
@@ -30,3 +35,25 @@ def print_cols(
         else:
             print(" ", file=fid, end="")
     return column
+
+
+def ignore_existing_file_strategy(_: str | Path) -> None:
+    pass
+
+
+def raise_error_when_file_exists_strategy(path: str | Path) -> None:
+    path = Path(path)
+    if path.exists():
+        errmsg = f"""\
+Cannot override existing file \"{path}\".
+Please remove the file or specify --override option"""
+        # raise click.UsageError(errmsg)
+        raise FileExistsError(errmsg)
+
+
+def check_if_path_exists(override: bool) -> t.Callable[[str | Path], None]:
+    return (
+        ignore_existing_file_strategy
+        if override
+        else raise_error_when_file_exists_strategy
+    )

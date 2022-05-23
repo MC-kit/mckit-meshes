@@ -139,9 +139,8 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
     def boundaries_shape(self) -> Tuple[int, int, int]:
         return self.ibins.size, self.jbins.size, self.kbins.size
 
-    def surrounds_point(self, x, y, z, local: bool = True) -> bool:
-        """
-        Check if the point is within the volume of mesh.
+    def surrounds_point(self, x: float, y: float, z: float, local: bool = True) -> bool:
+        """Check if the point (x,y,z) is within the volume of mesh.
 
         By default, assumes that the point is given in local coordinates.
         """
@@ -195,7 +194,9 @@ class CartesianGeometrySpec(AbstractGeometrySpec):
     def local_coordinates(self, points: np.ndarray) -> np.ndarray:
         assert points.shape[-1] == 3, "Expected cartesian point array or single point"
         if self.origin is not ZERO_ORIGIN:
-            return cast(np.ndarray, points - ZERO_ORIGIN)
+            return cast(
+                np.ndarray, points - ZERO_ORIGIN
+            )  # TODO dvp: recall what is this subtraction for?
         else:
             return points
 

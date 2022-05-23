@@ -4,11 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from mckit_meshes import __version__
 from mckit_meshes.cli.runner import mckit_meshes
 from mckit_meshes.fmesh import FMesh
-
-from .utils import run_version
 
 
 @pytest.fixture()
@@ -16,8 +13,12 @@ def source(data):
     return data / "1.m"
 
 
-def test_version(runner):
-    run_version(runner, mckit_meshes, __version__)
+def test_help(runner):
+    result = runner.invoke(
+        mckit_meshes, args=["mesh2npz", "--help"], catch_exceptions=False
+    )
+    assert result.exit_code == 0
+    assert "Usage: " in result.output
 
 
 def test_with_prefix(tmp_path, runner, data):
@@ -65,7 +66,7 @@ def test_without_prefix(cd_tmpdir, runner, source):
     assert output_path.exists()
 
 
-def test_existing_mesh_tally_file_and_not_specified_meshtally(
+def test_existing_mesh_tally_file_and_not_specified_mesh_tally(
     cd_tmpdir, runner, source
 ):
     t = Path.cwd()
@@ -93,21 +94,11 @@ def test_no_mesh_tally_file_and_not_specified_mesh_tally(cd_tmpdir, runner):
 
 
 def test_not_existing_mesh_tally_file(runner):
-    # with pytest.raises(RuntimeError) as x:
     result = runner.invoke(
         mckit_meshes, args=["mesh2npz", "not-existing.m"], catch_exceptions=False
     )
     assert result.exit_code > 0
     assert "does not exist" in result.output
-
-
-def test_help(runner):
-    result = runner.invoke(
-        mckit_meshes, args=["mesh2npz", "--help"], catch_exceptions=False
-    )
-    assert result.exit_code == 0
-    # print(result.output)
-    assert "Usage: " in result.output
 
 
 def test_failure_on_existing_output_file_when_override_is_not_set(
@@ -127,10 +118,11 @@ def test_failure_on_existing_output_file_when_override_is_not_set(
     errmsg = f"""\
 Cannot override existing file \"{output_path}\".
 Please remove the file or specify --override option"""
-    assert errmsg in result.output
+    assert errmsg in str(result.exception)
 
 
-def test_2035224(cd_tmpdir, runner, data):
+def test_long_mesh_number(cd_tmpdir, runner, data):
+    """Check if mesh number representation in npz file is long enough to handle large numbers."""
     prefix = Path.cwd()
     _input = data / "2035224.m"
     result = runner.invoke(

@@ -1,14 +1,7 @@
-from typing import List
-
-import sys
-
-from contextlib import contextmanager
-from pathlib import Path
-
 import click
 import mckit_meshes.version as meta
 
-from mckit_meshes.cli.commands import do_mesh2npz
+from mckit_meshes.cli.commands import do_mesh2npz, do_npz2vtk
 
 # from mckit_meshes.cli.commands.common import get_default_output_directory
 from mckit_meshes.cli.logging import init_logger, logger
@@ -52,7 +45,7 @@ def mckit_meshes(ctx, verbose: bool, quiet: bool, logfile: str, override: bool) 
     "-p",
     default="npz",
     help="""A prefix to prepend output files (default: "npz/"),
-output files are also prepended with MESH_TALLY file base name, 
+output files are also prepended with MESH_TALLY file base name,
 if there are more than 1 input file""",
 )
 @click.argument(
@@ -65,6 +58,28 @@ if there are more than 1 input file""",
 def mesh2npz(ctx, prefix, mesh_tallies):
     """Converts mesh files to npz files."""
     return do_mesh2npz(prefix, mesh_tallies, ctx.obj["OVERRIDE"])
+
+
+@mckit_meshes.command()
+@click.pass_context
+@click.option(
+    "--prefix",
+    "-p",
+    default=".",
+    help="""A prefix to prepend output files (default: "./"),
+output files are also prepended with MESH_TALLY file base name,
+if there are more than 1 input file""",
+)
+@click.argument(
+    "npz_files",
+    metavar="[<npz_file>...]",
+    type=click.Path(exists=True),
+    nargs=-1,
+    required=False,
+)
+def npz2vtk(ctx, prefix, npz_files):
+    """Converts npz files to VTK files."""
+    return do_npz2vtk(prefix, npz_files, ctx.obj["OVERRIDE"])
 
 
 if __name__ == "__main__":

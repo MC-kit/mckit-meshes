@@ -40,39 +40,35 @@ from ...utils.io import check_if_path_exists
 __LOG = logging.getLogger(__name__)
 
 
-def revise_mesh_tallies(mesh_tallies) -> t.List[Path]:
-    if mesh_tallies:
-        return list(map(Path, mesh_tallies))
+def revise_npz_files(npz_files) -> t.List[Path]:
+    if npz_files:
+        return list(map(Path, npz_files))
 
     cwd = Path.cwd()
-    rv = list(cwd.glob("*.m"))
+    rv = list(cwd.glob("*.npz"))
     if not rv:
-        errmsg = "No .m-files found in directory '{}', nothing to do.".format(
-            cwd.absolute()
-        )
+        errmsg = f"No .npz-files found in directory '{cwd.absolute()}', nothing to do."
         __LOG.warning(errmsg)
     return rv
 
 
-def mesh2npz(
-    prefix: str | Path, mesh_tallies: t.Iterable[str | Path], override: bool = False
+def npz2vtk(
+    prefix: str | Path, npz_files: t.Iterable[str | Path], override: bool = False
 ) -> None:
     """Convert MCNP meshtal file to a number of npz files, one for each mesh tally."""
-    mesh_tallies = revise_mesh_tallies(mesh_tallies)
-    single_input = len(mesh_tallies) == 1
+    npz_files = revise_npz_files(npz_files)
     prefix = Path(prefix)
-    for m in mesh_tallies:
-        m = Path(m)
-        if single_input:
-            p = prefix
-        else:
-            p = prefix / m.stem
-        __LOG.info("Processing {}".format(m))
-        __LOG.debug("Saving tallies with prefix {}".format(prefix))
-        p.mkdir(parents=True, exist_ok=True)
-        with m.open() as stream:
-            fmesh.m_2_npz(
-                stream,
-                prefix=p,
-                check_existing_file_strategy=check_if_path_exists(override),
-            )
+    file_exists_strategy = check_if_path_exists(override)
+    for npz in npz_files:
+        npz = Path(npz)
+        __LOG.info("Processing {}".format(npz))
+        __LOG.debug("Saving VTK file with prefix {}".format(prefix))
+        prefix.mkdir(parents=True, exist_ok=True)
+        mesh = fmesh.FMesh.load_npz(npz)
+        vtk_file_stem = f"{prefix / str(mesh.name)}"
+        vtk_file_name = (
+            vtk_file_stem + ".vtr"
+        )  # TODO dvp: revise this when it comes to saving structured mesh
+        file_exists_strategy(vtk_file_name)
+        vtk = mesh.save2vtk(vtk_file_stem)
+        __LOG.info("Saved VTK to {}", vtk)
