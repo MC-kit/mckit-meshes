@@ -49,7 +49,6 @@ def mckit_meshes(
 
     obj = ctx.ensure_object(dict)
     obj["OVERRIDE"] = override
-    # noqa
 
 
 @mckit_meshes.command()
@@ -75,7 +74,6 @@ def mesh2npz(
     """Converts mesh files to npz files."""
     do_mesh2npz(prefix, mesh_tallies, ctx.obj["OVERRIDE"])
     #
-    # noqa
 
 
 @mckit_meshes.command()
@@ -100,7 +98,6 @@ def npz2vtk(ctx: click.Context, prefix: str | Path, npz_files: t.List[t.Any]) ->
     do_npz2vtk(prefix, npz_files, ctx.obj["OVERRIDE"])
     # Don't remove these comments: this makes flake8 happy on absent arguments in the docstring.
     #
-    # noqa
 
 
 if __name__ == "__main__":

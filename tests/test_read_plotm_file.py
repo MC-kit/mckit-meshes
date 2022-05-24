@@ -73,8 +73,8 @@ def test_first_page_from_contour_file_meta_info_is_complete(test_file):
     [
         (
             "# bottom -> origin ",
-            a(1875, 188, 1875, 1125).reshape(1, 2, 2),  # noqa
-            a(0, -100, 0, 0).reshape(1, 2, 2),  # noqa
+            a(1875, 188, 1875, 1125).reshape(1, 2, 2),
+            a(0, -100, 0, 0).reshape(1, 2, 2),
             0,
             0,
             a(100, 100),
