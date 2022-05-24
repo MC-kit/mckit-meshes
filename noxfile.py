@@ -29,8 +29,8 @@ except ImportError:
 # TODO dvp: uncomment when code and docs are more mature
 nox.options.sessions = (
     "safety",
-    "isort",
-    "black",
+    # "isort",
+    # "black",
     "pre-commit",
     # TODO dvp: enable default runs with  lint and mypy when code matures and
     #           if these checks are not already enabled in pre-commit
