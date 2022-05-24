@@ -1,3 +1,15 @@
+"""The CLI application module.
+
+The module applies :meth:`click` API to organize CLI interface for McKit-meshes package.
+"""
+from __future__ import annotations
+
+import typing as t
+
+import datetime
+
+from pathlib import Path
+
 import click
 import mckit_meshes.version as meta
 
@@ -28,14 +40,16 @@ VERSION = meta.__version__
 )
 @click.option("--logfile", default=None, help="File to log to")
 @click.version_option(VERSION, prog_name=NAME)
-def mckit_meshes(ctx, verbose: bool, quiet: bool, logfile: str, override: bool) -> None:
-    # """McKit-meshes command line interface."""
-
+def mckit_meshes(
+    ctx: click.Context, verbose: bool, quiet: bool, logfile: str, override: bool
+) -> None:
+    """McKit-meshes command line interface."""
     init_logger(logfile, quiet, verbose)
     # TODO dvp: add customized logger configuring from a configuration toml-file.
 
     obj = ctx.ensure_object(dict)
     obj["OVERRIDE"] = override
+    # noqa
 
 
 @mckit_meshes.command()
@@ -55,9 +69,13 @@ if there are more than 1 input file""",
     nargs=-1,
     required=False,
 )
-def mesh2npz(ctx, prefix, mesh_tallies):
+def mesh2npz(
+    ctx: click.Context, prefix: str | Path, mesh_tallies: t.List[t.Any]
+) -> None:
     """Converts mesh files to npz files."""
-    return do_mesh2npz(prefix, mesh_tallies, ctx.obj["OVERRIDE"])
+    do_mesh2npz(prefix, mesh_tallies, ctx.obj["OVERRIDE"])
+    #
+    # noqa
 
 
 @mckit_meshes.command()
@@ -77,10 +95,15 @@ if there are more than 1 input file""",
     nargs=-1,
     required=False,
 )
-def npz2vtk(ctx, prefix, npz_files):
+def npz2vtk(ctx: click.Context, prefix: str | Path, npz_files: t.List[t.Any]) -> None:
     """Converts npz files to VTK files."""
-    return do_npz2vtk(prefix, npz_files, ctx.obj["OVERRIDE"])
+    do_npz2vtk(prefix, npz_files, ctx.obj["OVERRIDE"])
+    # Don't remove these comments: this makes flake8 happy on absent arguments in the docstring.
+    #
+    # noqa
 
 
 if __name__ == "__main__":
+    ct = datetime.datetime.now()
     mckit_meshes(obj={})
+    logger.success(f"Elapsed time: {datetime.datetime.now() - ct}")
