@@ -11,6 +11,7 @@ on:
       - "**.yaml"
       - "**.yml"
       - "**.toml"
+      - "**/data/**"
   pull_request:
     branches:
       - "master"
