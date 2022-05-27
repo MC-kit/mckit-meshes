@@ -62,8 +62,6 @@ def activate_virtualenv_in_precommit_hooks(s: Session) -> None:
     Args:
         s: The Session object.
     """
-    assert s.bin is not None
-
     virtualenv = s.env.get("VIRTUAL_ENV")
     if virtualenv is None:
         return
@@ -131,7 +129,7 @@ def precommit(s: Session) -> None:
 @session(python="3.10")
 def safety(s: Session) -> None:
     """Scan dependencies for insecure packages."""
-    args = s.posargs or ["--ignore", "44715"]
+    args = s.posargs  # or ["--ignore", "44715"]
     # TODO dvp: remove the 'ignore' option above on numpy updating to
     #      1.22.1 and above
     #      safety reports:
