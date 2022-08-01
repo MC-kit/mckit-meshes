@@ -42,7 +42,7 @@ xarray = ">=2022.3.0"
 h5netcdf = ">=1.0.0"
 multipledispatch = "^0.6.0"
 pyevtk = "^1.4.1"
-toolz = "^0.11.2"
+toolz = ">=0.11.2,<0.13.0"
 loguru = "^0.6.0"
 
 [tool.poetry.dev-dependencies]
