@@ -116,6 +116,7 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
     @abc.abstractmethod
     def cylinder(self) -> bool:
         """Is this an instance of a cylinder mesh specification?"""
+        ...
 
     @abc.abstractmethod
     def local_coordinates(self, points: np.ndarray) -> np.ndarray:
@@ -123,10 +124,8 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
 
         Args:
             points: ... with global coordinates
-
-        Returns:
-            coordinates suitable to search in spatial bins
         """
+        ...
 
     @abc.abstractmethod
     def get_mean_square_distance_weights(self, point) -> float:
@@ -134,31 +133,48 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
 
         Args:
             point: ... from where to compute distance
-
-        Returns:
-            mean square distances for each mesh voxel
         """
+        ...
 
     @abc.abstractmethod
     def calc_cell_centers(self) -> np.ndarray:
+        """Calculate cell (voxel) centers."""
         ...
 
     @abc.abstractmethod
     def print_geom(self, io: TextIO, indent: str) -> None:
+        """Print geometry specification.
+
+        Args:
+            io: stream to print to
+            indent: indent to insert before lines
+
+        """
         ...
 
     # Generic methods
 
     @property
     def bins_shape(self) -> Tuple[int, int, int]:
+        """Shape of data corresponding to spatial bins.
+
+        Returns:
+            Tuple with the data shape.
+        """
         return (self.ibins.size - 1), (self.jbins.size - 1), (self.kbins.size - 1)
 
     @property
     def bins_size(self) -> int:
+        """Size of data corresponding to spatial bins.
+
+        Returns:
+            int: number of voxels
+        """
         return (self.ibins.size - 1) * (self.jbins.size - 1) * (self.kbins.size - 1)
 
     @property
     def boundaries(self) -> np.ndarray:
+        """Corners or min, max values of bins."""
         return np.vstack(
             (
                 self.ibins[[0, -1]],
@@ -169,6 +185,7 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
 
     @property
     def boundaries_shape(self) -> Tuple[int, int, int]:
+        """Bins (boundaries) shape."""
         return self.ibins.size, self.jbins.size, self.kbins.size
 
     def surrounds_point(self, x: float, y: float, z: float, local: bool = True) -> bool:
@@ -188,6 +205,16 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
         Union[int, slice, np.ndarray],
         Union[int, slice, np.ndarray],
     ]:
+        """Select indices for data corresponding to given spatial values
+
+        Args:
+            i_values: indices along i (X or R) dimension
+            j_values: ... along j (Y or Z)
+            k_values: ... along k (Z or Theta)
+
+        Returns:
+            see :py:func:`select_indexes()`
+        """
         return (
             select_indexes(self.ibins, i_values),
             select_indexes(self.jbins, j_values),
