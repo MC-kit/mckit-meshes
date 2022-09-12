@@ -65,7 +65,8 @@ jobs:
       - name: Run pre commit checks
         run: |
           nox --force-color --session=pre-commit
-          # this includes pycln, isort, black, flake8 checks
+          # this includes pycln, isort, black checks
+          # TODO dvp: but not flake8 - not satisfied yet
 
 #       - name: Run mypy static type checks
 #         run: |
