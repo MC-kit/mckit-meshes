@@ -9,7 +9,7 @@ import numpy as np
 from matplotlib import cm, collections, colors, patches
 from matplotlib import pyplot as plt
 from matplotlib.path import Path as PlotPath
-from mckit_meshes.plotting import BriefTicksAroundOneTicker
+from mckit_meshes.plotting.BriefTicksAroundOneTicker import BriefTicksAroundOneTicker
 
 SetupAxesStrategyType = Callable[[plt.Axes], None]
 

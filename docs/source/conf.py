@@ -14,16 +14,15 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
-from typing import List
 
 # -- Project information -----------------------------------------------------
 
-project = "mckit-nuclides"
-copyright = "2022, dvp"
-author = "dvp"
+project = "mckit-meshes"
+copyright = "2022, dvp2015"
+author = "dvp2015"
 
 # The full version, including alpha/beta/rc tags
-release = "0.1.0"
+release = "0.1.2"
 
 
 # -- General configuration ---------------------------------------------------
@@ -31,15 +30,19 @@ release = "0.1.0"
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions: List[str] = []
+extensions: list[str] = [
+    # "pytest_doctestplus.sphinx.doctestplus", # see https://github.com/astropy/pytest-doctestplus
+]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ["_templates"]
+templates_path: list[str] = [
+    # "_templates"
+]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns: List[str] = []
+exclude_patterns: list[str] = []
 
 
 # -- Options for HTML output -------------------------------------------------

@@ -57,15 +57,15 @@ References
 .. Substitutions
 
 .. |Maintained| image:: https://img.shields.io/badge/Maintained%3F-yes-green.svg
-   :target: https://github.com/MC-kit/mckit_meshes/graphs/commit-activity
+   :target: https://github.com/MC-kit/mckit-meshes/graphs/commit-activity
 .. |Tests| image:: https://github.com/MC-kit/mckit_meshes/workflows/Tests/badge.svg
-   :target: https://github.com/MC-kit/mckit_meshes/actions?workflow=Tests
+   :target: https://github.com/MC-kit/mckit-meshes/actions?workflow=Tests
    :alt: Tests
-.. |License| image:: https://img.shields.io/github/license/MC-kit/mckit_meshes
+.. |License| image:: https://img.shields.io/github/license/MC-kit/mckit-meshes
    :target: https://github.com/MC-kit/mckit_meshes
-.. |Versions| image:: https://img.shields.io/pypi/pyversions/mckit_meshes
+.. |Versions| image:: https://img.shields.io/pypi/pyversions/mckit-meshes
    :alt: PyPI - Python Version
-.. |PyPI| image:: https://img.shields.io/pypi/v/mckit_meshes
+.. |PyPI| image:: https://img.shields.io/pypi/v/mckit-meshes
    :target: https://pypi.org/project/mckit_meshes/
    :alt: PyPI
 .. |Docs| image:: https://readthedocs.org/projects/mckit_meshes/badge/?version=latest

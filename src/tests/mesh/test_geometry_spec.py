@@ -184,3 +184,20 @@ def test_adjust_axs_vec_for_mcnp():
 def test_select_indices(inp, value, expected):
     actual = select_indexes(inp, value)
     assert expected == actual
+
+
+@pytest.mark.parametrize(
+    "inp, values, expected",
+    [
+        (a(0, 5, 10), [-1, 0, 2], [-1, 0, 0]),
+        (a(0, 5, 10), [-1, 0, 6], [-1, 0, 1]),
+        (a(0, 5, 10), [-1, 0, 10], [-1, 0, 1]),
+        (a(0, 5, 10), [-1, 0, 11], [-1, 0, 2]),
+        (a(0, 5, 10), [1, 2, 3], [0, 0, 0]),
+    ],
+)
+def test_select_indices_with_arrays(inp, values, expected):
+    actual = select_indexes(inp, values)
+    assert np.array_equal(
+        expected, actual
+    ), f"for {inp} and {values}, we expect {expected}, actual {actual}"

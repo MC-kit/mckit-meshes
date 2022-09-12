@@ -27,11 +27,13 @@
     used in FMesh.
 
 """
-from typing import Iterable, List, Optional, Sequence, TextIO, Tuple, Union, cast
+from __future__ import annotations
+
+from typing import Final, Iterable, List, Optional, Sequence, TextIO, Tuple, Union, cast
 
 import abc
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import mckit_meshes.utils as ut
 import numpy as np
@@ -39,17 +41,17 @@ import numpy.linalg as linalg
 
 from mckit_meshes.utils.cartesian_product import cartesian_product
 
-_2PI = 2.0 * np.pi
-_1_TO_2PI = 1 / _2PI
-__DEG_2_RAD = np.pi / 180.0
-CARTESIAN_BASIS = np.eye(3, dtype=np.double)
-NX, NY, NZ = CARTESIAN_BASIS
+_2PI: Final[float] = 2.0 * np.pi
+_1_TO_2PI: Final[float] = 1 / _2PI
+__DEG_2_RAD: Final[float] = np.pi / 180.0
+CARTESIAN_BASIS: Final[np.ndarray] = np.eye(3, dtype=np.double)
+(NX, NY, NZ) = CARTESIAN_BASIS
 
-DEFAULT_AXIS = NZ
-DEFAULT_VEC = NX
+DEFAULT_AXIS: Final[np.ndarray] = NZ
+DEFAULT_VEC: Final[np.ndarray] = NX
 
 
-ZERO_ORIGIN: np.ndarray = np.zeros((3,), dtype=np.double)
+ZERO_ORIGIN: Final[np.ndarray] = np.zeros((3,), dtype=np.double)
 
 
 def as_float_array(array) -> np.ndarray:
@@ -67,16 +69,26 @@ def as_float_array(array) -> np.ndarray:
 
 @dataclass(eq=False)
 class AbstractGeometrySpecData:
+    """Data mixin for :py:class:`AbstractGeometrySpec`.
+
+    Provides reusable data fields.
+
+    """
+
     ibins: np.ndarray
     jbins: np.ndarray
     kbins: np.ndarray
-    origin: np.ndarray = ZERO_ORIGIN
+    origin: np.ndarray = field(default_factory=lambda: ZERO_ORIGIN.copy())
 
     def __post_init__(self) -> None:
-        """Check if a caller provided data in numpy format."""
+        """Force a caller provided data as numpy arrays.
+
+        Raises:
+            TypeError: if any of the fields is not a numpy array.
+        """
         for b in self.bins:
             if not isinstance(b, np.ndarray):
-                raise ValueError(f"Expected numpy array, actual {b[0]}...{b[-1]}")
+                raise TypeError(f"Expected numpy array, actual {b[0]}...{b[-1]}")
 
     def __hash__(self) -> int:
         return hash(self.bins)
@@ -89,44 +101,80 @@ class AbstractGeometrySpecData:
 
     @property
     def bins(self) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-        """Return tuple of origin and bins."""
+        """Pack the fields to tuple.
+
+        Returns:
+            tuple of origin and bins.
+        """
         return self.origin, self.ibins, self.jbins, self.kbins
 
 
 class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
+    """Common base for rectilinear and cylinder mesh specifications."""
+
     @property
     @abc.abstractmethod
     def cylinder(self) -> bool:
+        """Is this an instance of a cylinder mesh specification?"""
         ...
 
     @abc.abstractmethod
     def local_coordinates(self, points: np.ndarray) -> np.ndarray:
+        """Convert points coordinates to local system.
+
+        Args:
+            points: ... with global coordinates
+        """
         ...
 
     @abc.abstractmethod
-    def get_mean_square_distance_weights(self, point):
+    def get_mean_square_distance_weights(self, point) -> float:
+        """Estimate weights as a voxel mean square distance from the point.
+
+        Args:
+            point: ... from where to compute distance
+        """
         ...
 
     @abc.abstractmethod
-    def calc_cell_centers(self):
+    def calc_cell_centers(self) -> np.ndarray:
+        """Calculate cell (voxel) centers."""
         ...
 
     @abc.abstractmethod
     def print_geom(self, io: TextIO, indent: str) -> None:
+        """Print geometry specification.
+
+        Args:
+            io: stream to print to
+            indent: indent to insert before lines
+
+        """
         ...
 
     # Generic methods
 
     @property
     def bins_shape(self) -> Tuple[int, int, int]:
+        """Shape of data corresponding to spatial bins.
+
+        Returns:
+            Tuple with the data shape.
+        """
         return (self.ibins.size - 1), (self.jbins.size - 1), (self.kbins.size - 1)
 
     @property
     def bins_size(self) -> int:
+        """Size of data corresponding to spatial bins.
+
+        Returns:
+            int: number of voxels
+        """
         return (self.ibins.size - 1) * (self.jbins.size - 1) * (self.kbins.size - 1)
 
     @property
     def boundaries(self) -> np.ndarray:
+        """Corners or min, max values of bins."""
         return np.vstack(
             (
                 self.ibins[[0, -1]],
@@ -137,11 +185,11 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
 
     @property
     def boundaries_shape(self) -> Tuple[int, int, int]:
+        """Bins (boundaries) shape."""
         return self.ibins.size, self.jbins.size, self.kbins.size
 
-    def surrounds_point(self, x, y, z, local: bool = True) -> bool:
-        """
-        Check if the point is within the volume of mesh.
+    def surrounds_point(self, x: float, y: float, z: float, local: bool = True) -> bool:
+        """Check if the point (x,y,z) is within the volume of mesh.
 
         By default, assumes that the point is given in local coordinates.
         """
@@ -157,13 +205,23 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
         Union[int, slice, np.ndarray],
         Union[int, slice, np.ndarray],
     ]:
+        """Select indices for data corresponding to given spatial values
+
+        Args:
+            i_values: indices along i (X or R) dimension
+            j_values: ... along j (Y or Z)
+            k_values: ... along k (Z or Theta)
+
+        Returns:
+            see :py:func:`select_indexes()`
+        """
         return (
             select_indexes(self.ibins, i_values),
             select_indexes(self.jbins, j_values),
             select_indexes(self.kbins, k_values),
         )
 
-    def print(self, io: TextIO, columns: int = 6):
+    def print(self, io: TextIO, columns: int = 6) -> None:
         indent = " " * 8
         self.print_geom(io, indent)
         print(indent, "origin=", " ".join(format_floats(self.origin)), sep="", file=io)
@@ -195,7 +253,9 @@ class CartesianGeometrySpec(AbstractGeometrySpec):
     def local_coordinates(self, points: np.ndarray) -> np.ndarray:
         assert points.shape[-1] == 3, "Expected cartesian point array or single point"
         if self.origin is not ZERO_ORIGIN:
-            return cast(np.ndarray, points - ZERO_ORIGIN)
+            return cast(
+                np.ndarray, points - ZERO_ORIGIN
+            )  # TODO dvp: recall what is this subtraction for?
         else:
             return points
 
@@ -234,25 +294,26 @@ class CartesianGeometrySpec(AbstractGeometrySpec):
 
 @dataclass(eq=False)
 class CylinderGeometrySpec(AbstractGeometrySpec):
-    axs: np.ndarray = DEFAULT_AXIS
-    vec: np.ndarray = DEFAULT_VEC
+    """Cylinder spec.
+
+    Attributes:
+        axs: cylinder axis
+        vec: vector to measure angle (theta) from
+    """
+
+    axs: np.ndarray = field(default_factory=lambda: DEFAULT_AXIS.copy())
+    vec: np.ndarray = field(default_factory=lambda: DEFAULT_VEC.copy())
 
     def __post_init__(self):
         super().__post_init__()
 
         if self.axs is not DEFAULT_AXIS:
             if not isinstance(self.axs, np.ndarray):
-                # self.axs = as_float_array(self.axs)
-                raise ValueError(f"Expected axs as numpy array, actual {self.axs}")
-            if np.array_equal(self.axs, DEFAULT_AXIS):
-                self.axs = DEFAULT_AXIS  # internalize on default value
+                raise TypeError(f"Expected axs as numpy array, actual {self.axs}")
 
         if self.vec is not DEFAULT_VEC:
             if not isinstance(self.vec, np.ndarray):
-                # self.vec = as_float_array(self.vec)
-                raise ValueError(f"Expected vec as numpy array, actual {self.vec}")
-            if np.array_equal(self.vec, DEFAULT_VEC):
-                self.axs = DEFAULT_VEC  # internalize on default value
+                raise TypeError(f"Expected vec as numpy array, actual {self.vec}")
 
         if not (self.theta[0] == 0.0 and self.theta[-1] == 1.0):
             raise ValueError("Theta is expected in rotations only")
@@ -292,8 +353,9 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
         local_points: np.ndarray = points - self.origin
         local_points[..., :] = (
             np.sqrt(local_points[..., 0] ** 2 + local_points[..., 1] ** 2),  # r
-            local_points[..., 2],  # z
-            np.arctan2(local_points[..., 1], local_points[..., 0]) * _1_TO_2PI,  # theta
+            local_points[..., 2],  # z, just copy
+            np.arctan2(local_points[..., 1], local_points[..., 0])
+            * _1_TO_2PI,  # theta in rotations
         )
         return local_points
 
@@ -375,7 +437,7 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
         axs = self.axs / linalg.norm(self.axs)
         axs_z = np.dot(axs, NZ)
 
-        def aggregator(elements):
+        def _aggregator(elements):
             r, z, fi = elements
             x, y = r * (v1 * np.cos(fi) + v2 * np.sin(fi))[0:2]
             x += _x0
@@ -384,7 +446,7 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
             return np.array([x, y, z], dtype=float)
 
         cell_centers: np.ndarray = cartesian_product(
-            r_mids, z_mids, t_mids, aggregator=aggregator
+            r_mids, z_mids, t_mids, aggregator=_aggregator
         )
 
         return cell_centers
@@ -425,13 +487,13 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
         )
 
 
-def _print_bins(indent, prefix, _ibins, io, columns: int = 6):
+def _print_bins(indent, prefix, _ibins, io, columns: int = 6) -> None:
     intervals, coarse_mesh = compute_intervals_and_coarse_bins(_ibins)
     coarse_mesh = coarse_mesh[1:]  # drop the first value - it's presented with origin
     print(indent, f"{prefix}mesh=", sep="", end="", file=io)
     second_indent = indent + " " * 5
     ut.print_n(
-        map("{:.6g}".format, coarse_mesh), io=io, indent=second_indent, columns=columns
+        (f"{x:.6g}" for x in coarse_mesh), io=io, indent=second_indent, columns=columns
     )
     print(indent, f"{prefix}ints=", sep="", end="", file=io)
     ut.print_n(intervals, io=io, indent=second_indent, columns=columns)
@@ -446,39 +508,39 @@ def select_indexes(
 
     Examples:
 
-    >>> r = np.arange(5)
-    >>> r
-    array([0, 1, 2, 3, 4])
+        >>> r = np.arange(5)
+        >>> r
+        array([0, 1, 2, 3, 4])
 
-    For x is None return slice over all `a` indexes.
+        For x is None return slice over all `a` indexes.
 
-    >>> select_indexes(r, None)
-    slice(0, 5, None)
+        >>> select_indexes(r, None)
+        slice(0, 5, None)
 
-    For non specified x, if input array represents just one bin,
-    then return index 0 to squeeze results.
-    >>> select_indexes(np.array([10,20]), None)
-    0
+        For non specified x, if input array represents just one bin,
+        then return index 0 to squeeze results.
+        >>> select_indexes(np.array([10,20]), None)
+        0
 
-    For x = 1.5, we have 1 < 1.5 < 2, so the bin index is to be 1
-    >>> select_indexes(r, 1.5)
-    1
+        For x = 1.5, we have 1 < 1.5 < 2, so the bin index is to be 1
+        >>> select_indexes(r, 1.5)
+        1
 
-    For x = 0, it's the first bin, and index is to be 0
-    >>> select_indexes(r, 0)
-    0
+        For x = 0, it's the first bin, and index is to be 0
+        >>> select_indexes(r, 0)
+        0
 
-    For coordinates below r[0] return -1.
-    >>> select_indexes(r, -1)
-    -1
+        For coordinates below r[0] return -1.
+        >>> select_indexes(r, -1)
+        -1
 
-    For coordinates above  r[-1] return a.size-1.
-    >>> select_indexes(r, 5)
-    4
+        For coordinates above  r[-1] return a.size-1.
+        >>> select_indexes(r, 5)
+        4
 
-    And for array of coordinates
-    >>> select_indexes(r, np.array([1.5, 0, -1, 5]))  # doctest: +SKIP
-    array([ 1,  0, -1,  4])
+        And for array of coordinates
+        >>> select_indexes(r, np.array([1.5, 0, -1, 5]))
+        array([ 1,  0, -1,  4])
 
     Args:
         a:  bin boundaries
@@ -513,7 +575,7 @@ def format_floats(floats: Iterable[float], _format="{:.6g}") -> Iterable[str]:
 
 def compute_intervals_and_coarse_bins(
     arr: Sequence[float], tolerance: float = 1.0e-4
-) -> Tuple[List[int], List[float]]:
+) -> Tuple[List[int], Sequence[float]]:
     """Compute fine intervals and coarse binning.
 
     Examples:

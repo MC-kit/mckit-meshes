@@ -203,9 +203,9 @@ class WgtMesh:
                 return True
         return False
 
-    def __add__(self, other: "WgtMesh") -> "WgtMesh":
+    def __add__(self, other) -> "WgtMesh":
         assert self.bins_are_equal(other)
-        weights = list(a + b for a, b in zip(self.weights, other.weights))
+        weights = [a + b for a, b in zip(self.weights, other.weights)]
         res = WgtMesh(
             self._geometry_spec,
             self.energies,
@@ -213,9 +213,9 @@ class WgtMesh:
         )
         return res
 
-    def __sub__(self, other: "WgtMesh") -> "WgtMesh":
+    def __sub__(self, other) -> "WgtMesh":
         assert self.bins_are_equal(other)
-        weights = list(a - b for a, b in zip(self.weights, other.weights))
+        weights = [a - b for a, b in zip(self.weights, other.weights)]
         res = WgtMesh(
             self._geometry_spec,
             self.energies,
@@ -224,7 +224,7 @@ class WgtMesh:
         return res
 
     def __mul__(self, coeff: float) -> "WgtMesh":
-        weights = list(w * coeff for w in self.weights)
+        weights = [w * coeff for w in self.weights]
         res = WgtMesh(
             self._geometry_spec,
             self.energies,

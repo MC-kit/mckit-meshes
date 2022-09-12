@@ -2,9 +2,9 @@
 
 See `Cjolowicz's article <https://cjolowicz.github.io/posts/hypermodern-python-03-linting>`_
 """
-from typing import List
+from typing import Final, List
 
-import platform
+import re
 import shutil
 import sys
 
@@ -14,42 +14,53 @@ from textwrap import dedent
 
 import nox
 
-# from nox.sessions import Session
-try:
-    from nox_poetry import Session, session  # mypy: ignore
-except ImportError:
-    message = f"""\
-    Nox failed to import the 'nox-poetry' package.
+from nox import Session, session  # mypy: ignore
 
-    Please install it using the following command:
-
-    {sys.executable} -m pip install nox-poetry"""
-    raise SystemExit(dedent(message)) from None
-
-# TODO dvp: uncomment when code and docs are more mature
 nox.options.sessions = (
-    "safety",
-    "isort",
-    "black",
+    # "safety",   # TODO dvp: check if 'safety' session is necessary, if yes, return it
     "pre-commit",
-    # TODO dvp: enable default runs with  lint and mypy when code matures and
-    #           if these checks are not already enabled in pre-commit
-    # "lint",
-    # "mypy",
     "xdoctest",
     "tests",
     "docs-build",
 )
 
-package = "mckit_meshes"
-locations = f"src/{package}", "tests", "noxfile.py", "docs/source/conf.py"
 
-supported_pythons = ["3.8", "3.9", "3.10"]
-black_pythons = "3.10"
-mypy_pythons = "3.10"
-lint_pythons = "3.10"
+NAME_RGX = re.compile(r'name\s*=\s*"(?P<package>[-_a-zA-Z]+)"')
 
-on_windows = platform.system() == "Windows"
+
+def find_my_name() -> str:
+    """Find this package name.
+
+    Search the first row in pyproject.toml in format
+
+        name = "<package>"
+
+    and returns the <package> value.
+    This allows to reuse the noxfile.py in similar projects
+    without any changes.
+
+    Returns:
+        str: Current package found in pyproject.toml
+
+    Raises:
+        ValueError: if the pattern is not found.
+    """
+    with Path("pyproject.toml").open() as fid:
+        for line in fid:
+            res = NAME_RGX.match(line)
+            if res is not None:
+                return res["package"].replace("-", "_")
+    msg = "Cannot find package name"
+    raise ValueError(msg)
+
+
+package: Final = find_my_name()
+locations: Final = f"src/{package}", "src/tests", "noxfile.py", "docs/source/conf.py"
+
+supported_pythons: Final = "3.8", "3.9", "3.10", "3.11"
+black_pythons: Final = "3.10"
+mypy_pythons: Final = "3.10"
+lint_pythons: Final = "3.10"
 
 
 def activate_virtualenv_in_precommit_hooks(s: Session) -> None:
@@ -62,8 +73,6 @@ def activate_virtualenv_in_precommit_hooks(s: Session) -> None:
     Args:
         s: The Session object.
     """
-    assert s.bin is not None  # noqa: S101
-
     virtualenv = s.env.get("VIRTUAL_ENV")
     if virtualenv is None:
         return
@@ -108,52 +117,36 @@ def activate_virtualenv_in_precommit_hooks(s: Session) -> None:
 def precommit(s: Session) -> None:
     """Lint using pre-commit."""
     args = s.posargs or ["run", "--all-files", "--show-diff-on-failure"]
-    s.install(
-        "black",
-        "darglint",
-        "flake8",
-        "flake8-bandit",
-        "flake8-bugbear",
-        "flake8-docstrings",
-        "flake8-rst-docstrings",
-        "pep8-naming",
-        "pre-commit",
-        "pre-commit-hooks",
-        "isort",
-        "mypy",
-        "types-setuptools",
+    s.run(
+        "poetry",
+        "install",
+        "--only",
+        "pre_commit,style,isort,black,flake8",
+        external=True,
     )
     s.run("pre-commit", *args)
     if args and args[0] == "install":
         activate_virtualenv_in_precommit_hooks(s)
 
 
-@session(python="3.10")
-def safety(s: Session) -> None:
-    """Scan dependencies for insecure packages."""
-    args = s.posargs or ["--ignore", "44715"]
-    # TODO dvp: remove the 'ignore' option above on numpy updating to
-    #      1.22.1 and above
-    #      safety reports:
-    #      -> numpy, installed 1.22.1, affected >0, id 44715
-    #      All versions of Numpy are affected by CVE-2021-41495:
-    #      A null Pointer Dereference vulnerability exists in numpy.sort,
-    #      in the PyArray_DescrNew function due to missing return-value validation,
-    #      which allows attackers to conduct DoS attacks by
-    #      repetitively creating sort arrays.
-    #      https://github.com/numpy/numpy/issues/19038
-    #      numpy-1.22.2 - still does not work
-
-    requirements = s.poetry.export_requirements()
-    s.install("safety")
-    s.run("safety", "check", "--full-report", f"--file={requirements}", *args)
+# @session(python="3.10")
+# def safety(s: Session) -> None:
+#     """Scan dependencies for insecure packages."""
+#     requirements = s.poetry.export_requirements()
+#     s.install("safety")
+#     s.run("safety", "check", "--full-report", f"--file={requirements}", *s.posargs)
 
 
 @session(python=supported_pythons)
 def tests(s: Session) -> None:
     """Run the test suite."""
-    s.install(".")
-    s.install("coverage[toml]", "pytest", "pygments")
+    s.run(
+        "poetry",
+        "install",
+        "--only",
+        "main,test,xdoctest,coverage",
+        external=True,
+    )
     try:
         s.run("coverage", "run", "--parallel", "-m", "pytest", *s.posargs)
     finally:
@@ -178,43 +171,69 @@ def coverage(s: Session) -> None:
     s.run("coverage", *args)
 
 
-@session(python=supported_pythons)
+# TODO dvp: check some strange errors on 3.8, 3.9 and slow install of pandas on 3.11
+@session(python="3.10")
 def typeguard(s: Session) -> None:
     """Runtime type checking using Typeguard."""
-    s.install(".")
-    s.install("pytest", "typeguard", "pygments")
+    s.run(
+        "poetry",
+        "install",
+        "--only",
+        "main,test,typeguard",
+        external=True,
+    )
+    # s.install("pytest", "typeguard", "pygments")
     s.run("pytest", f"--typeguard-packages={package}", *s.posargs)
 
 
 @session(python="3.10")
 def isort(s: Session) -> None:
     """Organize imports."""
-    s.install("isort")
     search_patterns = [
         "*.py",
-        "mckit_meshes/*.py",
-        "tests/*.py",
+        f"src/{package}/*.py",
+        "src/tests/*.py",
         "benchmarks/*.py",
         "profiles/*.py",
-        #        "adhoc/*.py",
     ]
     files_to_process: List[str] = sum(
-        map(lambda p: glob(p, recursive=True), search_patterns), []
+        (glob(p, recursive=True) for p in search_patterns), []
     )
-    s.run(
-        "isort",
-        "--check",
-        "--diff",
-        *files_to_process,
-        external=True,
-    )
+    if files_to_process:
+        s.run(
+            "poetry",
+            "install",
+            "--only",
+            "isort",
+            external=True,
+        )
+        s.run(
+            "pycln",
+            "--check",
+            "--diff",
+            *files_to_process,
+            external=True,
+        )
+        s.run(
+            "isort",
+            "--check",
+            "--diff",
+            *files_to_process,
+            external=True,
+        )
 
 
 @session(python=black_pythons)
 def black(s: Session) -> None:
     """Run black code formatter."""
     args = s.posargs or locations
-    s.install("black")
+    s.run(
+        "poetry",
+        "install",
+        "--only",
+        "black",
+        external=True,
+    )
     s.run("black", *args)
 
 
@@ -222,16 +241,12 @@ def black(s: Session) -> None:
 def lint(s: Session) -> None:
     """Lint using flake8."""
     args = s.posargs or locations
-    s.install(
+    s.run(
+        "poetry",
+        "install",
+        "--only",
         "flake8",
-        "flake8-annotations",
-        "flake8-bandit",
-        "flake8-black",
-        "flake8-bugbear",
-        "flake8-docstrings",
-        "flake8-rst-docstrings",
-        "flake8-import-order",
-        "darglint",
+        external=True,
     )
     s.run("flake8", *args)
 
@@ -239,9 +254,14 @@ def lint(s: Session) -> None:
 @session(python=mypy_pythons)
 def mypy(s: Session) -> None:
     """Type-check using mypy."""
-    args = s.posargs or ["src", "tests", "docs/source/conf.py"]
-    s.install(".")
-    s.install("mypy", "pytest", "types-setuptools")
+    args = s.posargs or ["src", "docs/source/conf.py"]
+    s.run(
+        "poetry",
+        "install",
+        "--only",
+        "main,mypy",
+        external=True,
+    )
     s.run("mypy", *args)
     if not s.posargs:
         s.run("mypy", f"--python-executable={sys.executable}", "noxfile.py")
@@ -251,29 +271,27 @@ def mypy(s: Session) -> None:
 def xdoctest(s: Session) -> None:
     """Run examples with xdoctest."""
     args = s.posargs or ["all"]
-    s.install(".")
-    s.install("xdoctest[colors]")
+    s.run(
+        "poetry",
+        "install",
+        "--only",
+        "main,xdoctest",
+        external=True,
+    )
     s.run("python", "-m", "xdoctest", package, *args)
 
 
-# TODO dvp: readthedocs limit python version to 3.8, check later. See .readthedocs.yaml
-@session(name="docs-build", python="3.8")
+@session(name="docs-build", python="3.10")
 def docs_build(s: Session) -> None:
     """Build the documentation."""
     args = s.posargs or ["docs/source", "docs/_build"]
-    s.install(".")
-    s.install(
-        "sphinx",
-        "sphinx-click",
-        "sphinx-rtd-theme",
-        # "sphinxcontrib-htmlhelp",
-        # "sphinxcontrib-jsmath",
-        "sphinxcontrib-napoleon",
-        # "sphinxcontrib-qthelp",
-        "sphinx-autodoc-typehints",
-        # "sphinx_autorun",
+    s.run(
+        "poetry",
+        "install",
+        "--only",
+        "main,docs",
+        external=True,
     )
-
     build_dir = Path("docs", "_build")
     if build_dir.exists():
         shutil.rmtree(build_dir)
@@ -285,20 +303,13 @@ def docs_build(s: Session) -> None:
 def docs(s: Session) -> None:
     """Build and serve the documentation with live reloading on file changes."""
     args = s.posargs or ["--open-browser", "docs/source", "docs/_build"]
-    s.install(".")
-    s.install(
-        "sphinx",
-        "sphinx-autobuild",
-        "sphinx-click",
-        "sphinx-rtd-theme",
-        # "sphinxcontrib-htmlhelp",
-        # "sphinxcontrib-jsmath",
-        # "sphinxcontrib-napoleon",
-        # "sphinxcontrib-qthelp",
-        # "sphinx-autodoc-typehints",
-        # "sphinx_autorun",
+    s.run(
+        "poetry",
+        "install",
+        "--only",
+        "main,docs,docs_auto",
+        external=True,
     )
-
     build_dir = Path("docs", "_build")
     if build_dir.exists():
         shutil.rmtree(build_dir)
