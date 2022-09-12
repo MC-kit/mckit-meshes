@@ -353,8 +353,9 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
         local_points: np.ndarray = points - self.origin
         local_points[..., :] = (
             np.sqrt(local_points[..., 0] ** 2 + local_points[..., 1] ** 2),  # r
-            local_points[..., 2],  # z
-            np.arctan2(local_points[..., 1], local_points[..., 0]) * _1_TO_2PI,  # theta
+            local_points[..., 2],  # z, just copy
+            np.arctan2(local_points[..., 1], local_points[..., 0])
+            * _1_TO_2PI,  # theta in rotations
         )
         return local_points
 
@@ -507,39 +508,39 @@ def select_indexes(
 
     Examples:
 
-    >>> r = np.arange(5)
-    >>> r
-    array([0, 1, 2, 3, 4])
+        >>> r = np.arange(5)
+        >>> r
+        array([0, 1, 2, 3, 4])
 
-    For x is None return slice over all `a` indexes.
+        For x is None return slice over all `a` indexes.
 
-    >>> select_indexes(r, None)
-    slice(0, 5, None)
+        >>> select_indexes(r, None)
+        slice(0, 5, None)
 
-    For non specified x, if input array represents just one bin,
-    then return index 0 to squeeze results.
-    >>> select_indexes(np.array([10,20]), None)
-    0
+        For non specified x, if input array represents just one bin,
+        then return index 0 to squeeze results.
+        >>> select_indexes(np.array([10,20]), None)
+        0
 
-    For x = 1.5, we have 1 < 1.5 < 2, so the bin index is to be 1
-    >>> select_indexes(r, 1.5)
-    1
+        For x = 1.5, we have 1 < 1.5 < 2, so the bin index is to be 1
+        >>> select_indexes(r, 1.5)
+        1
 
-    For x = 0, it's the first bin, and index is to be 0
-    >>> select_indexes(r, 0)
-    0
+        For x = 0, it's the first bin, and index is to be 0
+        >>> select_indexes(r, 0)
+        0
 
-    For coordinates below r[0] return -1.
-    >>> select_indexes(r, -1)
-    -1
+        For coordinates below r[0] return -1.
+        >>> select_indexes(r, -1)
+        -1
 
-    For coordinates above  r[-1] return a.size-1.
-    >>> select_indexes(r, 5)
-    4
+        For coordinates above  r[-1] return a.size-1.
+        >>> select_indexes(r, 5)
+        4
 
-    And for array of coordinates
-    >>> select_indexes(r, np.array([1.5, 0, -1, 5]))  # doctest: +SKIP
-    array([ 1,  0, -1,  4])
+        And for array of coordinates
+        >>> select_indexes(r, np.array([1.5, 0, -1, 5]))
+        array([ 1,  0, -1,  4])
 
     Args:
         a:  bin boundaries
@@ -574,7 +575,7 @@ def format_floats(floats: Iterable[float], _format="{:.6g}") -> Iterable[str]:
 
 def compute_intervals_and_coarse_bins(
     arr: Sequence[float], tolerance: float = 1.0e-4
-) -> Tuple[List[int], List[float]]:
+) -> Tuple[List[int], Sequence[float]]:
     """Compute fine intervals and coarse binning.
 
     Examples:

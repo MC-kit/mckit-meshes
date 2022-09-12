@@ -147,7 +147,6 @@ def tests(s: Session) -> None:
         "main,test,xdoctest,coverage",
         external=True,
     )
-    # s.install("pytest", "pygments", "coverage[toml]")
     try:
         s.run("coverage", "run", "--parallel", "-m", "pytest", *s.posargs)
     finally:

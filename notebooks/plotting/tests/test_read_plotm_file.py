@@ -1,6 +1,6 @@
 import datetime as dt
 
-import mckit_meshes.read_plotm_file as rpf
+import notebooks.plotting.read_plotm_file as rpf
 import numpy as np
 import pytest
 
