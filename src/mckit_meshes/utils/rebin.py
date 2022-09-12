@@ -3,7 +3,7 @@
 # TODO: DVP: implement propagation in result the indexes computed on shrink
 # for reuse in FMesh.shrink for equivalent grids or alike
 
-from typing import Tuple
+from typing import Iterable, Tuple
 
 import collections.abc
 import gc
@@ -169,18 +169,16 @@ def rebin_1d(a, bins, new_bins, axis=0, grouped=False, assume_sorted=False):
 
 
 def rebin_nd(
-    a,
-    rebin_spec,
-    assume_sorted=False,
-    external_process_threshold=__EXTERNAL_PROCESS_THRESHOLD,
-):
+    a: ndarray,
+    rebin_spec: Iterable[Tuple[ndarray, ndarray, int, bool]],
+    assume_sorted: bool = False,
+    external_process_threshold: int = __EXTERNAL_PROCESS_THRESHOLD,
+) -> ndarray:
     """
     Rebin an array `a` over multidimensional grid.
 
-    Parameters
-    ----------
-        a: ndarray
-            A data to rebin.
+    Args:
+        a: An array to rebin.
         rebin_spec: Iterator
             An iterator listing tuples specifying  bins, new_bins, axis and
             grouped  parameters for rebinning.

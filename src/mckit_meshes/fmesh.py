@@ -61,7 +61,7 @@ from toolz.itertoolz import concatv
 __LOG = logging.getLogger(__name__)
 
 
-def expand_args(args):
+def _expand_args(args):
     return rebin.rebin_nd(*args)
 
 
@@ -131,24 +131,21 @@ class FMesh:
         self.bins["Y"] = self._y = geometry_spec.jbins
         self.bins["Z"] = self._z = geometry_spec.kbins
         self.bins["E"] = self._e = gc.as_float_array(ebins)
-        assert 2 <= self._e.size
         self.data = gc.as_float_array(data)
         self.errors = gc.as_float_array(errors)
-        assert self.data.shape == self.errors.shape
-        assert self.data.shape == (self.e.size - 1,) + self._geometry_spec.bins_shape
-        self._totals = totals
-        self._totals_err = totals_err
+        # self._totals = totals
+        # self._totals_err = totals_err
         if 2 < self._e.size:
             if totals is None or totals_err is None:
                 assert (
                     totals is None and totals_err is None
                 ), "Both totals and totals_err are to be provided or omitted"
-                totals = np.sum(self.data, axis=0)
-                non_zero = totals > 0.0
-                totals_err = np.zeros_like(totals)
-                totals_err[non_zero] = (
+                self._totals = np.sum(self.data, axis=0)
+                non_zero = self._totals > 0.0
+                self._totals_err = np.zeros_like(self._totals)
+                self._totals_err[non_zero] = (
                     np.sqrt(np.sum((self.errors * self.data) ** 2, axis=0))[non_zero]
-                    / totals[non_zero]
+                    / self._totals[non_zero]
                 )
             else:
                 assert (
@@ -157,18 +154,23 @@ class FMesh:
                 self._totals = np.asarray(totals, dtype=float)
                 self._totals_err = np.asarray(totals_err, dtype=float)
         else:
-            assert self._totals is None
-            assert self._totals_err is None
+            self._totals = None
+            self._totals_err = None
+        self._comment = comment
+        self.check_attributes()
+
+    def check_attributes(self):
+        """Check if attributes shapes correspond to  each other."""
+        assert 2 <= self._e.size
+        assert self.data.shape == self.errors.shape
+        assert self.data.shape == (self.e.size - 1,) + self._geometry_spec.bins_shape
         assert (
             self._totals is None
             or isinstance(self._totals, np.ndarray)
             and isinstance(self._totals_err, np.ndarray)
             and self._totals.shape == self._totals_err.shape
+            and self._totals.shape == self._geometry_spec.bins_shape
         )
-        assert (
-            self._totals is None or self._totals.shape == self._geometry_spec.bins_shape
-        )
-        self._comment = comment
 
     # @property
     # def x(self):
@@ -819,9 +821,9 @@ class FMesh:
             for i in range(self.e.size - 1):
                 yield data[i], data_rebin_spec, True
 
-        new_data = np.stack(pool.map(expand_args, iter_over_e(self.data)), axis=0)
+        new_data = np.stack(pool.map(_expand_args, iter_over_e(self.data)), axis=0)
         t = self.data * self.errors
-        new_errors = np.stack(pool.map(expand_args, iter_over_e(t)), axis=0)
+        new_errors = np.stack(pool.map(_expand_args, iter_over_e(t)), axis=0)
         new_errors /= new_data
         if self.totals is None:
             new_totals = None
