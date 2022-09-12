@@ -96,9 +96,9 @@ class FMesh:
         ebins: np.ndarray,
         data: np.ndarray,
         errors: np.ndarray,
-        totals: np.ndarray = None,
-        totals_err: np.ndarray = None,
-        comment: str = None,
+        totals: Optional[np.ndarray] = None,
+        totals_err: Optional[np.ndarray] = None,
+        comment: Optional[str] = None,
     ) -> None:
         """Construct FMesh instance object.
 
@@ -154,14 +154,17 @@ class FMesh:
                 assert (
                     totals is not None and totals_err is not None
                 ), "Both totals and totals_err are to be provided or omitted"
-                totals = np.asarray(totals, dtype=float)
-                totals_err = np.asarray(totals_err, dtype=float)
+                self._totals = np.asarray(totals, dtype=float)
+                self._totals_err = np.asarray(totals_err, dtype=float)
         else:
-            assert totals is None
-            assert totals_err is None
-        self._totals = totals
-        self._totals_err = totals_err
-        assert self._totals is None or self._totals.shape == self._totals_err.shape
+            assert self._totals is None
+            assert self._totals_err is None
+        assert (
+            self._totals is None
+            or isinstance(self._totals, np.ndarray)
+            and isinstance(self._totals_err, np.ndarray)
+            and self._totals.shape == self._totals_err.shape
+        )
         assert (
             self._totals is None or self._totals.shape == self._geometry_spec.bins_shape
         )
@@ -208,17 +211,17 @@ class FMesh:
         return self._geometry_spec.kbins
 
     @property
-    def totals(self) -> np.ndarray:
+    def totals(self) -> np.ndarray | None:
         """Total values over energy."""
         return self._totals
 
     @property
-    def totals_err(self) -> np.ndarray:
+    def totals_err(self) -> np.ndarray | None:
         """Relative errors of total values over energy."""
         return self._totals_err
 
     @property
-    def comment(self) -> str:
+    def comment(self) -> str | None:
         """Comment from FC card for this mesh tally."""
         return self._comment
 
@@ -269,7 +272,7 @@ class FMesh:
         ), "Incompatible meshes for precision comparison."
         return self.total_precision < other.total_precision
 
-    def __eq__(self, other: "FMesh") -> bool:
+    def __eq__(self, other) -> bool:
         if not isinstance(other, FMesh):
             return False
         res = (
@@ -1245,27 +1248,22 @@ def _next_not_empty_line(f: Iterable[str]) -> Optional[List[str]]:
     return None
 
 
-def _find_words_after(f, *keywords: str) -> List[str]:
+def _find_words_after(f, *keywords: str) -> list[str]:
     """Searches for words that follow keywords.
 
     The line from file f is read. Then it is split into words (by spaces).
     If its first words are the same as keywords, then remaining words (up to
     newline character) are returned. Otherwise, new line is read.
 
-    Parameters
-    ----------
-    f : iterable of text lines
-        File in which words are searched.
-    *keywords : list of str
-        List of keywords after which right words are. The order is important.
+    Args:
+        f: File in which words are searched.
+        keywords:  List of keywords after which right words are. The order is important.
 
-    Returns
-    -------
-    words : list of str
+    Returns:
         The list of words that follow keywords.
     """
     for line in f:
-        words = line.split()
+        words: list[str] = line.split()
         i = 0
         for w, kw in zip(words, keywords):
             if w != kw:
@@ -1329,7 +1327,7 @@ def fix_mesh_comment(mesh_no: int, comment: str) -> str:
 def meshes_to_vtk(
     *meshes: FMesh,
     out_dir: Path = None,
-    get_mesh_description_strategy: Callable[[FMesh], str] = None,
+    get_mesh_description_strategy: Callable[[FMesh], str],
 ) -> None:
     if out_dir:
         out_dir.mkdir(parents=True, exist_ok=True)
