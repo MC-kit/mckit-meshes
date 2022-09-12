@@ -66,9 +66,9 @@ def test_without_prefix(cd_tmpdir, runner, source):
 
 
 def test_no_npz_files_and_not_specified_npz(cd_tmpdir, runner):
-    assert not list(
+    assert not [
         f for f in Path.cwd().glob("*.npz")
-    ), "There shouldn't be any .m files in current directory"
+    ], "There shouldn't be any .m files in current directory"
     result = runner.invoke(mckit_meshes, args=["npz2vtk"], catch_exceptions=False)
     assert result.exit_code == 0, "Should be noop, when nothing to do"
     assert (

@@ -83,9 +83,9 @@ def test_existing_mesh_tally_file_and_not_specified_mesh_tally(
 
 
 def test_no_mesh_tally_file_and_not_specified_mesh_tally(cd_tmpdir, runner):
-    assert not list(
+    assert not [
         f for f in Path.cwd().glob("*.m")
-    ), "There shouldn't be any .m files in current directory"
+    ], "There shouldn't be any .m files in current directory"
     result = runner.invoke(mckit_meshes, args=["mesh2npz"], catch_exceptions=False)
     assert result.exit_code == 0, "Should be noop, when nothing to do"
     assert (
