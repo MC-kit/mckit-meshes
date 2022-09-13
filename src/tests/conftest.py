@@ -1,21 +1,34 @@
+from typing import Generator
+
 import os
 
 from pathlib import Path
 
 import pytest
 
-from mckit_meshes.utils.resource import path_resolver
+_DATA = Path(__file__).parent / "data"
 
 
 @pytest.fixture(scope="session")
 def data() -> Path:
-    return path_resolver("tests")("data")
+    """Compute the path to test data.
+
+    Returns:
+        Path to test data.
+    """
+    return _DATA
 
 
 @pytest.fixture
-def cd_tmpdir(tmpdir):
-    old_dir = tmpdir.chdir()
+def cd_tmpdir(tmp_path) -> Generator[Path, None, None]:
+    """Temporarily change to temp directory.
+
+    Yields:
+        Path: to temporary directory
+    """
+    old_dir = Path.cwd()
+    os.chdir(tmp_path)
     try:
-        yield
+        yield tmp_path
     finally:
         os.chdir(old_dir)
