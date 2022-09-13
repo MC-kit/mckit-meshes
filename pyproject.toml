@@ -178,10 +178,10 @@ exclude = '''
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-norecursedirs = ".* build dist *.egg-info data"
-python_functions = "test_*  profile_*"
-addopts = "-ra -q --tb=short --xdoctest-modules --strict-markers --ignore setup.py --failed-first"
-doctest_optionflags = "NORMALIZE_WHITESPACE IGNORE_EXCEPTION_DETAIL"
+norecursedirs = ".* ignore build dist __pycache__ tools data"
+#python_functions = "test_*  profile_*"
+addopts = "-ra -q -p no:doctest --xdoctest --xdoctest-style=google --ignore-glob=setup.py --ignore-glob=tools --tb=short --strict-markers --failed-first"
+#doctest_optionflags = "NORMALIZE_WHITESPACE IGNORE_EXCEPTION_DETAIL"
 testpaths = ["src/tests"]
 markers = [
     "slow: too slow tests"
@@ -189,8 +189,15 @@ markers = [
 # xfail tests that pass should fail the test suite
 xfail_strict = true
 filterwarnings = [
+#    "default",
+#    "ignore:.*No cfgstr given in Cacher constructor or call.*:Warning",
+#    "ignore:.*Define the __nice__ method for.*:Warning", "ignore:.*private pytest class or function.*:Warning",
     "ignore:.*not typechecking multipledispatch.dispatcher.*:UserWarning"
 ]
+
+[tool.xdoctest]
+quiet = true
+options = ""
 
 # [tool.coverage]
 [tool.coverage.paths]
