@@ -15,7 +15,7 @@ Note:
 Description
 -----------
 
-The module implements methods to read, merge, inverse, normalize and plot
+The module implements methods to read and manipulate (merge, inverse, scale, etc.)
 MCNP mesh tallies and weight meshes.
 
 .. TODO dvp: apply FISPACT v.5 API and describe here.
