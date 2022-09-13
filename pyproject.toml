@@ -180,7 +180,7 @@ exclude = '''
 minversion = "6.0"
 norecursedirs = ".* build dist *.egg-info data"
 python_functions = "test_*  profile_*"
-addopts = "-ra -q --tb=short --doctest-modules  --xdoctest-modules --strict-markers --ignore setup.py --failed-first"
+addopts = "-ra -q --tb=short --xdoctest-modules --strict-markers --ignore setup.py --failed-first"
 doctest_optionflags = "NORMALIZE_WHITESPACE IGNORE_EXCEPTION_DETAIL"
 testpaths = ["src/tests"]
 markers = [

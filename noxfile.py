@@ -267,7 +267,7 @@ def mypy(s: Session) -> None:
         s.run("mypy", f"--python-executable={sys.executable}", "noxfile.py")
 
 
-@session(python=supported_pythons)
+@session(python=supported_pythons[-2:])
 def xdoctest(s: Session) -> None:
     """Run examples with xdoctest."""
     args = s.posargs or ["all"]
