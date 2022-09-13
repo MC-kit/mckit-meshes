@@ -35,11 +35,11 @@ Examples
 Contributing
 ------------
 
-.. image:: https://github.com/MC-kit/mckit_meshes/workflows/Tests/badge.svg
-   :target: https://github.com/MC-kit/mckit_meshes/actions?query=workflow%3ATests
+.. image:: https://github.com/MC-kit/mckit-meshes/workflows/Tests/badge.svg
+   :target: https://github.com/MC-kit/mckit-meshes/actions?workflow=Tests
    :alt: Tests
-.. image:: https://codecov.io/gh/MC-kit/mckit_meshes/branch/master/graph/badge.svg?token=wlqoa368k8
-  :target: https://codecov.io/gh/MC-kit/mckit_meshes
+.. image:: https://codecov.io/gh/MC-kit/mckit-meshes/branch/master/graph/badge.svg?token=wlqoa368k8
+  :target: https://codecov.io/gh/MC-kit/mckit-meshes
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
    :target: https://github.com/psf/black
 .. image:: https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336
