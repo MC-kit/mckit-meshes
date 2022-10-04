@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mckit-meshes"
-version = "0.1.2"
+version = "0.1.3a0"
 description = "Python tools to work with MCNP meshtallies and weight meshes."
 authors = ["dvp2015 <dmitri_portnov@yahoo.com>"]
 license = "MIT"
