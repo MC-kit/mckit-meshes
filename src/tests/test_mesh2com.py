@@ -1,6 +1,6 @@
 import numpy as np
 
-from mckit_meshes.mesh2com import *
+from mckit_meshes.mesh2com import mesh2com
 from six import StringIO
 
 
