@@ -7,11 +7,13 @@ on:
       - master
       - devel
     paths:
-      - .github/labels.yaml
-      - .github/workflows/repo-labels.yaml
+      - .github/labels.yml
+      - .github/workflows/labeler.yml
   pull_request:
     branches:
-      - trunk
+      - main
+      - master
+      - devel
     paths:
       - .github/labels.yaml
       - .github/workflows/labeler.yml
@@ -24,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3.1.0
 
       - name: Sync GitHub Issue Labels
         uses: crazy-max/ghaction-github-labeler@v4

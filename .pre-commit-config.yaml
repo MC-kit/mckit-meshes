@@ -60,7 +60,7 @@ repos:
     -   id: pycln
         name: pycln
         exclude: tools|\.idea|\.cache
-        entry: poetry run pycln
+        entry: poetry run pycln --config pyproject.toml
         language: system
         types: [python]
     # Nicely sort imports
@@ -86,6 +86,13 @@ repos:
 #        name: blacken-docs
 #        entry: poetry run blacken-docs
 #        language: system
+
+#- repo: https://github.com/sirosen/texthooks
+#  rev: "0.3.1"
+#  hooks:
+#  - id: fix-ligatures
+#  - id: fix-smartquotes
+
 
 # Checking for common mistakes
 #- repo: https://github.com/pre-commit/pygrep-hooks
