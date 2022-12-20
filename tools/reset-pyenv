@@ -3,8 +3,8 @@
 # set -exu
 
 pyenv virtualenv-delete -f  mckit_meshes
-pyenv virtualenv 3.10.7 mckit_meshes
-pyenv rehash
+pyenv virtualenv 3.11.1 mckit_meshes
+poetry env info
 poetry install
 pyenv rehash
 python -c "import mckit_meshes; print(mckit_meshes.__version__)"
