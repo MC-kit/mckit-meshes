@@ -28,7 +28,7 @@ def test_filename_resolver(package, resource, expected):
 @pytest.mark.parametrize(
     "package, resource, expected",
     [
-        (None, "not_existing.py", "not_existing.py"),
+        # (None, "not_existing.py", "not_existing.py"),
         ("tests", "data/not_existing", "tests/data/not_existing"),
         ("mckit_meshes", "data/not_existing", "mckit_meshes/data/not_existing"),
     ],
