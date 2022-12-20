@@ -100,7 +100,7 @@ flake8-comprehensions = ">=3.10.0"
 flake8-docstrings = ">=1.6.0"
 flake8-import-order = ">=0.18.1"
 flake8-print = ">=5.0.0"
-flake8-rst-docstrings = ">=0.2.7"
+# flake8-rst-docstrings = ">=0.2.7"
 flake8-use-fstring = ">=1.4"
 tryceratops = ">=1.0.1"
 
