@@ -50,8 +50,8 @@ def npz2vtk(
     file_exists_strategy = check_if_path_exists(override)
     for npz in npz_files:
         npz = Path(npz)
-        __LOG.info("Processing {}".format(npz))
-        __LOG.debug("Saving VTK file with prefix {}".format(prefix))
+        __LOG.info("Processing {}", npz)
+        __LOG.debug("Saving VTK file with prefix {}", prefix)
         prefix.mkdir(parents=True, exist_ok=True)
         mesh = fmesh.FMesh.load_npz(npz)
         vtk_file_stem = f"{prefix / str(mesh.name)}"
