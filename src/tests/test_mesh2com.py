@@ -1,7 +1,8 @@
+from io import StringIO
+
 import numpy as np
 
 from mckit_meshes.mesh2com import mesh2com
-from six import StringIO
 
 
 def test_mesh2com_simple_cube():
