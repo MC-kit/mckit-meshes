@@ -64,7 +64,7 @@ skip_windows = pytest.mark.skipif((sys.platform == "win32"), reason="Fails on wi
             ),
         ),
         (
-            "# 2-D over columns",
+            "# 2-D over max_columns",
             np.linspace(0.0, 1.0, 5),  # x_new
             a(0, 1),  # x
             np.linspace(0.0, 3.0, 4).reshape((2, 2)),  # y [[0, 1], [2, 3]]

@@ -7,6 +7,7 @@ from enum import IntEnum
 
 import mckit_meshes.mesh.geometry_spec as gs
 import mckit_meshes.utils as ut
+import mckit_meshes.utils.io
 import numpy as np
 
 GeometrySpec = Union[gs.CartesianGeometrySpec, gs.CylinderGeometrySpec]
@@ -48,19 +49,19 @@ class WgtMesh:
         self._geometry_spec.print(io, columns=columns)
         print("wwge:n", end=" ", file=io)
         second_indent = " " * 15
-        ut.print_n(
+        mckit_meshes.utils.io.print_n(
             gs.format_floats(self.energies[0][1:]),
             io=io,
             indent=second_indent,
-            columns=columns,
+            max_columns=columns,
         )
         if len(self.energies) > 1:
             print("wwge:p", end=" ", file=io)
-            ut.print_n(
+            mckit_meshes.utils.io.print_n(
                 gs.format_floats(self.energies[1][1:]),
                 io=io,
                 indent=second_indent,
-                columns=columns,
+                max_columns=columns,
             )
 
     def print_meshtal_spec(
@@ -78,11 +79,11 @@ class WgtMesh:
         indent = " " * 8
         print(indent, "emesh=", sep="", end="", file=io)
         second_indent = indent + " " * 6
-        ut.print_n(
+        mckit_meshes.utils.io.print_n(
             gs.format_floats(self.energies[0][1:]),
             io=io,
             indent=second_indent,
-            columns=columns,
+            max_columns=columns,
         )
         if len(self.energies) > 1:
             print(f"fc{tally_p_number}    === WW generation mesh for photons", file=io)
@@ -90,11 +91,11 @@ class WgtMesh:
             self._geometry_spec.print(io, columns=columns)
             print(indent, "emesh=", sep="", end="", file=io)
             # TODO dvp: try to use do_print_bins here
-            ut.print_n(
+            mckit_meshes.utils.io.print_n(
                 gs.format_floats(self.energies[1][1:]),
                 io=io,
                 indent=second_indent,
-                columns=columns,
+                max_columns=columns,
             )
 
     def validate(self):
@@ -191,9 +192,7 @@ class WgtMesh:
 
     def bins_are_equal(self, other: "WgtMesh") -> bool:
         if not isinstance(other, WgtMesh):
-            raise RuntimeError(
-                "Invalid class of object to compare: {}", other.__class__
-            )
+            raise RuntimeError("Invalid class of object to compare: {}", other.__class__)
         if self._geometry_spec == other._geometry_spec:
             le = len(self.energies)
             if le == len(other.energies):
@@ -397,14 +396,10 @@ class WgtMesh:
                                 _wp[e, i, j, k] = _wp_data[cell_index]
                 _w.append(_wp)
                 assert np.all(
-                    np.transpose(
-                        _wp_data.reshape((nep, _nfz, _nfy, _nfx)), (0, 3, 2, 1)
-                    )
+                    np.transpose(_wp_data.reshape((nep, _nfz, _nfy, _nfx)), (0, 3, 2, 1))
                     == _wp
                 )
-        geometry_spec = make_geometry_spec(
-            [_x0, _y0, _z0], _x, _y, _z, axs=axs, vec=vec
-        )
+        geometry_spec = make_geometry_spec([_x0, _y0, _z0], _x, _y, _z, axs=axs, vec=vec)
         return cls(geometry_spec, _e, _w)
 
     def get_mean_square_distance_weights(self, point):

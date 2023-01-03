@@ -189,9 +189,8 @@ def rebin_nd(
         external_process_threshold: int
             If size of `a` is greater than that, then the computation is executed in external process,
             to achieve immediate memory cleanup.
-    Returns
-    --------
-        rebinned_data: ndarray
+    Returns:
+        Rebinned data.
     """
     if not isinstance(rebin_spec, collections.abc.Iterator):
         rebin_spec = iter(rebin_spec)
@@ -360,9 +359,7 @@ def shrink_nd(a, trim_spec, assume_sorted=False):
     except StopIteration:
         return None, a
     new_bins_seq, recursed_data = shrink_nd(a, trim_spec, assume_sorted)
-    top_bins, top_data = shrink_1d(
-        recursed_data, bins, left, right, axis, assume_sorted
-    )
+    top_bins, top_data = shrink_1d(recursed_data, bins, left, right, axis, assume_sorted)
     if new_bins_seq:
         new_bins_seq = [top_bins] + new_bins_seq
     else:

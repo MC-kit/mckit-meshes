@@ -36,6 +36,7 @@ import abc
 from dataclasses import dataclass, field
 
 import mckit_meshes.utils as ut
+import mckit_meshes.utils.io
 import numpy as np
 import numpy.linalg as linalg
 
@@ -213,7 +214,7 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
             k_values: ... along k (Z or Theta)
 
         Returns:
-            see :py:func:`select_indexes()`
+            see :func:`select_indexes()`
         """
         return (
             select_indexes(self.ibins, i_values),
@@ -272,8 +273,7 @@ class CartesianGeometrySpec(AbstractGeometrySpec):
             return bins_square
 
         x_square, y_square, z_square = [
-            calc_sum(x - px)
-            for x, px in zip((self.ibins, self.jbins, self.kbins), point)
+            calc_sum(x - px) for x, px in zip((self.ibins, self.jbins, self.kbins), point)
         ]
         w = np.zeros((ni, nj, nk), dtype=float)
         for i in range(ni):
@@ -492,11 +492,16 @@ def _print_bins(indent, prefix, _ibins, io, columns: int = 6) -> None:
     coarse_mesh = coarse_mesh[1:]  # drop the first value - it's presented with origin
     print(indent, f"{prefix}mesh=", sep="", end="", file=io)
     second_indent = indent + " " * 5
-    ut.print_n(
-        (f"{x:.6g}" for x in coarse_mesh), io=io, indent=second_indent, columns=columns
+    mckit_meshes.utils.io.print_n(
+        (f"{x:.6g}" for x in coarse_mesh),
+        io=io,
+        indent=second_indent,
+        max_columns=columns,
     )
     print(indent, f"{prefix}ints=", sep="", end="", file=io)
-    ut.print_n(intervals, io=io, indent=second_indent, columns=columns)
+    mckit_meshes.utils.io.print_n(
+        intervals, io=io, indent=second_indent, max_columns=columns
+    )
 
 
 def select_indexes(

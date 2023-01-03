@@ -7,7 +7,7 @@ pkg="${env//-/_}"
 
 pyenv virtualenv-delete -f  "$env"
 pyenv virtualenv "3.11.1" "$env"
-pyenv local "$env" "3.10.8" "3.9.16" "3.8.16"
+pyenv local "$env" "3.10.9" "3.9.16" "3.8.16"
 pyenv rehash
 poetry env info
 poetry install

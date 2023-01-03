@@ -28,5 +28,5 @@ def test_heating_spec():
 
 def test_heating_spec_fail():
     e = ParticleKind.e
-    with pytest.raises(RuntimeError):
-        _ = e.heating_reactions()
+    with pytest.raises(ValueError):
+        _ = e.heating_reactions
