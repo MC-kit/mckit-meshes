@@ -23,8 +23,9 @@ DEFAULT_ORIGIN = np.zeros((3,), dtype=float)
 
 @pytest.fixture(scope="module")
 def weights_ijk() -> Callable[[float], WgtMesh]:
-    """
-    Weights vary along ijk dimensions. Single energy bin.
+    """Weights vary along ijk dimensions.
+
+    Single energy bin.
 
     Returns
     -------
@@ -60,8 +61,7 @@ def weights_ijk() -> Callable[[float], WgtMesh]:
 
 @pytest.fixture(scope="module")
 def weights_eijk() -> Callable[[float], WgtMesh]:
-    """
-    Weights vary along all dimensions.
+    """Weights vary along all dimensions.
 
     Returns
     -------
@@ -193,9 +193,7 @@ def test_add_bad_path():
         [[[[[1]]]], [[[[10]]]]],
     )
     bm = WgtMesh(
-        make_geometry_spec(
-            DEFAULT_ORIGIN, [0, 10], [0, 20], [0, 50]  # <-- kbins differ
-        ),
+        make_geometry_spec(DEFAULT_ORIGIN, [0, 10], [0, 20], [0, 50]),  # <-- kbins differ
         [[0, 20], [0, 20]],
         [[[[[2]]]], [[[[20]]]]],
     )

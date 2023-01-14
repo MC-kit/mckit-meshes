@@ -66,9 +66,7 @@ def test_without_prefix(cd_tmpdir, runner, source):
     assert output_path.exists()
 
 
-def test_existing_mesh_tally_file_and_not_specified_mesh_tally(
-    cd_tmpdir, runner, source
-):
+def test_existing_mesh_tally_file_and_not_specified_mesh_tally(cd_tmpdir, runner, source):
     t = Path.cwd()
     shutil.copy(source, t)
     input_path = t / "1.m"

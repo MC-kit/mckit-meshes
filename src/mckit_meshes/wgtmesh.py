@@ -27,9 +27,7 @@ class Particles(IntEnum):
 
 # noinspection GrazieInspection
 class WgtMesh:
-    """
-    Class to work with MCNP weight window files.
-    """
+    """Class to work with MCNP weight window files."""
 
     def __init__(
         self,
@@ -245,7 +243,6 @@ class WgtMesh:
 
         Args;
             stream: a stream to write to
-
         """
         data = []
         _if, _iv, _ni = 1, 1, len(self.energies)
@@ -340,7 +337,6 @@ class WgtMesh:
 
         Returns:
             WgtMesh: loaded mesh.
-
         """
         _if, _iv, number_of_particles, number_of_parameters = (
             int(s) for s in f.readline().split()[:4]
@@ -491,8 +487,7 @@ class WgtMesh:
             return first
 
     def reciprocal(self) -> "WgtMesh":
-        """
-        Invert weights values.
+        """Invert weights values.
 
         To be used for anti-forward method of weight generation.
 
@@ -508,8 +503,7 @@ class WgtMesh:
     def normalize(
         self, normalization_point: Point, normalized_value: float = 1.0, energy_bin=-1
     ) -> "WgtMesh":
-        """
-        Scale weights to have value `value` at `normalisation_point`.
+        """Scale weights to have value `value` at `normalisation_point`.
 
         All other voxels are scaled proportionally.
 
@@ -554,7 +548,6 @@ class WgtMesh:
 
         Returns:
             WgtMesh: Normalized reciprocal of self weights.
-
         """
         return self.reciprocal().normalize(normalization_point, normalized_value)
 
@@ -600,8 +593,7 @@ def reciprocal(a: np.ndarray, zero_index: np.ndarray = None) -> np.ndarray:
 def prepare_probabilities_and_nps(
     _nps: int, _weights: np.ndarray
 ) -> Tuple[np.ndarray, np.ndarray]:
-    """
-    Computes intermediate data for merging procedure.
+    """Computes intermediate data for merging procedure.
 
     The probabilities are reciprocals to weights.
     Zero weights mean zero probabilities and don't affect the merged result.

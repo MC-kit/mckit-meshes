@@ -23,6 +23,10 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Physics",
 ]
 
+[build-system]
+requires = ["poetry-core>=1.1.0"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.poetry.scripts]
 mckit-meshes = "mckit_meshes.cli.runner:mckit_meshes"
 
@@ -32,12 +36,12 @@ Chnagelog = "https://github.com/MC-kit/mckit-meshes/releases"
 
 
 [tool.poetry.dependencies]
-python = ">=3.8,<4.0"   # TODO dvp: numpy 1.21.4 sets upper limit to 3.11
+python = ">=3.8,<4.0"
 click = ">=8.0.1"
 loguru = ">=0.6.0"
 numpy = ">=1.23.2"
 openpyxl = ">=3.0.9"
-pandas = ">=1.3.4"
+pandas = ">=1.4.1"
 pyevtk = ">=1.4.1"
 toolz = ">=0.11.2"
 
@@ -59,6 +63,7 @@ safety = ">=2.3.5"
 [tool.poetry.group.pre_commit.dependencies]
 pre-commit = ">=2.15.0"
 rstcheck = ">=3.3.1"
+pydocstringformatter = "^0.7.3"
 
 [tool.poetry.group.black.dependencies]
 black = ">=22.8.0"
@@ -72,7 +77,6 @@ pytest = ">=7.0.1"
 pytest-cache = ">=1.0"
 pytest-cov = ">=3.0.0"
 pytest-mock = ">=3.6.1"
-#codecov = ">=2.1.12"
 coverage = { version = ">=6.1.2", extras = ["toml"] }
 
 [tool.poetry.group.coverage.dependencies]
@@ -118,9 +122,11 @@ flake8-use-fstring = ">=1.4"
 flake8-use-pathlib = ">=0.3.0"
 pandas-vet = ">=0.2.3"
 tryceratops = ">=1.0.1"
-
+pylint = ">=2.15.10"
+flake8-pylint = ">=0.1.3"
 # TODO dvp: check/use flake8-pyprojecttoml plugin
 # https://gitlab.com/durko/flake8-pyprojecttoml/-/blob/master/pyproject.toml
+
 
 [tool.poetry.group.docs.dependencies]
 sphinx = ">=5.3.0"
@@ -133,10 +139,6 @@ sphinxcontrib-napoleon = ">=0.7"
 [tool.poetry.group.docs_auto.dependencies]
 sphinx-autobuild = ">=2021.3.14"
 
-
-[build-system]
-requires = ["poetry-core>=1.1.0"]
-build-backend = "poetry.core.masonry.api"
 
 [tool.isort]
 atomic = true
@@ -300,3 +302,12 @@ experimental = true
 [tool.pycln]
 path = "src"
 #silence = true
+
+
+[tool.pydocstringformatter]
+write = true
+style = "pep257"
+exclude = "tools/**"
+strip-whitespaces = true
+max-line-length = 90
+summary-quotes-same-line = true

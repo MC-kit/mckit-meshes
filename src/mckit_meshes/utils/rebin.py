@@ -89,7 +89,8 @@ def interpolate(x_new, x, y, axis=None):
 
 
 def rebin_1d(a, bins, new_bins, axis=0, grouped=False, assume_sorted=False):
-    """Transforms 1-D histogram defined as `data` on the limiting points
+    """Transforms 1-D histogram defined as `data` on the limiting points.
+
     define like `bins` to equivalent (see the terms below) histogram defined
     on other limiting points defined as `new_bins`.
 
@@ -174,8 +175,7 @@ def rebin_nd(
     assume_sorted: bool = False,
     external_process_threshold: int = __EXTERNAL_PROCESS_THRESHOLD,
 ) -> ndarray:
-    """
-    Rebin an array `a` over multidimensional grid.
+    """Rebin an array `a` over multidimensional grid.
 
     Args:
         a: An array to rebin.
@@ -254,7 +254,8 @@ def rebin_spec_composer(bins_seq, new_bins_seq, axes=None, grouped_flags=None):
 def shrink_1d(
     a: np.ndarray, bins: np.ndarray, low=None, high=None, axis=None, assume_sorted=False
 ) -> Tuple[np.ndarray, np.ndarray]:
-    """Select sub-arrays of a `a` and corresponding `bins` for minimal span
+    """Select sub-arrays of a `a` and corresponding `bins` for minimal span.
+
     of bins, which completely covers the range [`low`..`high`]
     both sides included.
 
@@ -280,7 +281,6 @@ def shrink_1d(
             The shrank bins
         new_data: ndarray
             The shrank grid
-
     """
 
     if low is None and high is None:
@@ -368,8 +368,8 @@ def shrink_nd(a, trim_spec, assume_sorted=False):
 
 
 def trim_spec_composer(bins_seq, lefts=None, rights=None, axes=None):
-    """
-    Helps to compose trim_spec parameter in
+    """Helps to compose trim_spec parameter in.
+
     :py:func:`triniti_ne.rebin.trim_nd` with
     reasonable defaults for lefts, rights and axes iterators.
 

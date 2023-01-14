@@ -20,9 +20,7 @@ from numpy.testing import assert_array_equal
     ],
 )
 def test_cartesian_product_with_inner_vector(arrays, expected):
-    actual = cartesian_product(
-        *[np.array(x) for x in arrays], aggregator=lambda x: a(*x)
-    )
+    actual = cartesian_product(*[np.array(x) for x in arrays], aggregator=lambda x: a(*x))
     assert_array_equal(actual, np.array(expected))
 
 

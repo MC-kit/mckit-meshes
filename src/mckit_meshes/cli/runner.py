@@ -68,9 +68,7 @@ if there are more than 1 input file""",
     nargs=-1,
     required=False,
 )
-def mesh2npz(
-    ctx: click.Context, prefix: str | Path, mesh_tallies: t.List[t.Any]
-) -> None:
+def mesh2npz(ctx: click.Context, prefix: str | Path, mesh_tallies: t.List[t.Any]) -> None:
     """Converts mesh files to npz files."""
     do_mesh2npz(prefix, mesh_tallies, ctx.obj["OVERRIDE"])
     #

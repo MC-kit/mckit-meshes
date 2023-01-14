@@ -13,7 +13,6 @@ Examples:
     In order to save fmesh data to vtk format, method save2vtk should be used.
     This saves resulting regular grid to .vtr file::
         tally_list[0].save2vtk(filename='sample', data_name='heating neutron')
-
 """
 
 # TODO dvp: redesign this class as xarray data structure.
@@ -222,7 +221,7 @@ class FMesh:
 
     @property
     def total_precision(self) -> float:
-        """ """
+        """"""
         if self.has_multiple_energy_bins:
             return self.totals_err[
                 -1
@@ -244,13 +243,11 @@ class FMesh:
         )
 
     def is_equal_by_mesh(self, other: "FMesh") -> bool:
-        """
+        """Args:
 
-        Args:
           other: "FMesh":
 
         Returns:
-
         """
         return (
             self.kind == other.kind
@@ -300,7 +297,6 @@ class FMesh:
         Returns:
             ebins, data, err
                 Energy bin boundaries, group energy spectrum and relative errors.
-
         """
         key_index = {0: "X", 1: "Y", 2: "Z"}
         values = [x, y, z]
@@ -413,8 +409,6 @@ class FMesh:
           Path]:
 
         Returns:
-
-
         """
         if isinstance(file_, Path):
             file_ = str(file_)
@@ -615,7 +609,7 @@ class FMesh:
             print("\n", file=stream)
 
     def total_by_energy(self, new_name: int = 0) -> "FMesh":
-        """Integrate over energy bins
+        """Integrate over energy bins.
 
         Args:
             new_name: name for new `FMesh`  (Default value = 0)
@@ -741,11 +735,11 @@ class FMesh:
 
         new_data = np.stack(
             pool.map(_expand_args, iter_over_e(self.data)), axis=0
-        )  # noqa: ignore[PD013]
+        )  # : ignore[PD013]
         t = self.data * self.errors
         new_errors = np.stack(
             pool.map(_expand_args, iter_over_e(t)), axis=0
-        )  # noqa: ignore[PD013]
+        )  # : ignore[PD013]
         new_errors /= new_data
         if self.totals is None:
             new_totals = None
@@ -784,7 +778,6 @@ class FMesh:
 
         Returns:
             New FMesh object with the rebinned data.
-
         """
         assert not self.is_cylinder, "Not implemented for cylinder meshes"
 
@@ -900,7 +893,6 @@ def merge_tallies(
 
     Returns:
         The merged FMesh.
-
     """
     result_data = None
     errors = None
@@ -943,7 +935,6 @@ def read_meshtal(stream: TextIO, select=None, mesh_file_info=None) -> List[FMesh
 
     Returns:
         The list of individual fmesh tally.
-
     """
     next(stream)  # TODO dvp check if we need to store problem time stamp
     next(stream)  # TODO dvp check if we need to store problem title
@@ -964,7 +955,6 @@ def _iterate_bins(stream, _n, _with_ebins):
 
     Yields:
         pairs value - error
-
     """
     value_start, value_end = (41, 53) if _with_ebins else (32, 44)
     for _i in range(_n):
@@ -994,7 +984,6 @@ def iter_meshtal(
 
     Yields:
         Mesh tallies filtered.
-
     """
     try:
         while True:
@@ -1170,7 +1159,6 @@ def check_ebins(fid: Iterable[str], keys: List[str]) -> bool:
 
     Raises:
         ValueError: if keys don't correspond to the nonempty line.
-
     """
     title_line = _next_not_empty_line(fid)
     if title_line is None:
@@ -1214,11 +1202,10 @@ def _find_words_after(f: TextIO, *keywords: str) -> list[str]:
 
     Returns:
         The list of words that follow keywords.
-
     """
     for line in f:
         words: list[str] = line.split()
-        i = 0  # noqa: ignore[SIM113]
+        i = 0  # : ignore[SIM113]
         for w, kw in zip(words, keywords):
             if w != kw:
                 break
@@ -1258,7 +1245,6 @@ def m_2_npz(
 
     Returns:
         Total number of files created
-
     """
     next(stream)  # TODO dvp check if we need to store problem time stamp
     next(stream)  # TODO dvp check if we need to store problem title
@@ -1266,7 +1252,7 @@ def m_2_npz(
     nps = int(float((line.strip().split("=")[1])))
     if mesh_file_info is not None:
         mesh_file_info.nps = nps
-    total = 0  # noqa: ignore[SIM113]
+    total = 0  # : ignore[SIM113]
     for t in iter_meshtal(stream, name_select=name_select, tally_select=tally_select):
         t.save_2_npz(prefix / (str(t.name) + suffix), check_existing_file_strategy)
         total += 1

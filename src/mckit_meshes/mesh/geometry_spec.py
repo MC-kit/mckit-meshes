@@ -25,7 +25,6 @@
     The new callers are to use local_coordinates converter to avoid difficulties.
     For the old callers we will use ZERO_ORIGIN for Geometry Specification being
     used in FMesh.
-
 """
 from __future__ import annotations
 
@@ -63,7 +62,6 @@ def as_float_array(array) -> np.ndarray:
 
     Returns:
         np.ndarray:  either original or conversion.
-
     """
     return np.asarray(array, dtype=float)
 
@@ -73,7 +71,6 @@ class AbstractGeometrySpecData:
     """Data mixin for :py:class:`AbstractGeometrySpec`.
 
     Provides reusable data fields.
-
     """
 
     ibins: np.ndarray
@@ -149,7 +146,6 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
         Args:
             io: stream to print to
             indent: indent to insert before lines
-
         """
         ...
 
@@ -206,7 +202,7 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
         Union[int, slice, np.ndarray],
         Union[int, slice, np.ndarray],
     ]:
-        """Select indices for data corresponding to given spatial values
+        """Select indices for data corresponding to given spatial values.
 
         Args:
             i_values: indices along i (X or R) dimension
@@ -473,7 +469,6 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
             - `self.vec` is in PY=0 plane
             - `self.axs` is vertical
 
-
         Returns
         -------
         gs:
@@ -609,7 +604,6 @@ def compute_intervals_and_coarse_bins(
     [1, 1, 1, 1, 1]
     >>> coarse is arr
     True
-
 
     Args:
         arr: actual bins

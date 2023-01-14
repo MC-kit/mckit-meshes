@@ -43,8 +43,8 @@ def default_setup_access_strategy(
     extent: np.ndarray,
     origin: np.ndarray,
 ) -> None:
-    """
-    Use this for setup axes strategy, when there was True parameter in the old code
+    """Use this for setup axes strategy, when there was True parameter in the old code.
+
         plot_ps_page(
             axes,
             page,
@@ -59,7 +59,6 @@ def default_setup_access_strategy(
 
     Returns
     -------
-
     """
     axes.set_aspect("equal")
     if basis is rpf.XZ:

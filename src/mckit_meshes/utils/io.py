@@ -61,9 +61,8 @@ def print_cols(
 
     Returns:
         int: the number of the last column printed on the last row
-
     """
-    column = 0  # noqa: ignore[SIM113]
+    column = 0  # : ignore[SIM113]
     for s in seq:
         print(fmt.format(s), file=fid, end="")
         column += 1

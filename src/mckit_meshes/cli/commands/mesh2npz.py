@@ -1,6 +1,5 @@
 # noinspection PyPep8
-"""
-    Convert MCNP meshtal file to a number of npz files, one for each meshtal.
+"""Convert MCNP meshtal file to a number of npz files, one for each meshtal.
 
     Usage:
 
@@ -18,7 +17,6 @@
 
     Arguments:
         MESH_TALLY... - files to load mesh tallies from (default: all the .m files in current folder)
-
 
     Features:
         Fails if, an output file exist and neither --override, nor --update options is specified in command line

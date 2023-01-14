@@ -2,8 +2,8 @@ import sys
 
 
 def mesh2com(xbins, ybins, zbins, out=sys.stdout):
-    """
-    Prints content for mcnp com file to plot crossections over mesh
+    """Prints content for mcnp com file to plot crossections over mesh.
+
     voxels centers and with normals in x, y and z directions.
     """
     print("label 0 0", file=out)

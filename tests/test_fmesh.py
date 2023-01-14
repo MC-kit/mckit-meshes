@@ -108,9 +108,7 @@ def test_save2vtk(simple_bins, tmp_path):
     name, kind, xbins, ybins, zbins, ebins = simple_bins(name=22)
     data = np.array([[[[11.0]]], [[[11.0]]]])
     errors = np.array([[[[0.1]]], [[[0.1]]]])
-    m = FMesh(
-        name, kind, CartesianGeometrySpec(xbins, ybins, zbins), ebins, data, errors
-    )
+    m = FMesh(name, kind, CartesianGeometrySpec(xbins, ybins, zbins), ebins, data, errors)
     tfn = tmp_path / "test_fmesh_.m"
     m.save2vtk(str(tfn))
 
@@ -200,9 +198,7 @@ def test_total_by_energy(simple_bins):
     )
     data = np.array([[[[10.0]]], [[[20.0]]], [[[30.0]]]])
     errors = np.array([[[[0.1]]], [[[0.2]]], [[[0.3]]]])
-    m = FMesh(
-        name, kind, CartesianGeometrySpec(xbins, ybins, zbins), ebins, data, errors
-    )
+    m = FMesh(name, kind, CartesianGeometrySpec(xbins, ybins, zbins), ebins, data, errors)
     desired = FMesh(
         0,
         kind,
