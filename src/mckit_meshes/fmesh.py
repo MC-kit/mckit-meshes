@@ -1,19 +1,4 @@
-"""Classes and functions for operations with fmesh tallies.
-
-Examples:
-    Suppose we have meshtal file - MCNP output for fmesh tallies - sample.m.
-
-    It contains several tallies with numbers 14, 24, and 34. First, we have to
-    read it::
-        tally_list = list(read_meshtal('sample.m'))
-
-    x and z are coordinates of mesh cell centers along x and z axis. data is
-    2-dimensional array of fmesh tally values. err - relative errors.
-
-    In order to save fmesh data to vtk format, method save2vtk should be used.
-    This saves resulting regular grid to .vtr file::
-        tally_list[0].save2vtk(filename='sample', data_name='heating neutron')
-"""
+"""Classes and functions for operations with fmesh tallies."""
 
 # TODO dvp: redesign this class as xarray data structure.
 #           multidimensional array with coordinates is more appropriate for this class.
@@ -59,9 +44,9 @@ class FMesh:
     Processing includes normalization, merging and conversion to weights mesh.
 
     Attrs:
-        NPZ_MARK Signature to be stored in the of meta entry in a npz file.
+        NPZ_MARK: Signature to be stored in the of meta entry in a npz file.
             This is used to check that the file is for FMesh object.
-        NPZ_FORMAT Identifies version of format of data stored in npz file.
+        NPZ_FORMAT: Identifies version of format of data stored in npz file.
     """
 
     NPZ_MARK = np.int16(5445)
@@ -264,9 +249,7 @@ class FMesh:
         Returns:
             True if this mesh is more precise than other one.
         """
-        assert self.is_equal_by_mesh(
-            other
-        ), "Incompatible meshes for precision comparison."
+        assert self.is_equal_by_mesh(other), "Incompatible meshes for precision comparison."
         return self.total_precision < other.total_precision
 
     def surrounds_point(self, x: float, y: float, z: float, local: bool = True) -> bool:
@@ -401,21 +384,21 @@ class FMesh:
         np.savez_compressed(str(filename), **kwd)
 
     @classmethod
-    def load_npz(cls, file_: Union[str, Path]) -> "FMesh":
-        """Loads Fmesh object from the binary file_.
+    def load_npz(cls, _file: Union[str, Path]) -> "FMesh":
+        """Loads Fmesh object from the binary file.
 
         Args:
-          file_: Union[str:
-          Path]:
+          _file: npz-file to load from.
 
         Returns:
+            The loaded FMesh object.
         """
-        if isinstance(file_, Path):
-            file_ = str(file_)
-        with np.load(file_) as data:
+        if isinstance(_file, Path):
+            _file = str(_file)
+        with np.load(_file) as data:
             meta = data["meta"]
             mark = meta[0]
-            assert mark == FMesh.NPZ_MARK, "Incompatible file format %s" % file_
+            assert mark == FMesh.NPZ_MARK, f"Incompatible file format {_file}"
             version = meta[1]
             name, kind = meta[2:4]
             if 1 <= version:
@@ -457,9 +440,7 @@ class FMesh:
                 if origin is None:
                     geometry_spec = gc.CartesianGeometrySpec(x, y, z)
                 else:
-                    geometry_spec = gc.CylinderGeometrySpec(
-                        x, y, z, origin=origin, axs=axis
-                    )
+                    geometry_spec = gc.CylinderGeometrySpec(x, y, z, origin=origin, axs=axis)
                 return cls(
                     name,
                     kind,
@@ -657,9 +638,7 @@ class FMesh:
                 [emax, xmax, ymax, zmax],
             )
         )
-        new_bins_list, new_data = rebin.shrink_nd(
-            self.data, iter(trim_spec), assume_sorted=True
-        )
+        new_bins_list, new_data = rebin.shrink_nd(self.data, iter(trim_spec), assume_sorted=True)
         _, new_errors = rebin.shrink_nd(self.errors, iter(trim_spec), assume_sorted=True)
 
         assert all(np.array_equal(a, b) for a, b in zip(new_bins_list, _))
@@ -676,9 +655,7 @@ class FMesh:
                     [xmax, ymax, zmax],
                 )
             )
-            _, new_totals = rebin.shrink_nd(
-                self.totals, iter(totals_trim_spec), assume_sorted=True
-            )
+            _, new_totals = rebin.shrink_nd(self.totals, iter(totals_trim_spec), assume_sorted=True)
             _, new_totals_err = rebin.shrink_nd(
                 self.totals_err, iter(totals_trim_spec), assume_sorted=True
             )
@@ -737,9 +714,7 @@ class FMesh:
             pool.map(_expand_args, iter_over_e(self.data)), axis=0
         )  # : ignore[PD013]
         t = self.data * self.errors
-        new_errors = np.stack(
-            pool.map(_expand_args, iter_over_e(t)), axis=0
-        )  # : ignore[PD013]
+        new_errors = np.stack(pool.map(_expand_args, iter_over_e(t)), axis=0)  # : ignore[PD013]
         new_errors /= new_data
         if self.totals is None:
             new_totals = None
@@ -803,13 +778,9 @@ class FMesh:
                     axes=[0, 1, 2],
                 )
             )
-            new_totals = rebin.rebin_nd(
-                self.totals, iter(totals_rebin_spec), assume_sorted=True
-            )
+            new_totals = rebin.rebin_nd(self.totals, iter(totals_rebin_spec), assume_sorted=True)
             t = self.totals * self.totals_err
-            new_totals_err = rebin.rebin_nd(
-                t, iter(totals_rebin_spec), assume_sorted=True
-            )
+            new_totals_err = rebin.rebin_nd(t, iter(totals_rebin_spec), assume_sorted=True)
             new_totals_err /= new_totals
 
         return FMesh(
@@ -862,7 +833,9 @@ class FMesh:
         )
 
     def __repr__(self) -> str:
-        msg = "Fmesh({name}, {kind}, {xmin}..{xmax}, {ymin}..{ymax}, {zmin}..{zmax}, {emin}..{emax})"
+        msg = (
+            "Fmesh({name}, {kind}, {xmin}..{xmax}, {ymin}..{ymax}, {zmin}..{zmax}, {emin}..{emax})"
+        )
         (xmin, xmax), (ymin, ymax), (zmin, zmax) = self._geometry_spec.boundaries
         return msg.format(
             name=self.name,
@@ -1015,22 +988,16 @@ def iter_meshtal(
                     ibins = np.array(
                         [
                             float(w)
-                            for w in _find_words_after(
-                                concatv([line], fid), "R", "direction:"
-                            )
+                            for w in _find_words_after(concatv([line], fid), "R", "direction:")
                         ]
                     )
 
-                    jbins = np.array(
-                        [float(w) for w in _find_words_after(fid, "Z", "direction:")]
-                    )
+                    jbins = np.array([float(w) for w in _find_words_after(fid, "Z", "direction:")])
 
                     kbins = np.array(
                         [
                             float(w)
-                            for w in _find_words_after(
-                                fid, "Theta", "direction", "(revolutions):"
-                            )
+                            for w in _find_words_after(fid, "Theta", "direction", "(revolutions):")
                         ]
                     )
 
@@ -1039,12 +1006,7 @@ def iter_meshtal(
                     )
 
                     ebins = np.array(
-                        [
-                            float(w)
-                            for w in _find_words_after(
-                                fid, "Energy", "bin", "boundaries:"
-                            )
-                        ]
+                        [float(w) for w in _find_words_after(fid, "Energy", "bin", "boundaries:")]
                     )
                     with_ebins = check_ebins(
                         fid, ["Energy", "R", "Z", "Th", "Result", "Rel", "Error"]
@@ -1053,29 +1015,18 @@ def iter_meshtal(
                     xbins = np.array(
                         [
                             float(w)
-                            for w in _find_words_after(
-                                concatv([line], fid), "X", "direction:"
-                            )
+                            for w in _find_words_after(concatv([line], fid), "X", "direction:")
                         ]
                     )
 
-                    ybins = np.array(
-                        [float(w) for w in _find_words_after(fid, "Y", "direction:")]
-                    )
+                    ybins = np.array([float(w) for w in _find_words_after(fid, "Y", "direction:")])
 
-                    zbins = np.array(
-                        [float(w) for w in _find_words_after(fid, "Z", "direction:")]
-                    )
+                    zbins = np.array([float(w) for w in _find_words_after(fid, "Z", "direction:")])
 
                     geometry_spec = gc.CartesianGeometrySpec(xbins, ybins, zbins)
 
                     ebins = np.array(
-                        [
-                            float(w)
-                            for w in _find_words_after(
-                                fid, "Energy", "bin", "boundaries:"
-                            )
-                        ]
+                        [float(w) for w in _find_words_after(fid, "Energy", "bin", "boundaries:")]
                     )
                     with_ebins = check_ebins(
                         fid, ["Energy", "X", "Y", "Z", "Result", "Rel", "Error"]
@@ -1084,14 +1035,10 @@ def iter_meshtal(
                 spatial_bins_size = geometry_spec.bins_size
                 bins_size = spatial_bins_size * (ebins.size - 1)
 
-                data_items = np.fromiter(
-                    _iterate_bins(fid, bins_size, with_ebins), dtype=float
-                )
+                data_items = np.fromiter(_iterate_bins(fid, bins_size, with_ebins), dtype=float)
                 data_items = data_items.reshape(bins_size, 2)
                 shape = (ebins.size - 1,) + geometry_spec.bins_shape
-                data, error = data_items[:, 0].reshape(shape), data_items[:, 1].reshape(
-                    shape
-                )
+                data, error = data_items[:, 0].reshape(shape), data_items[:, 1].reshape(shape)
 
                 def _iterate_totals(stream, totals_number):
                     """Reading totals.
@@ -1110,12 +1057,8 @@ def iter_meshtal(
                         for w in _line[4:]:
                             yield float(w)
 
-                if (
-                    ebins.size > 2
-                ):  # Totals are not output if there's only one bin in energy domain
-                    totals_items = np.fromiter(
-                        _iterate_totals(fid, spatial_bins_size), dtype=float
-                    )
+                if ebins.size > 2:  # Totals are not output if there's only one bin in energy domain
+                    totals_items = np.fromiter(_iterate_totals(fid, spatial_bins_size), dtype=float)
                     totals_items = totals_items.reshape(spatial_bins_size, 2)
                     shape = geometry_spec.bins_shape
                     totals = totals_items[:, 0].reshape(shape)

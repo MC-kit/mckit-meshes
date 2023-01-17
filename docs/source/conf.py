@@ -35,9 +35,9 @@ author = "dvp2015"
 # built documents.
 #
 # The short X.Y version.
-version = mckit_nuclides.__version__.rsplit(".", maxsplit=1)[0]
+version = mckit_meshes.__version__.rsplit(".", maxsplit=1)[0]
 # The full version, including alpha/beta/rc tags.
-release = mckit_nuclides.__version__
+release = mckit_meshes.__version__
 
 
 # -- General configuration ---------------------------------------------------
