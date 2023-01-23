@@ -170,4 +170,6 @@ latex_elements: Dict[str, str] = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title,
 #  author, document class [howto, manual, or own class]).
-latex_documents = [(master_doc, "mapstp.tex", "mapstp Documentation", "Dmitry Portnov", "manual")]
+latex_documents = [
+    (master_doc, "mckit-meshes.tex", "mckit-meshes Documentation", "Dmitry Portnov", "manual")
+]
