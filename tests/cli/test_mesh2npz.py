@@ -14,9 +14,7 @@ def source(data):
 
 
 def test_help(runner):
-    result = runner.invoke(
-        mckit_meshes, args=["mesh2npz", "--help"], catch_exceptions=False
-    )
+    result = runner.invoke(mckit_meshes, args=["mesh2npz", "--help"], catch_exceptions=False)
     assert result.exit_code == 0
     assert "Usage: " in result.output
 
@@ -57,9 +55,7 @@ def test_multiple_files(tmp_path, runner, data):
 
 
 def test_without_prefix(cd_tmpdir, runner, source):
-    result = runner.invoke(
-        mckit_meshes, args=["mesh2npz", str(source)], catch_exceptions=False
-    )
+    result = runner.invoke(mckit_meshes, args=["mesh2npz", str(source)], catch_exceptions=False)
     assert result.exit_code == 0
     cwd = Path.cwd()
     output_path = cwd / "npz" / "1004.npz"
@@ -99,9 +95,7 @@ def test_not_existing_mesh_tally_file(runner):
     assert "does not exist" in result.output
 
 
-def test_failure_on_existing_output_file_when_override_is_not_set(
-    tmp_path, runner, source
-):
+def test_failure_on_existing_output_file_when_override_is_not_set(tmp_path, runner, source):
     prefix = tmp_path / "npz"
     output_path = prefix / "1004.npz"
     output_path.parent.mkdir(parents=True, exist_ok=True)

@@ -15,9 +15,7 @@ def source(data):
 
 
 def test_help(runner):
-    result = runner.invoke(
-        mckit_meshes, args=["npz2vtk", "--help"], catch_exceptions=False
-    )
+    result = runner.invoke(mckit_meshes, args=["npz2vtk", "--help"], catch_exceptions=False)
     assert result.exit_code == 0
     assert "Usage: " in result.output
 
@@ -50,15 +48,12 @@ def test_multiple_files(tmp_path, runner, data):
     # prefix = Path(prefix)
     for i in [1004, 2004]:
         assert (prefix / f"{i}.vtr").exists(), (
-            "When multiple npz files are specified "
-            "the vtr file should be created for every one."
+            "When multiple npz files are specified " "the vtr file should be created for every one."
         )
 
 
 def test_without_prefix(cd_tmpdir, runner, source):
-    result = runner.invoke(
-        mckit_meshes, args=["npz2vtk", str(source)], catch_exceptions=False
-    )
+    result = runner.invoke(mckit_meshes, args=["npz2vtk", str(source)], catch_exceptions=False)
     assert result.exit_code == 0
     cwd = Path.cwd()
     output_path = cwd / "1004.vtr"

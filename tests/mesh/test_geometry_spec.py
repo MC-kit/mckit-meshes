@@ -9,17 +9,11 @@ from mckit_meshes.mesh.geometry_spec import (
     select_indexes,
 )
 from mckit_meshes.utils.testing import a
-from numpy.testing import (
-    assert_almost_equal,
-    assert_array_almost_equal,
-    assert_array_equal,
-)
+from numpy.testing import assert_almost_equal, assert_array_almost_equal, assert_array_equal
 
 
 def test_cartesian_constructor():
-    cartesian = CartesianGeometrySpec(
-        ibins=a(1, 2, 3), jbins=a(4, 5, 6), kbins=a(7, 8, 9)
-    )
+    cartesian = CartesianGeometrySpec(ibins=a(1, 2, 3), jbins=a(4, 5, 6), kbins=a(7, 8, 9))
     assert not cartesian.cylinder
     assert isinstance(cartesian.x, np.ndarray)
     assert np.array_equal(a(1, 2, 3), cartesian.x)
@@ -30,9 +24,7 @@ def test_cartesian_constructor():
 
 
 def test_cylinder_constructor():
-    cylinder = CylinderGeometrySpec(
-        a(1, 2, 3), a(4, 5, 6), a(0, 0.5, 1), origin=a(1, 0, 0)
-    )
+    cylinder = CylinderGeometrySpec(a(1, 2, 3), a(4, 5, 6), a(0, 0.5, 1), origin=a(1, 0, 0))
     assert cylinder.cylinder
     assert isinstance(cylinder.r, np.ndarray)
     assert np.array_equal(a(1, 2, 3), cylinder.r)

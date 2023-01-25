@@ -392,9 +392,7 @@ def test_rebin_1d(rebinned_data, data, bins, new_bins, axis, grouped):
                     np.array([0.25, 0.5, 1.0, 1.5, 1.75]),
                 ],
             ),
-            np.array(
-                [[0, 0, 1, 1], [0, 0, 1, 1], [1, 1, 2, 2], [1, 1, 2, 2]], dtype=float
-            ),
+            np.array([[0, 0, 1, 1], [0, 0, 1, 1], [1, 1, 2, 2], [1, 1, 2, 2]], dtype=float),
         ),
         (
             # rebin by the second axis

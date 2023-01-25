@@ -41,11 +41,7 @@ def check_if_path_exists(override: bool) -> t.Callable[[str | Path], None]:
     Returns:
         The selected strategy.
     """
-    return (
-        ignore_existing_file_strategy
-        if override
-        else raise_error_when_file_exists_strategy
-    )
+    return ignore_existing_file_strategy if override else raise_error_when_file_exists_strategy
 
 
 def print_cols(

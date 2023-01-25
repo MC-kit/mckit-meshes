@@ -61,9 +61,7 @@ def test_read_mesh_tall(tmp_path, simple_bins):
     with tfp.open("wt") as fid:
         fid.write("timestamp\n")
         fid.write("problem title\n")
-        fid.write(
-            "Number of histories used for normalizing tallies =      39594841.00\n\n"
-        )
+        fid.write("Number of histories used for normalizing tallies =      39594841.00\n\n")
         m.save_2_mcnp_mesh(fid)
     actual = read_meshtal(tfp.open())
     assert len(actual) == 1
@@ -83,16 +81,12 @@ def test_merge_tallies(simple_bins):
     name, kind, xbins, ybins, zbins, ebins = simple_bins(name=18)
     data = np.array([[[[10.0]]], [[[10.0]]]])
     errors = np.array([[[[0.1]]], [[[0.1]]]])
-    m1 = FMesh(
-        name, kind, CartesianGeometrySpec(xbins, ybins, zbins), ebins, data, errors
-    )
+    m1 = FMesh(name, kind, CartesianGeometrySpec(xbins, ybins, zbins), ebins, data, errors)
     m2 = copy(m1)
     # noinspection PyTypeChecker
     actual = merge_tallies(3, 1, (m1, 1.0), (m2, 2.0))
     expected_data = data * 3.0
-    expected_errors = (
-        np.sqrt((data * errors) ** 2 + (2 * data * errors) ** 2) / expected_data
-    )
+    expected_errors = np.sqrt((data * errors) ** 2 + (2 * data * errors) ** 2) / expected_data
     expected = FMesh(
         3,
         1,
@@ -117,18 +111,14 @@ def test_m_2_npz(tmp_path, simple_bins):
     name, kind, xbins, ybins, zbins, ebins = simple_bins(name=14)
     data = np.array([[[[7.0]]], [[[10.0]]]])
     errors = np.array([[[[0.1]]], [[[0.05]]]])
-    m1 = FMesh(
-        name, kind, CartesianGeometrySpec(xbins, ybins, zbins), ebins, data, errors
-    )
+    m1 = FMesh(name, kind, CartesianGeometrySpec(xbins, ybins, zbins), ebins, data, errors)
     m2 = copy(m1)
     m2.name = 2
     tfn = tmp_path / "fmesh.m"
     with tfn.open("w") as fid:
         fid.write("timestamp\n")
         fid.write("problem title\n")
-        fid.write(
-            "Number of histories used for normalizing tallies =      39594841.00\n\n"
-        )
+        fid.write("Number of histories used for normalizing tallies =      39594841.00\n\n")
         m1.save_2_mcnp_mesh(fid)
         m2.save_2_mcnp_mesh(fid)
     # now use already opened file
@@ -169,9 +159,7 @@ def test_m_2_npz_with_comment(tmp_path, simple_bins):
     with open(tfn, "w") as fid:
         fid.write("timestamp\n")
         fid.write("problem title\n")
-        fid.write(
-            "Number of histories used for normalizing tallies =      39594841.00\n\n"
-        )
+        fid.write("Number of histories used for normalizing tallies =      39594841.00\n\n")
         m1.save_2_mcnp_mesh(fid)
         m2.save_2_mcnp_mesh(fid)
     # now use already opened file
@@ -193,9 +181,7 @@ def test_m_2_npz_with_comment(tmp_path, simple_bins):
 
 
 def test_total_by_energy(simple_bins):
-    name, kind, xbins, ybins, zbins, ebins = simple_bins(
-        ebins=np.array([0.0, 6.0, 7.0, 8.0])
-    )
+    name, kind, xbins, ybins, zbins, ebins = simple_bins(ebins=np.array([0.0, 6.0, 7.0, 8.0]))
     data = np.array([[[[10.0]]], [[[20.0]]], [[[30.0]]]])
     errors = np.array([[[[0.1]]], [[[0.2]]], [[[0.3]]]])
     m = FMesh(name, kind, CartesianGeometrySpec(xbins, ybins, zbins), ebins, data, errors)
@@ -205,9 +191,7 @@ def test_total_by_energy(simple_bins):
         CartesianGeometrySpec(xbins, ybins, zbins),
         np.array([0.0, 8.0]),
         np.array([[[[60.0]]]]),
-        np.array(
-            [[[[np.sqrt((10 * 0.1) ** 2 + (20 * 0.2) ** 2 + (30 * 0.3) ** 2) / 60.0]]]]
-        ),
+        np.array([[[[np.sqrt((10 * 0.1) ** 2 + (20 * 0.2) ** 2 + (30 * 0.3) ** 2) / 60.0]]]]),
     )
     actual = m.total_by_energy(new_name=0)
     assert actual == desired
@@ -432,9 +416,7 @@ def test_rebin(
         ),
     ],
 )
-def test_shrink(
-    tmp_path, msg, emin, emax, xmin, xmax, ymin, ymax, zmin, zmax, expected_mesh
-):
+def test_shrink(tmp_path, msg, emin, emax, xmin, xmax, ymin, ymax, zmin, zmax, expected_mesh):
     text = """timestamp
 problem title
 Number of histories used for normalizing tallies =      39594841.00
@@ -472,9 +454,7 @@ def test_repr(simple_bins):
     name, kind, xbins, ybins, zbins, ebins = simple_bins()
     data = np.asarray([[[[5.0]]], [[[10.0]]]], dtype=float)
     errors = np.asarray([[[[0.2]]], [[[0.1]]]], dtype=float)
-    m = FMesh(
-        name, kind, CartesianGeometrySpec(xbins, ybins, zbins), a(*ebins), data, errors
-    )
+    m = FMesh(name, kind, CartesianGeometrySpec(xbins, ybins, zbins), a(*ebins), data, errors)
     assert "Fmesh(14, 1, 0.0..1.0, 2.0..3.0, 4.0..5.0, 0.0..7.0)" == repr(m)
 
 
@@ -483,9 +463,7 @@ def test_reading_mfile_with_negative(data):
 
     with data_path.open() as fid:
         m1, m2 = iter_meshtal(fid)
-        assert (
-            m1.name == 1355114 and m2.name == 1355214
-        ), "reads files with negative values OK"
+        assert m1.name == 1355114 and m2.name == 1355214, "reads files with negative values OK"
         assert (
             m1.data[0, 0, 0, 0] == 0.0 and m1.errors[0, 0, 0, 0] == 0.0
         ), "Should convert entries with negative values to zeroes"

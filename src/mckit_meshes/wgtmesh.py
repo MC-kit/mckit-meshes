@@ -289,9 +289,7 @@ class WgtMesh:
                 data1 += [_nfm[i][j], _r[i][j + 1], 1]
             data += produce_strings(data1, "{0:#13.5g}")
         for p in range(_ni):
-            data += produce_strings(
-                self.energies[p][1:], "{0:#13.5g}"
-            )  # omit the first zero
+            data += produce_strings(self.energies[p][1:], "{0:#13.5g}")  # omit the first zero
             data1 = []
             # TODO dvp: order of cycling and dimensions are not efficient:
             #           the index changing faster should be the most inner in cycle.
@@ -392,8 +390,7 @@ class WgtMesh:
                                 _wp[e, i, j, k] = _wp_data[cell_index]
                 _w.append(_wp)
                 assert np.all(
-                    np.transpose(_wp_data.reshape((nep, _nfz, _nfy, _nfx)), (0, 3, 2, 1))
-                    == _wp
+                    np.transpose(_wp_data.reshape((nep, _nfz, _nfy, _nfx)), (0, 3, 2, 1)) == _wp
                 )
         geometry_spec = make_geometry_spec([_x0, _y0, _z0], _x, _y, _z, axs=axs, vec=vec)
         return cls(geometry_spec, _e, _w)
@@ -463,9 +460,7 @@ class WgtMesh:
             merged_weights = []
             assert first.wm.bins_are_equal(second.wm)
             for i, weights in enumerate(first.wm.weights):
-                nps_first, probabilities_first = prepare_probabilities_and_nps(
-                    first.nps, weights
-                )
+                nps_first, probabilities_first = prepare_probabilities_and_nps(first.nps, weights)
                 nps_second, probabilities_second = prepare_probabilities_and_nps(
                     second.nps, second.wm.weights[i]
                 )
@@ -496,9 +491,7 @@ class WgtMesh:
         out:
             Reciprocal of this weights
         """
-        return WgtMesh(
-            self._geometry_spec, self.energies, list(map(reciprocal, self.weights))
-        )
+        return WgtMesh(self._geometry_spec, self.energies, list(map(reciprocal, self.weights)))
 
     def normalize(
         self, normalization_point: Point, normalized_value: float = 1.0, energy_bin=-1
@@ -534,9 +527,7 @@ class WgtMesh:
 
         return WgtMesh(gs, self.energies, new_weights)
 
-    def invert(
-        self, normalization_point: Point, normalized_value: float = 1.0
-    ) -> "WgtMesh":
+    def invert(self, normalization_point: Point, normalized_value: float = 1.0) -> "WgtMesh":
         """Get reciprocal of self weights and normalize to 1 at given point.
 
         Important:
@@ -590,9 +581,7 @@ def reciprocal(a: np.ndarray, zero_index: np.ndarray = None) -> np.ndarray:
     return result
 
 
-def prepare_probabilities_and_nps(
-    _nps: int, _weights: np.ndarray
-) -> Tuple[np.ndarray, np.ndarray]:
+def prepare_probabilities_and_nps(_nps: int, _weights: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     """Computes intermediate data for merging procedure.
 
     The probabilities are reciprocals to weights.

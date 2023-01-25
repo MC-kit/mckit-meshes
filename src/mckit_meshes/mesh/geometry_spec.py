@@ -337,8 +337,7 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
     def local_coordinates(self, points: np.ndarray) -> np.ndarray:
         assert points.shape[-1] == 3, "Expected cartesian point array or single point"
         assert np.array_equal(self.axs, DEFAULT_AXIS) and (
-            np.array_equal(self.vec, DEFAULT_VEC)
-            or self.vec[1] == 0.0  # vec is in xz plane
+            np.array_equal(self.vec, DEFAULT_VEC) or self.vec[1] == 0.0  # vec is in xz plane
         ), "Tilted cylinder meshes are not implemented yet"
         # TODO dvp: implement tilted cylinder meshes
         # ez = self.axs / np.linalg.norm(self.axs)
@@ -401,9 +400,7 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
         z_minus_pz = z - pz
         z_minus_pz_square = np.square(z_minus_pz)
         z_sum = (1.0 / 3.0) * (
-            z_minus_pz_square[1:]
-            + z_minus_pz_square[:-1]
-            + z_minus_pz[1:] * z_minus_pz[:-1]
+            z_minus_pz_square[1:] + z_minus_pz_square[:-1] + z_minus_pz[1:] * z_minus_pz[:-1]
         )
         w = np.zeros((ni, nj, nk), dtype=float)
 
@@ -441,9 +438,7 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
             z = axs_z * z + _z0
             return np.array([x, y, z], dtype=float)
 
-        cell_centers: np.ndarray = cartesian_product(
-            r_mids, z_mids, t_mids, aggregator=_aggregator
-        )
+        cell_centers: np.ndarray = cartesian_product(r_mids, z_mids, t_mids, aggregator=_aggregator)
 
         return cell_centers
 
@@ -494,9 +489,7 @@ def _print_bins(indent, prefix, _ibins, io, columns: int = 6) -> None:
         max_columns=columns,
     )
     print(indent, f"{prefix}ints=", sep="", end="", file=io)
-    mckit_meshes.utils.io.print_n(
-        intervals, io=io, indent=second_indent, max_columns=columns
-    )
+    mckit_meshes.utils.io.print_n(intervals, io=io, indent=second_indent, max_columns=columns)
 
 
 def select_indexes(

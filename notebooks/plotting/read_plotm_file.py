@@ -115,9 +115,7 @@ def parse_description_lines(description_lines: List[str]):
         line_no += 1
     probid = parse_us_date(select_part_in_parenthesis(description_lines[line_no])[10:])
     line_no += 2
-    first_axis, second_axis = map(
-        select_numbers, description_lines[line_no : line_no + 2]
-    )
+    first_axis, second_axis = map(select_numbers, description_lines[line_no : line_no + 2])
     basis = internalize_basis(np.vstack((first_axis, second_axis)))
     line_no += 3
     origin = select_numbers(description_lines[line_no])
@@ -131,9 +129,7 @@ def transform_page(
 ) -> Page:
     lines = collect_lines(page)
     description_lines = extract_description_lines(page[-20:])
-    date, title, probid, basis, origin, extent = parse_description_lines(
-        description_lines
-    )
+    date, title, probid, basis, origin, extent = parse_description_lines(description_lines)
     return Page(lines, basis, origin, extent, date, title, probid)
 
 
