@@ -1,28 +1,5 @@
 # noinspection PyPep8
-"""Convert MCNP meshtal file to a number of npz files, one for each meshtal.
-
-    Usage:
-
-        mesh2npz ] [-s TALLIES] [-p PREFIX] MESH_TALLY...
-        mesh2npz --version | -h | --help
-
-    Options:
-        -h, --help  print this message and exit
-        --version print the version and exit
-        -s, --select TALLIES            - comma separated list of tallies to extract from the mesh file
-        -p, --prefix PREFIX             - prefix to prepend output files (default: "npz/"),
-                                          output files are also prepended with MESH_TALLY file base name
-        --override                      - override existing output files, default(false)
-        --update                        - override existing output files, which are older than the source file
-
-    Arguments:
-        MESH_TALLY... - files to load mesh tallies from (default: all the .m files in current folder)
-
-    Features:
-        Fails if, an output file exist and neither --override, nor --update options is specified in command line
-        Uses standard mckit_meshes module logging (see logging_cfg docs).
-        Default log file mesh_2_npz.log.
-"""
+"""Convert MCNP meshtal file to a number of npz files, one for each meshtal."""
 from __future__ import annotations
 
 import typing as t

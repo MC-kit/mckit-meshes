@@ -1,19 +1,4 @@
-"""Classes and functions for operations with fmesh tallies.
-
-Examples:
-    Suppose we have meshtal file - MCNP output for fmesh tallies - sample.m.
-
-    It contains several tallies with numbers 14, 24, and 34. First, we have to
-    read it::
-        tally_list = list(read_meshtal('sample.m'))
-
-    x and z are coordinates of mesh cell centers along x and z axis. data is
-    2-dimensional array of fmesh tally values. err - relative errors.
-
-    In order to save fmesh data to vtk format, method save2vtk should be used.
-    This saves resulting regular grid to .vtr file::
-        tally_list[0].save2vtk(filename='sample', data_name='heating neutron')
-"""
+"""Classes and functions for operations with fmesh tallies."""
 
 # TODO dvp: redesign this class as xarray data structure.
 #           multidimensional array with coordinates is more appropriate for this class.
@@ -59,9 +44,9 @@ class FMesh:
     Processing includes normalization, merging and conversion to weights mesh.
 
     Attrs:
-        NPZ_MARK Signature to be stored in the of meta entry in a npz file.
+        NPZ_MARK: Signature to be stored in the of meta entry in a npz file.
             This is used to check that the file is for FMesh object.
-        NPZ_FORMAT Identifies version of format of data stored in npz file.
+        NPZ_FORMAT: Identifies version of format of data stored in npz file.
     """
 
     NPZ_MARK = np.int16(5445)
@@ -399,21 +384,21 @@ class FMesh:
         np.savez_compressed(str(filename), **kwd)
 
     @classmethod
-    def load_npz(cls, file_: Union[str, Path]) -> "FMesh":
-        """Loads Fmesh object from the binary file_.
+    def load_npz(cls, _file: Union[str, Path]) -> "FMesh":
+        """Loads Fmesh object from the binary file.
 
         Args:
-          file_: Union[str:
-          Path]:
+          _file: npz-file to load from.
 
         Returns:
+            The loaded FMesh object.
         """
-        if isinstance(file_, Path):
-            file_ = str(file_)
-        with np.load(file_) as data:
+        if isinstance(_file, Path):
+            _file = str(_file)
+        with np.load(_file) as data:
             meta = data["meta"]
             mark = meta[0]
-            assert mark == FMesh.NPZ_MARK, "Incompatible file format %s" % file_
+            assert mark == FMesh.NPZ_MARK, f"Incompatible file format {_file}"
             version = meta[1]
             name, kind = meta[2:4]
             if 1 <= version:
