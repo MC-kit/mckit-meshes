@@ -35,11 +35,11 @@ Examples
 Contributing
 ------------
 
-.. image:: https://github.com/MC-kit/mckit_meshes/workflows/Tests/badge.svg
-   :target: https://github.com/MC-kit/mckit_meshes/actions?query=workflow%3ATests
+.. image:: https://github.com/MC-kit/mckit-meshes/workflows/Tests/badge.svg
+   :target: https://github.com/MC-kit/mckit-meshes/actions?workflow=Tests
    :alt: Tests
-.. image:: https://codecov.io/gh/MC-kit/mckit_meshes/branch/master/graph/badge.svg?token=wlqoa368k8
-  :target: https://codecov.io/gh/MC-kit/mckit_meshes
+.. image:: https://codecov.io/gh/MC-kit/mckit-meshes/branch/master/graph/badge.svg?token=wlqoa368k8
+  :target: https://codecov.io/gh/MC-kit/mckit-meshes
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
    :target: https://github.com/psf/black
 .. image:: https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336
@@ -58,16 +58,16 @@ References
 
 .. |Maintained| image:: https://img.shields.io/badge/Maintained%3F-yes-green.svg
    :target: https://github.com/MC-kit/mckit-meshes/graphs/commit-activity
-.. |Tests| image:: https://github.com/MC-kit/mckit_meshes/workflows/Tests/badge.svg
+.. |Tests| image:: https://github.com/MC-kit/mckit-meshes/workflows/Tests/badge.svg
    :target: https://github.com/MC-kit/mckit-meshes/actions?workflow=Tests
    :alt: Tests
 .. |License| image:: https://img.shields.io/github/license/MC-kit/mckit-meshes
-   :target: https://github.com/MC-kit/mckit_meshes
+   :target: https://github.com/MC-kit/mckit-meshes
 .. |Versions| image:: https://img.shields.io/pypi/pyversions/mckit-meshes
    :alt: PyPI - Python Version
 .. |PyPI| image:: https://img.shields.io/pypi/v/mckit-meshes
-   :target: https://pypi.org/project/mckit_meshes/
+   :target: https://pypi.org/project/mckit-meshes/
    :alt: PyPI
-.. |Docs| image:: https://readthedocs.org/projects/mckit_meshes/badge/?version=latest
+.. |Docs| image:: https://readthedocs.org/projects/mckit-meshes/badge/?version=latest
    :target: https://mckit_meshes.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status

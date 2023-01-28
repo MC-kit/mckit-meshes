@@ -12,19 +12,16 @@ import pytest
 
 from mckit_meshes.utils.testing import a
 from mckit_meshes.wgtmesh import WgtMesh, make_geometry_spec, parse_coordinates
-from numpy.testing import (
-    assert_almost_equal,
-    assert_array_almost_equal,
-    assert_array_equal,
-)
+from numpy.testing import assert_almost_equal, assert_array_almost_equal, assert_array_equal
 
 DEFAULT_ORIGIN = np.zeros((3,), dtype=float)
 
 
 @pytest.fixture(scope="module")
 def weights_ijk() -> Callable[[float], WgtMesh]:
-    """
-    Weights vary along ijk dimensions. Single energy bin.
+    """Weights vary along ijk dimensions.
+
+    Single energy bin.
 
     Returns
     -------
@@ -48,9 +45,7 @@ def weights_ijk() -> Callable[[float], WgtMesh]:
 
     def call(start_value: float):
         return WgtMesh(
-            make_geometry_spec(
-                origin=DEFAULT_ORIGIN, ibins=ibins, jbins=jbins, kbins=kbins
-            ),
+            make_geometry_spec(origin=DEFAULT_ORIGIN, ibins=ibins, jbins=jbins, kbins=kbins),
             [ebins],
             [build_weights(start_value)],
         )
@@ -60,8 +55,7 @@ def weights_ijk() -> Callable[[float], WgtMesh]:
 
 @pytest.fixture(scope="module")
 def weights_eijk() -> Callable[[float], WgtMesh]:
-    """
-    Weights vary along all dimensions.
+    """Weights vary along all dimensions.
 
     Returns
     -------
@@ -85,9 +79,7 @@ def weights_eijk() -> Callable[[float], WgtMesh]:
 
     def call(start_value: float):
         return WgtMesh(
-            make_geometry_spec(
-                origin=DEFAULT_ORIGIN, ibins=ibins, jbins=jbins, kbins=kbins
-            ),
+            make_geometry_spec(origin=DEFAULT_ORIGIN, ibins=ibins, jbins=jbins, kbins=kbins),
             [ebins],
             [build_weights(start_value)],
         )
@@ -136,9 +128,7 @@ def test_read_write(tmpdir, wwinp):
 )
 def test_mesh_coordinate_parsing(text, expected):
     actual = parse_coordinates(text.split())
-    assert_array_almost_equal(
-        actual, expected, err_msg="Failed to parse coordinates " + text
-    )
+    assert_array_almost_equal(actual, expected, err_msg="Failed to parse coordinates " + text)
 
 
 def test_constructor_from_lists():
@@ -193,9 +183,7 @@ def test_add_bad_path():
         [[[[[1]]]], [[[[10]]]]],
     )
     bm = WgtMesh(
-        make_geometry_spec(
-            DEFAULT_ORIGIN, [0, 10], [0, 20], [0, 50]  # <-- kbins differ
-        ),
+        make_geometry_spec(DEFAULT_ORIGIN, [0, 10], [0, 20], [0, 50]),  # <-- kbins differ
         [[0, 20], [0, 20]],
         [[[[[2]]]], [[[[20]]]]],
     )
@@ -211,9 +199,7 @@ def test_add_bad_path():
         (1, a(1, 2), (a(1, 1, dtype=int), a(1, 0.5))),
     ],
 )
-def test_prepare_probabilities_and_nps(
-    nps: int, weights: np.ndarray, expected: np.ndarray
-):
+def test_prepare_probabilities_and_nps(nps: int, weights: np.ndarray, expected: np.ndarray):
     actual = wgtmesh.prepare_probabilities_and_nps(nps, weights)
     for _a, _b in zip(actual, expected):
         assert_array_equal(_a, _b)

@@ -1,8 +1,6 @@
-"""
-Intercept log messages from the used libraries and pass them to `loguru`.
+"""Intercept log messages from the used libraries and pass them to `loguru`.
 
 See https://github.com/Delgan/loguru
-
 """
 from typing import Final
 
@@ -23,7 +21,7 @@ from loguru import logger
 
 
 class InterceptHandler(logging.Handler):
-    """Send events from standard logging to loguru"""
+    """Send events from standard logging to loguru."""
 
     def emit(self, record):
         # Get corresponding Loguru level if it exists
@@ -38,9 +36,7 @@ class InterceptHandler(logging.Handler):
             frame = frame.f_back
             depth += 1
 
-        logger.opt(depth=depth, exception=record.exc_info).log(
-            level, record.getMessage()
-        )
+        logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
 
 
 log = logging.getLogger()
@@ -55,9 +51,7 @@ MCKIT_CONSOLE_LOG_FORMAT: Final[str] = environ.get(
 )
 
 
-def init_logger(
-    logfile, quiet, verbose, *, stderr_format: str = MCKIT_CONSOLE_LOG_FORMAT
-):
+def init_logger(logfile, quiet, verbose, *, stderr_format: str = MCKIT_CONSOLE_LOG_FORMAT):
     stderr_level: str = "INFO"
     if quiet:
         stderr_level = "WARNING"

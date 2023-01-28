@@ -7,6 +7,7 @@ from enum import IntEnum
 
 import mckit_meshes.mesh.geometry_spec as gs
 import mckit_meshes.utils as ut
+import mckit_meshes.utils.io
 import numpy as np
 
 GeometrySpec = Union[gs.CartesianGeometrySpec, gs.CylinderGeometrySpec]
@@ -26,9 +27,7 @@ class Particles(IntEnum):
 
 # noinspection GrazieInspection
 class WgtMesh:
-    """
-    Class to work with MCNP weight window files.
-    """
+    """Class to work with MCNP weight window files."""
 
     def __init__(
         self,
@@ -48,19 +47,19 @@ class WgtMesh:
         self._geometry_spec.print(io, columns=columns)
         print("wwge:n", end=" ", file=io)
         second_indent = " " * 15
-        ut.print_n(
+        mckit_meshes.utils.io.print_n(
             gs.format_floats(self.energies[0][1:]),
             io=io,
             indent=second_indent,
-            columns=columns,
+            max_columns=columns,
         )
         if len(self.energies) > 1:
             print("wwge:p", end=" ", file=io)
-            ut.print_n(
+            mckit_meshes.utils.io.print_n(
                 gs.format_floats(self.energies[1][1:]),
                 io=io,
                 indent=second_indent,
-                columns=columns,
+                max_columns=columns,
             )
 
     def print_meshtal_spec(
@@ -78,11 +77,11 @@ class WgtMesh:
         indent = " " * 8
         print(indent, "emesh=", sep="", end="", file=io)
         second_indent = indent + " " * 6
-        ut.print_n(
+        mckit_meshes.utils.io.print_n(
             gs.format_floats(self.energies[0][1:]),
             io=io,
             indent=second_indent,
-            columns=columns,
+            max_columns=columns,
         )
         if len(self.energies) > 1:
             print(f"fc{tally_p_number}    === WW generation mesh for photons", file=io)
@@ -90,11 +89,11 @@ class WgtMesh:
             self._geometry_spec.print(io, columns=columns)
             print(indent, "emesh=", sep="", end="", file=io)
             # TODO dvp: try to use do_print_bins here
-            ut.print_n(
+            mckit_meshes.utils.io.print_n(
                 gs.format_floats(self.energies[1][1:]),
                 io=io,
                 indent=second_indent,
-                columns=columns,
+                max_columns=columns,
             )
 
     def validate(self):
@@ -191,9 +190,7 @@ class WgtMesh:
 
     def bins_are_equal(self, other: "WgtMesh") -> bool:
         if not isinstance(other, WgtMesh):
-            raise RuntimeError(
-                "Invalid class of object to compare: {}", other.__class__
-            )
+            raise RuntimeError("Invalid class of object to compare: {}", other.__class__)
         if self._geometry_spec == other._geometry_spec:
             le = len(self.energies)
             if le == len(other.energies):
@@ -246,7 +243,6 @@ class WgtMesh:
 
         Args;
             stream: a stream to write to
-
         """
         data = []
         _if, _iv, _ni = 1, 1, len(self.energies)
@@ -293,9 +289,7 @@ class WgtMesh:
                 data1 += [_nfm[i][j], _r[i][j + 1], 1]
             data += produce_strings(data1, "{0:#13.5g}")
         for p in range(_ni):
-            data += produce_strings(
-                self.energies[p][1:], "{0:#13.5g}"
-            )  # omit the first zero
+            data += produce_strings(self.energies[p][1:], "{0:#13.5g}")  # omit the first zero
             data1 = []
             # TODO dvp: order of cycling and dimensions are not efficient:
             #           the index changing faster should be the most inner in cycle.
@@ -341,7 +335,6 @@ class WgtMesh:
 
         Returns:
             WgtMesh: loaded mesh.
-
         """
         _if, _iv, number_of_particles, number_of_parameters = (
             int(s) for s in f.readline().split()[:4]
@@ -397,14 +390,9 @@ class WgtMesh:
                                 _wp[e, i, j, k] = _wp_data[cell_index]
                 _w.append(_wp)
                 assert np.all(
-                    np.transpose(
-                        _wp_data.reshape((nep, _nfz, _nfy, _nfx)), (0, 3, 2, 1)
-                    )
-                    == _wp
+                    np.transpose(_wp_data.reshape((nep, _nfz, _nfy, _nfx)), (0, 3, 2, 1)) == _wp
                 )
-        geometry_spec = make_geometry_spec(
-            [_x0, _y0, _z0], _x, _y, _z, axs=axs, vec=vec
-        )
+        geometry_spec = make_geometry_spec([_x0, _y0, _z0], _x, _y, _z, axs=axs, vec=vec)
         return cls(geometry_spec, _e, _w)
 
     def get_mean_square_distance_weights(self, point):
@@ -472,9 +460,7 @@ class WgtMesh:
             merged_weights = []
             assert first.wm.bins_are_equal(second.wm)
             for i, weights in enumerate(first.wm.weights):
-                nps_first, probabilities_first = prepare_probabilities_and_nps(
-                    first.nps, weights
-                )
+                nps_first, probabilities_first = prepare_probabilities_and_nps(first.nps, weights)
                 nps_second, probabilities_second = prepare_probabilities_and_nps(
                     second.nps, second.wm.weights[i]
                 )
@@ -496,8 +482,7 @@ class WgtMesh:
             return first
 
     def reciprocal(self) -> "WgtMesh":
-        """
-        Invert weights values.
+        """Invert weights values.
 
         To be used for anti-forward method of weight generation.
 
@@ -506,15 +491,12 @@ class WgtMesh:
         out:
             Reciprocal of this weights
         """
-        return WgtMesh(
-            self._geometry_spec, self.energies, list(map(reciprocal, self.weights))
-        )
+        return WgtMesh(self._geometry_spec, self.energies, list(map(reciprocal, self.weights)))
 
     def normalize(
         self, normalization_point: Point, normalized_value: float = 1.0, energy_bin=-1
     ) -> "WgtMesh":
-        """
-        Scale weights to have value `value` at `normalisation_point`.
+        """Scale weights to have value `value` at `normalisation_point`.
 
         All other voxels are scaled proportionally.
 
@@ -545,9 +527,7 @@ class WgtMesh:
 
         return WgtMesh(gs, self.energies, new_weights)
 
-    def invert(
-        self, normalization_point: Point, normalized_value: float = 1.0
-    ) -> "WgtMesh":
+    def invert(self, normalization_point: Point, normalized_value: float = 1.0) -> "WgtMesh":
         """Get reciprocal of self weights and normalize to 1 at given point.
 
         Important:
@@ -559,7 +539,6 @@ class WgtMesh:
 
         Returns:
             WgtMesh: Normalized reciprocal of self weights.
-
         """
         return self.reciprocal().normalize(normalization_point, normalized_value)
 
@@ -602,11 +581,8 @@ def reciprocal(a: np.ndarray, zero_index: np.ndarray = None) -> np.ndarray:
     return result
 
 
-def prepare_probabilities_and_nps(
-    _nps: int, _weights: np.ndarray
-) -> Tuple[np.ndarray, np.ndarray]:
-    """
-    Computes intermediate data for merging procedure.
+def prepare_probabilities_and_nps(_nps: int, _weights: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    """Computes intermediate data for merging procedure.
 
     The probabilities are reciprocals to weights.
     Zero weights mean zero probabilities and don't affect the merged result.

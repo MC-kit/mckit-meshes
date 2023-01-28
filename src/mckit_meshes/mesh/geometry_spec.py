@@ -25,7 +25,6 @@
     The new callers are to use local_coordinates converter to avoid difficulties.
     For the old callers we will use ZERO_ORIGIN for Geometry Specification being
     used in FMesh.
-
 """
 from __future__ import annotations
 
@@ -36,6 +35,7 @@ import abc
 from dataclasses import dataclass, field
 
 import mckit_meshes.utils as ut
+import mckit_meshes.utils.io
 import numpy as np
 import numpy.linalg as linalg
 
@@ -62,7 +62,6 @@ def as_float_array(array) -> np.ndarray:
 
     Returns:
         np.ndarray:  either original or conversion.
-
     """
     return np.asarray(array, dtype=float)
 
@@ -72,7 +71,6 @@ class AbstractGeometrySpecData:
     """Data mixin for :py:class:`AbstractGeometrySpec`.
 
     Provides reusable data fields.
-
     """
 
     ibins: np.ndarray
@@ -148,7 +146,6 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
         Args:
             io: stream to print to
             indent: indent to insert before lines
-
         """
         ...
 
@@ -205,7 +202,7 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
         Union[int, slice, np.ndarray],
         Union[int, slice, np.ndarray],
     ]:
-        """Select indices for data corresponding to given spatial values
+        """Select indices for data corresponding to given spatial values.
 
         Args:
             i_values: indices along i (X or R) dimension
@@ -213,7 +210,7 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
             k_values: ... along k (Z or Theta)
 
         Returns:
-            see :py:func:`select_indexes()`
+            see :func:`select_indexes()`
         """
         return (
             select_indexes(self.ibins, i_values),
@@ -272,8 +269,7 @@ class CartesianGeometrySpec(AbstractGeometrySpec):
             return bins_square
 
         x_square, y_square, z_square = [
-            calc_sum(x - px)
-            for x, px in zip((self.ibins, self.jbins, self.kbins), point)
+            calc_sum(x - px) for x, px in zip((self.ibins, self.jbins, self.kbins), point)
         ]
         w = np.zeros((ni, nj, nk), dtype=float)
         for i in range(ni):
@@ -341,8 +337,7 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
     def local_coordinates(self, points: np.ndarray) -> np.ndarray:
         assert points.shape[-1] == 3, "Expected cartesian point array or single point"
         assert np.array_equal(self.axs, DEFAULT_AXIS) and (
-            np.array_equal(self.vec, DEFAULT_VEC)
-            or self.vec[1] == 0.0  # vec is in xz plane
+            np.array_equal(self.vec, DEFAULT_VEC) or self.vec[1] == 0.0  # vec is in xz plane
         ), "Tilted cylinder meshes are not implemented yet"
         # TODO dvp: implement tilted cylinder meshes
         # ez = self.axs / np.linalg.norm(self.axs)
@@ -405,9 +400,7 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
         z_minus_pz = z - pz
         z_minus_pz_square = np.square(z_minus_pz)
         z_sum = (1.0 / 3.0) * (
-            z_minus_pz_square[1:]
-            + z_minus_pz_square[:-1]
-            + z_minus_pz[1:] * z_minus_pz[:-1]
+            z_minus_pz_square[1:] + z_minus_pz_square[:-1] + z_minus_pz[1:] * z_minus_pz[:-1]
         )
         w = np.zeros((ni, nj, nk), dtype=float)
 
@@ -445,9 +438,7 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
             z = axs_z * z + _z0
             return np.array([x, y, z], dtype=float)
 
-        cell_centers: np.ndarray = cartesian_product(
-            r_mids, z_mids, t_mids, aggregator=_aggregator
-        )
+        cell_centers: np.ndarray = cartesian_product(r_mids, z_mids, t_mids, aggregator=_aggregator)
 
         return cell_centers
 
@@ -473,7 +464,6 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
             - `self.vec` is in PY=0 plane
             - `self.axs` is vertical
 
-
         Returns
         -------
         gs:
@@ -492,11 +482,14 @@ def _print_bins(indent, prefix, _ibins, io, columns: int = 6) -> None:
     coarse_mesh = coarse_mesh[1:]  # drop the first value - it's presented with origin
     print(indent, f"{prefix}mesh=", sep="", end="", file=io)
     second_indent = indent + " " * 5
-    ut.print_n(
-        (f"{x:.6g}" for x in coarse_mesh), io=io, indent=second_indent, columns=columns
+    mckit_meshes.utils.io.print_n(
+        (f"{x:.6g}" for x in coarse_mesh),
+        io=io,
+        indent=second_indent,
+        max_columns=columns,
     )
     print(indent, f"{prefix}ints=", sep="", end="", file=io)
-    ut.print_n(intervals, io=io, indent=second_indent, columns=columns)
+    mckit_meshes.utils.io.print_n(intervals, io=io, indent=second_indent, max_columns=columns)
 
 
 def select_indexes(
@@ -604,7 +597,6 @@ def compute_intervals_and_coarse_bins(
     [1, 1, 1, 1, 1]
     >>> coarse is arr
     True
-
 
     Args:
         arr: actual bins

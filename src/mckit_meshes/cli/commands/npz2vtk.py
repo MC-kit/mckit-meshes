@@ -35,9 +35,7 @@ def revise_npz_files(npz_files: t.Optional[t.Iterable[t.Any]]) -> t.List[Path]:
     return rv
 
 
-def npz2vtk(
-    prefix: str | Path, npz_files: t.Iterable[str | Path], override: bool = False
-) -> None:
+def npz2vtk(prefix: str | Path, npz_files: t.Iterable[str | Path], override: bool = False) -> None:
     """Convert MCNP meshtal file to a number of npz files, one for each mesh tally.
 
     Args:
@@ -50,8 +48,8 @@ def npz2vtk(
     file_exists_strategy = check_if_path_exists(override)
     for npz in npz_files:
         npz = Path(npz)
-        __LOG.info("Processing {}".format(npz))
-        __LOG.debug("Saving VTK file with prefix {}".format(prefix))
+        __LOG.info("Processing {}", npz)
+        __LOG.debug("Saving VTK file with prefix {}", prefix)
         prefix.mkdir(parents=True, exist_ok=True)
         mesh = fmesh.FMesh.load_npz(npz)
         vtk_file_stem = f"{prefix / str(mesh.name)}"

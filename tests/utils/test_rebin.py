@@ -64,7 +64,7 @@ skip_windows = pytest.mark.skipif((sys.platform == "win32"), reason="Fails on wi
             ),
         ),
         (
-            "# 2-D over columns",
+            "# 2-D over max_columns",
             np.linspace(0.0, 1.0, 5),  # x_new
             a(0, 1),  # x
             np.linspace(0.0, 3.0, 4).reshape((2, 2)),  # y [[0, 1], [2, 3]]
@@ -392,9 +392,7 @@ def test_rebin_1d(rebinned_data, data, bins, new_bins, axis, grouped):
                     np.array([0.25, 0.5, 1.0, 1.5, 1.75]),
                 ],
             ),
-            np.array(
-                [[0, 0, 1, 1], [0, 0, 1, 1], [1, 1, 2, 2], [1, 1, 2, 2]], dtype=float
-            ),
+            np.array([[0, 0, 1, 1], [0, 0, 1, 1], [1, 1, 2, 2], [1, 1, 2, 2]], dtype=float),
         ),
         (
             # rebin by the second axis

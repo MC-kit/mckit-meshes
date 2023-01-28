@@ -29,9 +29,7 @@ VERSION = meta.__version__
 @click.group("mckit-meshes", help=meta.__summary__)
 @click.pass_context
 @click.option("--override/--no-override", is_flag=True, default=False)
-@click.option(
-    "--verbose/--no-verbose", is_flag=True, default=False, help="Log everything"
-)
+@click.option("--verbose/--no-verbose", is_flag=True, default=False, help="Log everything")
 @click.option(
     "--quiet/--no-quiet",
     is_flag=True,
@@ -68,9 +66,7 @@ if there are more than 1 input file""",
     nargs=-1,
     required=False,
 )
-def mesh2npz(
-    ctx: click.Context, prefix: str | Path, mesh_tallies: t.List[t.Any]
-) -> None:
+def mesh2npz(ctx: click.Context, prefix: str | Path, mesh_tallies: t.List[t.Any]) -> None:
     """Converts mesh files to npz files."""
     do_mesh2npz(prefix, mesh_tallies, ctx.obj["OVERRIDE"])
     #

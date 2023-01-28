@@ -1,17 +1,30 @@
-.. mckit-nuclides documentation master file, created by
-   sphinx-quickstart on Sun Feb 13 00:58:06 2022.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
+======================================
 Welcome to mckit-meshes documentation!
-==========================================
+======================================
 
-.. note::
-   Still in progress.
+The package provides methods to read, write and process MCNP tally and weight meshes.
+
+That includes: ::
+    - comparison
+    - merge
+    - inversion and conversion tally to weight mesh
+    - normalization
+    - rebinning over spatial and energy bins
+    - extraction data for specific spatial points and slices
+
+.. todo ::
+   Documenation is still in progress.
+
+Content
+=======
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+
+   readme
+   modules
+   license
+   todo
 
 
 

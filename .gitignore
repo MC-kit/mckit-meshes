@@ -132,3 +132,7 @@ dmypy.json
 .idea/
 # sandbox
 wrk/
+
+# local poetry config
+poetry.toml
+
