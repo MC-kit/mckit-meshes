@@ -45,9 +45,7 @@ def revise_mesh_tallies(mesh_tallies) -> t.List[Path]:
     cwd = Path.cwd()
     rv = list(cwd.glob("*.m"))
     if not rv:
-        errmsg = "No .m-files found in directory '{}', nothing to do.".format(
-            cwd.absolute()
-        )
+        errmsg = "No .m-files found in directory '{}', nothing to do.".format(cwd.absolute())
         __LOG.warning(errmsg)
     return rv
 

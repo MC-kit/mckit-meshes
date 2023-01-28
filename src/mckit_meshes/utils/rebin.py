@@ -200,9 +200,7 @@ def rebin_nd(
         return a
 
     if Pool is not None and a.size > external_process_threshold:
-        recursion_res = Pool(processes=1).apply(
-            rebin_nd, args=(a, rebin_spec, assume_sorted)
-        )
+        recursion_res = Pool(processes=1).apply(rebin_nd, args=(a, rebin_spec, assume_sorted))
     else:
         recursion_res = rebin_nd(a, rebin_spec, assume_sorted)
 

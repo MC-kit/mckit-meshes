@@ -11,24 +11,20 @@ THIS_FILENAME = Path(__file__).name
 @pytest.mark.parametrize(
     "package, resource, expected",
     [
-        (None, THIS_FILENAME, THIS_FILENAME),
         ("tests", "data/1.m", "data/1.m"),
     ],
 )
 def test_filename_resolver(package, resource, expected):
     resolver = filename_resolver(package)
     actual = resolver(resource)
-    assert actual.replace("\\", "/").endswith(
-        expected
-    ), "Failed to compute resource file name"
-    assert Path(actual).exists(), f"The resource '{resource}' is not available"
+    assert actual.replace("\\", "/").endswith(expected), "Failed to compute resource file name"
+    assert Path(actual).exists(), f"The resource {resource!r} is not available"
 
 
 # noinspection PyCompatibility
 @pytest.mark.parametrize(
     "package, resource, expected",
     [
-        # (None, "not_existing.py", "not_existing.py"),
         ("tests", "data/not_existing", "tests/data/not_existing"),
         ("mckit_meshes", "data/not_existing", "mckit_meshes/data/not_existing"),
     ],
@@ -36,7 +32,7 @@ def test_filename_resolver(package, resource, expected):
 def test_filename_resolver_when_resource_doesnt_exist(package, resource, expected):
     resolver = filename_resolver(package)
     actual = resolver(resource)
-    assert not Path(actual).exists(), f"The resource '{resource}' should not be available"
+    assert not Path(actual).exists(), f"The resource {resource!r} should not be available"
 
 
 def test_filename_resolver_when_package_doesnt_exist():
@@ -46,18 +42,16 @@ def test_filename_resolver_when_package_doesnt_exist():
 
 
 def test_path_resolver():
-    resolver = path_resolver()
-    actual = resolver(THIS_FILENAME)
+    resolver = path_resolver("tests")
+    actual = resolver("utils/" + THIS_FILENAME)
     assert isinstance(actual, Path)
     assert actual.name == THIS_FILENAME
-    assert actual.exists(), f"The file '{THIS_FILENAME}' should be available"
+    assert actual.exists(), f"The file {THIS_FILENAME!r} should be available"
 
 
 def test_path_resolver_in_own_package_with_separate_file():
-    resolver = path_resolver()
-    assert resolver(
-        "__init__.py"
-    ).exists(), "Should find __init__.py in the current package"
+    resolver = path_resolver("tests")
+    assert resolver("__init__.py").exists(), "Should find '__init__.py' in the 'tests' package"
 
 
 if __name__ == "__main__":

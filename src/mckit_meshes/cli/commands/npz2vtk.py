@@ -35,9 +35,7 @@ def revise_npz_files(npz_files: t.Optional[t.Iterable[t.Any]]) -> t.List[Path]:
     return rv
 
 
-def npz2vtk(
-    prefix: str | Path, npz_files: t.Iterable[str | Path], override: bool = False
-) -> None:
+def npz2vtk(prefix: str | Path, npz_files: t.Iterable[str | Path], override: bool = False) -> None:
     """Convert MCNP meshtal file to a number of npz files, one for each mesh tally.
 
     Args:

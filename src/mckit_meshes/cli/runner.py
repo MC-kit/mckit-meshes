@@ -29,9 +29,7 @@ VERSION = meta.__version__
 @click.group("mckit-meshes", help=meta.__summary__)
 @click.pass_context
 @click.option("--override/--no-override", is_flag=True, default=False)
-@click.option(
-    "--verbose/--no-verbose", is_flag=True, default=False, help="Log everything"
-)
+@click.option("--verbose/--no-verbose", is_flag=True, default=False, help="Log everything")
 @click.option(
     "--quiet/--no-quiet",
     is_flag=True,
