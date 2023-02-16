@@ -63,7 +63,8 @@ def test_read_mesh_tall(tmp_path, simple_bins):
         fid.write("problem title\n")
         fid.write("Number of histories used for normalizing tallies =      39594841.00\n\n")
         m.save_2_mcnp_mesh(fid)
-    actual = read_meshtal(tfp.open())
+    with tfp.open() as fid:
+        actual = read_meshtal(fid)
     assert len(actual) == 1
     actual = actual[0]
     assert actual == m
@@ -260,7 +261,8 @@ def test_get_totals_slice(tmpdir, x, y, z, expected_total, expected_rel_error, m
     tf = tmpdir.join("gts.m")
     tf.write(_TEXT)
     tfn = str(tf)
-    meshes = read_meshtal(Path(tfn).open())
+    with Path(tfn).open() as fid:
+        meshes = read_meshtal(fid)
     assert meshes, msg
     assert 1 == len(meshes), msg
     m = meshes[0]
@@ -375,7 +377,8 @@ def test_rebin(
     tf = tmpdir.join("gts.m")
     tf.write(_TEXT)
     tfn = str(tf)
-    meshes = read_meshtal(Path(tfn).open())
+    with Path(tfn).open() as fid:
+        meshes = read_meshtal(fid)
     assert meshes
     assert 1 == len(meshes)
     m = meshes[0]
