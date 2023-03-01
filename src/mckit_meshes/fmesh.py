@@ -11,14 +11,16 @@ import logging
 
 from pathlib import Path
 
+import numpy as np
+
+from numpy.typing import ArrayLike
+
 import mckit_meshes.mesh.geometry_spec as gc
 import mckit_meshes.utils.no_daemon_process as ndp
 import mckit_meshes.utils.rebin as rebin
-import numpy as np
 
 from mckit_meshes.particle_kind import ParticleKind as Kind
 from mckit_meshes.utils.io import raise_error_when_file_exists_strategy
-from numpy.typing import ArrayLike
 from pyevtk.hl import gridToVTK
 from toolz.itertoolz import concatv
 

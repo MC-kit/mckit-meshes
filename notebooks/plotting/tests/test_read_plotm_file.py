@@ -1,11 +1,13 @@
 import datetime as dt
 
-import notebooks.plotting.read_plotm_file as rpf
 import numpy as np
+
+from numpy.testing import assert_almost_equal, assert_array_almost_equal
+
+import notebooks.plotting.read_plotm_file as rpf
 import pytest
 
 from mckit_meshes.utils.testing import a
-from numpy.testing import assert_almost_equal, assert_array_almost_equal
 
 
 @pytest.fixture(scope="module")

@@ -6,13 +6,15 @@ from functools import reduce
 from itertools import product
 from operator import mul
 
-import mckit_meshes.wgtmesh as wgtmesh
 import numpy as np
+
+from numpy.testing import assert_almost_equal, assert_array_almost_equal, assert_array_equal
+
+import mckit_meshes.wgtmesh as wgtmesh
 import pytest
 
 from mckit_meshes.utils.testing import a
 from mckit_meshes.wgtmesh import WgtMesh, make_geometry_spec, parse_coordinates
-from numpy.testing import assert_almost_equal, assert_array_almost_equal, assert_array_equal
 
 DEFAULT_ORIGIN = np.zeros((3,), dtype=float)
 

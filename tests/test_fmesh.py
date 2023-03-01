@@ -5,12 +5,14 @@ from copy import copy
 from pathlib import Path
 
 import numpy as np
+
+from numpy.testing import assert_almost_equal, assert_array_equal
+
 import pytest
 
 from mckit_meshes.fmesh import FMesh, iter_meshtal, m_2_npz, merge_tallies, read_meshtal
 from mckit_meshes.mesh.geometry_spec import CartesianGeometrySpec
 from mckit_meshes.utils.testing import a
-from numpy.testing import assert_almost_equal, assert_array_equal
 
 
 @pytest.fixture

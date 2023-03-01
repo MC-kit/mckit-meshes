@@ -1,9 +1,11 @@
 import numpy as np
+
+from numpy.testing import assert_array_equal
+
 import pytest
 
 from mckit_meshes.utils.cartesian_product import cartesian_product
 from mckit_meshes.utils.testing import a
-from numpy.testing import assert_array_equal
 
 
 @pytest.mark.parametrize(

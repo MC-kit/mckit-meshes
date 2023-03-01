@@ -34,10 +34,11 @@ import abc
 
 from dataclasses import dataclass, field
 
-import mckit_meshes.utils as ut
-import mckit_meshes.utils.io
 import numpy as np
 import numpy.linalg as linalg
+
+import mckit_meshes.utils as ut
+import mckit_meshes.utils.io
 
 from mckit_meshes.utils.cartesian_product import cartesian_product
 

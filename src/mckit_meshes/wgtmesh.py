@@ -5,10 +5,11 @@ import sys
 from dataclasses import dataclass
 from enum import IntEnum
 
+import numpy as np
+
 import mckit_meshes.mesh.geometry_spec as gs
 import mckit_meshes.utils as ut
 import mckit_meshes.utils.io
-import numpy as np
 
 GeometrySpec = Union[gs.CartesianGeometrySpec, gs.CylinderGeometrySpec]
 Point = np.ndarray
