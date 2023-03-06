@@ -221,7 +221,7 @@ source = ["src", ".nox/*/site-packages"]
 
 [tool.coverage.run]
 branch = true
-source = ["mckit_meshes"]
+source = ["src"]
 omit = ["*/plotting/*"]
 
 [tool.coverage.report]
