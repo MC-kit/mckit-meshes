@@ -12,7 +12,6 @@ from pathlib import Path
 
 def ignore_existing_file_strategy(_: str | Path) -> None:
     """Do nothing if file exists."""
-    pass
 
 
 def raise_error_when_file_exists_strategy(path: str | Path) -> None:

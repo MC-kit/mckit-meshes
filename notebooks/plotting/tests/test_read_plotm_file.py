@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime as dt
 
 import numpy as np
@@ -18,7 +20,7 @@ def test_file(data):
 
 
 @pytest.mark.parametrize(
-    "path, pages",
+    ["path", "pages"],
     [
         ("ng-2.3.5.ps", 1),
         ("plotm-1.ps", 2),
@@ -71,7 +73,7 @@ def test_first_page_from_contour_file_meta_info_is_complete(test_file):
 
 
 @pytest.mark.parametrize(
-    "msg,lines,expected,x,y,scale",
+    ["msg", "lines", "expected", "x", "y", "scale"],
     [
         (
             "# bottom -> origin ",

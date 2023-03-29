@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from mckit_meshes import __version__
 from mckit_meshes.cli.runner import mckit_meshes
 

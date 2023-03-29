@@ -1,22 +1,23 @@
-from typing import Generator, List, TextIO
+from __future__ import annotations
+
+from typing import Generator, TextIO
 
 
-def m_file_iterator(stream: TextIO) -> Generator[List[str], None, None]:
-    header: List[str] = []
-    for line in stream:
+def m_file_iterator(stream: TextIO) -> Generator[list[str], None, None]:
+    header: list[str] = []
+    for _line in stream:
         if len(header) < 3:
-            line = line.strip()
-            header.append(line)
+            header.append(_line.strip())
         else:
             break
     yield header
-    mesh: List[str] = []
+    mesh: list[str] = []
     for line in stream:
-        line = line.strip()
-        if line:
-            if len(mesh) > 0 and line.startswith("Mesh Tally Number"):
+        _line = line.strip()
+        if _line:
+            if len(mesh) > 0 and _line.startswith("Mesh Tally Number"):
                 yield mesh
                 mesh = []
-            mesh.append(line)
+            mesh.append(_line)
     if len(mesh) > 0:
         yield mesh

@@ -1,5 +1,5 @@
 """Particle kinds enumeration and methods."""
-
+from __future__ import annotations
 
 from enum import IntEnum
 
@@ -35,7 +35,6 @@ class ParticleKind(IntEnum):
         """
         if self is self.n:
             return "1 -4"
-        elif self is self.p:
+        if self is self.p:
             return "-5 -6"
-        else:
-            raise ValueError("Heating spec is not defined for " + self.name)
+        raise ValueError("Heating spec is not defined for " + self.name)

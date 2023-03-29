@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Generator
 
 import os
@@ -19,7 +21,7 @@ def data() -> Path:
     return _DATA
 
 
-@pytest.fixture
+@pytest.fixture()
 def cd_tmpdir(tmp_path) -> Generator[Path, None, None]:
     """Temporarily change to temp directory.
 

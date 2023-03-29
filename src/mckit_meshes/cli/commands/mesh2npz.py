@@ -8,21 +8,21 @@ import logging
 
 from pathlib import Path
 
-import mckit_meshes.fmesh as fmesh
+from mckit_meshes import fmesh
 
 from ...utils.io import check_if_path_exists
 
 __LOG = logging.getLogger(__name__)
 
 
-def revise_mesh_tallies(mesh_tallies) -> t.List[Path]:
+def revise_mesh_tallies(mesh_tallies) -> list[Path]:
     if mesh_tallies:
         return list(map(Path, mesh_tallies))
 
     cwd = Path.cwd()
     rv = list(cwd.glob("*.m"))
     if not rv:
-        errmsg = "No .m-files found in directory '{}', nothing to do.".format(cwd.absolute())
+        errmsg = f"No .m-files found in directory '{cwd.absolute()}', nothing to do."
         __LOG.warning(errmsg)
     return rv
 
@@ -35,15 +35,15 @@ def mesh2npz(
     single_input = len(mesh_tallies) == 1
     prefix = Path(prefix)
     for m in mesh_tallies:
-        m = Path(m)
+        _m = Path(m)
         if single_input:
             p = prefix
         else:
-            p = prefix / m.stem
-        __LOG.info("Processing {}".format(m))
-        __LOG.debug("Saving tallies with prefix {}".format(prefix))
+            p = prefix / _m.stem
+        __LOG.info(f"Processing {_m}")
+        __LOG.debug(f"Saving tallies with prefix {prefix}")
         p.mkdir(parents=True, exist_ok=True)
-        with m.open() as stream:
+        with _m.open() as stream:
             fmesh.m_2_npz(
                 stream,
                 prefix=p,

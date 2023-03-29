@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Callable
 
 import io
@@ -10,9 +12,9 @@ import numpy as np
 
 from numpy.testing import assert_almost_equal, assert_array_almost_equal, assert_array_equal
 
-import mckit_meshes.wgtmesh as wgtmesh
 import pytest
 
+from mckit_meshes import wgtmesh
 from mckit_meshes.utils.testing import a
 from mckit_meshes.wgtmesh import WgtMesh, make_geometry_spec, parse_coordinates
 
@@ -25,9 +27,7 @@ def weights_ijk() -> Callable[[float], WgtMesh]:
 
     Single energy bin.
 
-    Returns
-    -------
-    out:
+    Returns:
         Callable to build weights with given offset.
     """
     ebins = np.array([0.0, 20], dtype=float)
@@ -36,7 +36,7 @@ def weights_ijk() -> Callable[[float], WgtMesh]:
     kbins = np.linspace(0, 30, 3, endpoint=True, dtype=float)
 
     def build_weights(start_value: float) -> np.ndarray:
-        isz, jsz, ksz = map(lambda x: x.size - 1, [ibins, jbins, kbins])
+        isz, jsz, ksz = (x.size - 1 for x in [ibins, jbins, kbins])
         wgt_shape = (1, isz, jsz, ksz)
         result = np.zeros(wgt_shape, dtype=float)
         for ii, ji, ki in product(range(isz), range(jsz), range(ksz)):
@@ -59,9 +59,7 @@ def weights_ijk() -> Callable[[float], WgtMesh]:
 def weights_eijk() -> Callable[[float], WgtMesh]:
     """Weights vary along all dimensions.
 
-    Returns
-    -------
-    out:
+    Returns:
         Callable to build weights with given offset.
     """
     ebins = np.linspace(0.0, 20, 5, endpoint=True, dtype=float)
@@ -70,7 +68,7 @@ def weights_eijk() -> Callable[[float], WgtMesh]:
     kbins = np.linspace(0, 30, 3, endpoint=True, dtype=float)
 
     def build_weights(start_value: float) -> np.ndarray:
-        esz, isz, jsz, ksz = map(lambda x: x.size - 1, [ebins, ibins, jbins, kbins])
+        esz, isz, jsz, ksz = (x.size - 1 for x in [ebins, ibins, jbins, kbins])
         wgt_shape = (esz, isz, jsz, ksz)
         result = np.zeros(wgt_shape, dtype=float)
         for ei, ii, ji, ki in product(range(esz), range(isz), range(jsz), range(ksz)):
@@ -89,12 +87,11 @@ def weights_eijk() -> Callable[[float], WgtMesh]:
     return call
 
 
-@pytest.fixture
+@pytest.fixture()
 def wwinp(data) -> WgtMesh:
     filename = data / "wwinp"
     with open(filename) as stream:
-        m = WgtMesh.read(stream)
-    return m
+        return WgtMesh.read(stream)
 
 
 def test_trivial_constructor():
@@ -121,7 +118,7 @@ def test_read_write(tmpdir, wwinp):
 
 
 @pytest.mark.parametrize(
-    "text,expected",
+    ["text", "expected"],
     [
         ("0.0  1.0 10.0 1.0 1.0 100.0 1.0", a(0.0, 10.0, 100.0)),
         ("0.0  2.0 10.0 1.0 1.0 100.0 1.0", a(0.0, 5.0, 10.0, 100.0)),
@@ -194,7 +191,7 @@ def test_add_bad_path():
 
 
 @pytest.mark.parametrize(
-    "nps, weights, expected",
+    ["nps", "weights", "expected"],
     [
         (1, a(0, 1), (a(0, 1, dtype=int), a(0, 1))),
         (1, a(0, 2), (a(0, 1, dtype=int), a(0, 0.5))),
@@ -228,7 +225,7 @@ def test_merge(weights_eijk) -> None:
 def my_assert_array_equal(actual, expected):
     for i, (ai, ei) in enumerate(zip(actual, expected)):
         try:
-            ai, ei = _a, _b = map(float, [ai, ei])
+            ai, ei = _a, _b = map(float, [ai, ei])  # noqa: PLW2901
         except ValueError:
             pass
         assert ai == ei, f"{i} - items are not equal: {ai} != {ei}"

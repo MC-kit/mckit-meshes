@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import numpy as np
 
 from numpy.testing import assert_almost_equal, assert_array_almost_equal, assert_array_equal
@@ -39,7 +41,7 @@ def test_cylinder_constructor():
 
 
 def test_cylinder_constructor_with_wrong_theta():
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Theta is expected in rotations only"):
         CylinderGeometrySpec(a(1, 2, 3), a(4, 5, 6), a(7, 8, 9), origin=a(1, 0, 0))
 
 
@@ -51,7 +53,7 @@ def test_cartesian_local_coordinates():
 
 
 @pytest.mark.parametrize(
-    "points, origin, expected",
+    ["points", "origin", "expected"],
     [
         (
             a(2, 2, 3),
@@ -92,7 +94,7 @@ def test_boundaries():
 
 
 @pytest.mark.parametrize(
-    "point, expected",
+    ["point", "expected"],
     [
         (a(2, 5, 8), True),
         (a(1, 5, 8), False),
@@ -104,7 +106,7 @@ def test_surrounds_point_cartesian(point, expected):
 
 
 @pytest.mark.parametrize(
-    "point, expected",
+    ["point", "expected"],
     [
         (a(2, 2, 0), True),
         (a(2, 2, 2), False),
@@ -163,7 +165,7 @@ def test_adjust_axs_vec_for_mcnp():
 
 
 @pytest.mark.parametrize(
-    "inp, value, expected",
+    ["inp", "value", "expected"],
     [
         (a(0, 5, 10), -0.1, -1),
         (a(0, 5, 10), 0, 0),
@@ -181,7 +183,7 @@ def test_select_indices(inp, value, expected):
 
 
 @pytest.mark.parametrize(
-    "inp, values, expected",
+    ["inp", "values", "expected"],
     [
         (a(0, 5, 10), [-1, 0, 2], [-1, 0, 0]),
         (a(0, 5, 10), [-1, 0, 6], [-1, 0, 1]),

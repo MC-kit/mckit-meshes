@@ -1,11 +1,13 @@
-from typing import Any, Callable, Final, Optional, Union
+from __future__ import annotations
+
+from typing import Any, Callable, Final
 
 import warnings
 
 import matplotlib
 import numpy as np
 
-from matplotlib import cm, collections, colors, patches
+from matplotlib import collections, colors, patches
 from matplotlib import pyplot as plt
 from matplotlib.path import Path as PlotPath
 
@@ -19,7 +21,7 @@ SetupAxesStrategyType = Callable[[plt.Axes], None]
 def plot_ps_page(
     axes: plt.Axes,
     page: rpf.Page,
-    setup_axes_strategy: Optional[Union[bool, SetupAxesStrategyType]] = None,
+    setup_axes_strategy: bool | SetupAxesStrategyType | None = None,
 ) -> None:
     coll = collections.LineCollection(
         page.lines,
@@ -59,7 +61,7 @@ def default_setup_access_strategy(
     extent
     origin
 
-    Returns
+    Returns:
     -------
     """
     axes.set_aspect("equal")
@@ -172,10 +174,10 @@ def plot_2d_distribution(
     # zc = contours.collections[index_10_in_13]
     # plt.setp(zc, linewidth=3)
     levels = contours.levels
-    print("levels:{}".format(levels))
+    print(f"levels:{levels}")
     contour_labeled_levels = levels
     for ii in contour_labeled_levels:
-        assert ii in levels, "{} is not levels".format(ii)
+        assert ii in levels, f"{ii} is not levels"
     ax.clabel(
         contours,
         contour_labeled_levels,

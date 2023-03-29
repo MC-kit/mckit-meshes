@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from matplotlib.ticker import LogFormatterSciNotation
 from numpy import isnan
 

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import platform
 import sys
 
@@ -13,9 +15,8 @@ pytest_mark = pytest.mark.skipif((sys.platform == "win32"), reason="Fails on win
 def foo(x, depth=0):
     if depth == 0:
         return x
-    else:
-        with closing(ndp.Pool()) as p:
-            return p.map(partial(foo, depth=depth - 1), range(x + 1))
+    with closing(ndp.Pool()) as p:
+        return p.map(partial(foo, depth=depth - 1), range(x + 1))
 
 
 @pytest.mark.skipif(

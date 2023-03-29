@@ -1,4 +1,5 @@
 """Tests for npz2vtk CLI module."""
+from __future__ import annotations
 
 import shutil
 
@@ -61,14 +62,13 @@ def test_without_prefix(cd_tmpdir, runner, source):
 
 
 def test_no_npz_files_and_not_specified_npz(cd_tmpdir, runner):
-    assert not [
-        f for f in Path.cwd().glob("*.npz")
-    ], "There shouldn't be any .npz files in current directory"
+    assert not list(
+        Path.cwd().glob("*.npz")
+    ), "There shouldn't be any .npz files in current directory"
     result = runner.invoke(mckit_meshes, args=["npz2vtk"], catch_exceptions=False)
     assert result.exit_code == 0, "Should be noop, when nothing to do"
-    assert (
-        "WARNING" in result.output and "nothing to do" in result.output
-    ), "Should warn, when nothing to do"
+    assert "WARNING" in result.output, "Should warn"
+    assert "nothing to do" in result.output, "when nothing to do"
 
 
 def test_not_existing_input_file(runner):

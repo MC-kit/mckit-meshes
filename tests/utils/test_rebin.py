@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import sys
 
 import numpy as np
@@ -22,7 +24,7 @@ skip_windows = pytest.mark.skipif((sys.platform == "win32"), reason="Fails on wi
 
 # noinspection PyTypeChecker
 @pytest.mark.parametrize(
-    "msg, x_new, x, y, axis, expected_y",
+    ["msg", "x_new", "x", "y", "axis", "expected_y"],
     [
         (
             "# one point",
@@ -88,7 +90,7 @@ def test_interpolate(msg, x_new, x, y, axis, expected_y):
 
 
 @pytest.mark.parametrize(
-    "msg, array, bins, left, right, axis, expected_bins, expected_data",
+    ["msg", "array", "bins", "left", "right", "axis", "expected_bins", "expected_data"],
     [
         (
             "# shrink to the left bin",
@@ -182,7 +184,7 @@ def test_shrink_1d(msg, array, bins, left, right, axis, expected_bins, expected_
 
 # noinspection PyTypeChecker
 @pytest.mark.parametrize(
-    "msg, array, trim_spec, expected_bins, expected_data",
+    ["msg", "array", "trim_spec", "expected_bins", "expected_data"],
     [
         (
             "# 2D array shrink to the middle bin with not exact edges",
@@ -251,7 +253,7 @@ def test_shrink_nd(msg, array, trim_spec, expected_bins, expected_data):
 
 
 @pytest.mark.parametrize(
-    "rebinned_data,data,bins,new_bins,axis,grouped",
+    ["rebinned_data", "data", "bins", "new_bins", "axis", "grouped"],
     [
         (
             # rebin to more frequent bins
@@ -321,7 +323,7 @@ def test_rebin_1d(rebinned_data, data, bins, new_bins, axis, grouped):
 
 # noinspection PyTypeChecker
 @pytest.mark.parametrize(
-    "data,rebin_spec,rebinned_data",
+    ["data", "rebin_spec", "rebinned_data"],
     [
         (
             # rebin to more frequent bins
@@ -427,7 +429,7 @@ def test_rebin_nd(data, rebin_spec, rebinned_data):
 # noinspection PyTypeChecker
 @skip_windows
 @pytest.mark.parametrize(
-    "data,rebin_spec,rebinned_data",
+    ["data", "rebin_spec", "rebinned_data"],
     [
         (
             # rebin by the second axis, grouped

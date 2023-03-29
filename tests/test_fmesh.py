@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 
 from collections import namedtuple
@@ -15,16 +17,21 @@ from mckit_meshes.mesh.geometry_spec import CartesianGeometrySpec
 from mckit_meshes.utils.testing import a
 
 
-@pytest.fixture
+@pytest.fixture()
 def simple_bins():
+    _xbins = a(0, 1)
+    _ybins = a(2, 3)
+    _zbins = a(4, 5)
+    _ebins = a(0, 6, 7)
+
     def call(
         *,
         name=14,
         kind=1,
-        xbins=a(0, 1),
-        ybins=a(2, 3),
-        zbins=a(4, 5),
-        ebins=a(0, 6, 7),
+        xbins=_xbins,
+        ybins=_ybins,
+        zbins=_zbins,
+        ebins=_ebins,
     ):
         return name, kind, xbins, ybins, zbins, ebins
 
@@ -226,9 +233,9 @@ def test_get_totals(simple_bins):
     assert_array_equal(actual_totals_err, desired_totals_err)
 
 
-@pytest.mark.skip
+@pytest.mark.skip()
 @pytest.mark.parametrize(
-    "x, y, z, expected_total, expected_rel_error, msg",
+    ["x", "y", "z", "expected_total", "expected_rel_error", "msg"],
     [
         (0.5, None, None, 60.0, 0.16499, "# 1: slice over x=0.5"),
         (1.5, None, None, 120.0, 0.16499, "# 2: slice over x=1.5"),
@@ -300,7 +307,15 @@ Energy bin boundaries: 0 6 7 8
 
 
 @pytest.mark.parametrize(
-    "new_x, new_y, new_z, expected_data, expected_err, expected_total, expected_rel_error",
+    [
+        "new_x",
+        "new_y",
+        "new_z",
+        "expected_data",
+        "expected_err",
+        "expected_total",
+        "expected_rel_error",
+    ],
     [
         (
             # new binning with common edges with the old one
@@ -396,7 +411,7 @@ def test_rebin(
 
 
 @pytest.mark.parametrize(
-    "msg, emin, emax, xmin, xmax, ymin, ymax, zmin, zmax, expected_mesh",
+    ["msg", "emin", "emax", "xmin", "xmax", "ymin", "ymax", "zmin", "zmax", "expected_mesh"],
     [
         (
             "# select the first layer by x",
@@ -468,7 +483,7 @@ def test_reading_mfile_with_negative(data):
 
     with data_path.open() as fid:
         m1, m2 = iter_meshtal(fid)
-        assert m1.name == 1355114 and m2.name == 1355214, "reads files with negative values OK"
-        assert (
-            m1.data[0, 0, 0, 0] == 0.0 and m1.errors[0, 0, 0, 0] == 0.0
-        ), "Should convert entries with negative values to zeroes"
+        assert m1.name == 1355114, "reads files with negative values OK"
+        assert m2.name == 1355214, "reads files with negative values OK"
+        assert m1.data[0, 0, 0, 0] == 0.0, "Should convert entries with negative values to zeroes"
+        assert m1.errors[0, 0, 0, 0] == 0.0, "Should convert entries with negative values to zeroes"

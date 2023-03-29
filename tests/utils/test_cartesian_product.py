@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import numpy as np
 
 from numpy.testing import assert_array_equal
@@ -9,7 +11,7 @@ from mckit_meshes.utils.testing import a
 
 
 @pytest.mark.parametrize(
-    "arrays,expected",
+    ["arrays", "expected"],
     [
         (([1, 2], [3, 4]), [[[1, 3], [1, 4]], [[2, 3], [2, 4]]]),
         (
@@ -27,7 +29,7 @@ def test_cartesian_product_with_inner_vector(arrays, expected):
 
 
 @pytest.mark.parametrize(
-    "arrays,expected",
+    ["arrays", "expected"],
     [
         (([1, 2], [3, 4]), [[4, 5], [5, 6]]),
         (

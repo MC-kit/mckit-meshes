@@ -2,8 +2,9 @@
 
 # TODO: DVP: implement propagation in result the indexes computed on shrink
 # for reuse in FMesh.shrink for equivalent grids or alike
+from __future__ import annotations
 
-from typing import Iterable, Tuple
+from typing import Iterable
 
 import collections.abc
 import gc
@@ -84,8 +85,7 @@ def interpolate(x_new, x, y, axis=None):
     slope = y_deltas / deltas
     new_deltas = x_new - x_lo
     new_deltas = set_axis(new_deltas, axis, slope.shape)
-    y_new = slope * new_deltas + y_lo
-    return y_new
+    return slope * new_deltas + y_lo
 
 
 def rebin_1d(a, bins, new_bins, axis=0, grouped=False, assume_sorted=False):
@@ -94,7 +94,7 @@ def rebin_1d(a, bins, new_bins, axis=0, grouped=False, assume_sorted=False):
     define like `bins` to equivalent (see the terms below) histogram defined
     on other limiting points defined as `new_bins`.
 
-    Notes
+    Notes:
     -----
     The algorithm maintains the equality of integral on intervals defined on
     new_bins for the original and rebinned distributions.
@@ -122,13 +122,16 @@ def rebin_1d(a, bins, new_bins, axis=0, grouped=False, assume_sorted=False):
             If True, then skip assertion of bins sorting order,
             by default False - asserts the input_file data
 
-    Returns
+    Returns:
     -------
         rebinned_data: ndarray
     """
     assert (
-        bins[0] <= new_bins[0] and new_bins[-1] <= bins[-1]
-    ), "Rebinning doesn't provide extrapolation out of the original bins"
+        bins[0] <= new_bins[0]
+    ), "Rebinning doesn't provide extrapolation lower of the original bins"
+    assert (
+        new_bins[-1] <= bins[-1]
+    ), "Rebinning doesn't provide extrapolation upper of the original bins"
     assert (
         bins.size == a.shape[axis] + 1
     ), "The `a` array shape doesn't match the given bins and axis"
@@ -171,7 +174,7 @@ def rebin_1d(a, bins, new_bins, axis=0, grouped=False, assume_sorted=False):
 
 def rebin_nd(
     a: ndarray,
-    rebin_spec: Iterable[Tuple[ndarray, ndarray, int, bool]],
+    rebin_spec: Iterable[tuple[ndarray, ndarray, int, bool]],
     assume_sorted: bool = False,
     external_process_threshold: int = __EXTERNAL_PROCESS_THRESHOLD,
 ) -> ndarray:
@@ -189,6 +192,7 @@ def rebin_nd(
         external_process_threshold: int
             If size of `a` is greater than that, then the computation is executed in external process,
             to achieve immediate memory cleanup.
+
     Returns:
         Rebinned data.
     """
@@ -212,7 +216,7 @@ def rebin_nd(
         if n:
             del gc.garbage[:]
 
-    return res
+    return res  # noqa RET504 - the code above is to be executed
 
 
 def rebin_spec_composer(bins_seq, new_bins_seq, axes=None, grouped_flags=None):
@@ -251,7 +255,7 @@ def rebin_spec_composer(bins_seq, new_bins_seq, axes=None, grouped_flags=None):
 # @numba.jit
 def shrink_1d(
     a: np.ndarray, bins: np.ndarray, low=None, high=None, axis=None, assume_sorted=False
-) -> Tuple[np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray]:
     """Select sub-arrays of a `a` and corresponding `bins` for minimal span.
 
     of bins, which completely covers the range [`low`..`high`]
@@ -280,7 +284,6 @@ def shrink_1d(
         new_data: ndarray
             The shrank grid
     """
-
     if low is None and high is None:
         return bins, a
 
@@ -383,7 +386,7 @@ def trim_spec_composer(bins_seq, lefts=None, rights=None, axes=None):
         Iterates over the list of corresponding axes.
         If not provided (default), then iterates over sequence 0..len(bins).
 
-    Returns
+    Returns:
     -------
     trim_spec: sequence of tuples
         Iterator over the sequence of tuples (bins, lefts, rights, axis)

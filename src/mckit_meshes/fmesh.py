@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from typing import Callable, Generator, Iterable, List, Optional, TextIO, Tuple, Union
+from typing import Callable, Generator, Iterable, TextIO
 
 import logging
 
@@ -17,9 +17,9 @@ from numpy.typing import ArrayLike
 
 import mckit_meshes.mesh.geometry_spec as gc
 import mckit_meshes.utils.no_daemon_process as ndp
-import mckit_meshes.utils.rebin as rebin
 
 from mckit_meshes.particle_kind import ParticleKind as Kind
+from mckit_meshes.utils import rebin
 from mckit_meshes.utils.io import raise_error_when_file_exists_strategy
 from pyevtk.hl import gridToVTK
 from toolz.itertoolz import concatv
@@ -54,7 +54,7 @@ class FMesh:
     NPZ_MARK = np.int16(5445)
     NPZ_FORMAT = np.int16(4)
 
-    class X(RuntimeError):
+    class FMeshError(RuntimeError):
         """FMesh class specific exception."""
 
     def __init__(
@@ -65,9 +65,9 @@ class FMesh:
         ebins: np.ndarray,
         data: np.ndarray,
         errors: np.ndarray,
-        totals: Optional[np.ndarray] = None,
-        totals_err: Optional[np.ndarray] = None,
-        comment: Optional[str] = None,
+        totals: np.ndarray | None = None,
+        totals_err: np.ndarray | None = None,
+        comment: str | None = None,
     ) -> None:
         """Construct FMesh instance object.
 
@@ -92,9 +92,9 @@ class FMesh:
         self.name = int(name)
         self.kind = Kind(kind)
 
-        self._geometry_spec: Union[
-            gc.CartesianGeometrySpec, gc.CylinderGeometrySpec, gc.AbstractGeometrySpec
-        ] = geometry_spec
+        self._geometry_spec: gc.CartesianGeometrySpec | gc.CylinderGeometrySpec | gc.AbstractGeometrySpec = (
+            geometry_spec
+        )
         self.bins = {}
         self.bins["X"] = self._x = geometry_spec.ibins
         self.bins["Y"] = self._y = geometry_spec.jbins
@@ -208,13 +208,16 @@ class FMesh:
 
     @property
     def total_precision(self) -> float:
-        """"""
+        """Get total precision of this mesh.
+
+        Returns:
+            total precision from totals or errors, if there are no totals.
+        """
         if self.has_multiple_energy_bins:
             return self.totals_err[
                 -1
             ]  # TODO dvp: assumes max energy bin is most representative, check usage
-        else:
-            return self.errors[0, 0, 0, 0]
+        return self.errors[0, 0, 0, 0]
 
     def check_attributes(self) -> None:
         """Check consistency of attributes."""
@@ -229,12 +232,14 @@ class FMesh:
             and self._totals.shape == self._geometry_spec.bins_shape
         )
 
-    def is_equal_by_mesh(self, other: "FMesh") -> bool:
-        """Args:
+    def is_equal_by_mesh(self, other: FMesh) -> bool:
+        """Check if the meshes are equivalent by kind and geometry.
 
+        Args:
           other: "FMesh":
 
         Returns:
+            True, if this mesh is equal to other by kind and geometry, otherwise False
         """
         return (
             self.kind == other.kind
@@ -242,7 +247,7 @@ class FMesh:
             and np.array_equal(self.e, other.e)
         )
 
-    def has_better_precision_than(self, other: "FMesh") -> bool:
+    def has_better_precision_than(self, other: FMesh) -> bool:
         """Compare precision achieved for the meshes.
 
         Args:
@@ -270,7 +275,7 @@ class FMesh:
 
     def get_spectrum(
         self, x: ArrayLike, y: ArrayLike, z: ArrayLike
-    ) -> Tuple[ArrayLike, ArrayLike, ArrayLike]:
+    ) -> tuple[ArrayLike, ArrayLike, ArrayLike]:
         """Gets energy spectrum at the specified point.
 
         Args:
@@ -300,11 +305,7 @@ class FMesh:
 
     def select_indexes(
         self, *, x: ArrayLike = None, y: ArrayLike = None, z: ArrayLike = None
-    ) -> Tuple[
-        Union[int, slice, np.ndarray],
-        Union[int, slice, np.ndarray],
-        Union[int, slice, np.ndarray],
-    ]:
+    ) -> tuple[int | slice | np.ndarray, int | slice | np.ndarray, int | slice | np.ndarray,]:
         """Select indexes in spatial bins corresponding to given coordinates.
 
         If coordinate is not specified, then return all the points along this coordinate.
@@ -321,7 +322,7 @@ class FMesh:
 
     def get_totals(
         self, *, x: ArrayLike = None, y: ArrayLike = None, z: ArrayLike = None
-    ) -> Optional[Tuple[np.ndarray, np.ndarray]]:
+    ) -> tuple[np.ndarray, np.ndarray] | None:
         """Get total values for specified grid points.
 
         If a coordinate is not specified, than all the points along this coordinate.
@@ -386,7 +387,7 @@ class FMesh:
         np.savez_compressed(str(filename), **kwd)
 
     @classmethod
-    def load_npz(cls, _file: Union[str, Path]) -> "FMesh":
+    def load_npz(cls, _file: str | Path) -> FMesh:
         """Loads Fmesh object from the binary file.
 
         Args:
@@ -454,8 +455,7 @@ class FMesh:
                     totals_err,
                     comment=comment,
                 )
-            else:
-                raise FMesh.X("Invalid version for FMesh file %d" % version)
+            raise FMesh.FMeshError("Invalid version for FMesh file %d" % version)
 
     def save2vtk(self, filename: str = None, data_name: str = None) -> str:
         """Saves this fmesh data to vtk file.
@@ -482,7 +482,7 @@ class FMesh:
 
         cell_data = {}
         for i, e in enumerate(self.e[1:]):
-            key = data_name + " E={0:.4e}".format(e)
+            key = data_name + f" E={e:.4e}"
             cell_data[key] = self.data[i, :, :, :]
         if self.has_multiple_energy_bins:
             name = data_name + " total"
@@ -497,7 +497,7 @@ class FMesh:
             stream: stream to store the mesh.
         """
 
-        def format_comment(a: "FMesh") -> str:
+        def format_comment(a: FMesh) -> str:
             return "\n" + a.comment if a.comment else ""
 
         header = f"""
@@ -558,7 +558,7 @@ class FMesh:
                     for iz in range(z.size):
                         value = self.data[ie, ix, iy, iz]
                         err = self.errors[ie, ix, iy, iz]
-                        row = " %10.3e%10.3f%10.3f%10.3f %11.5e %11.5e" % (
+                        row = " {:10.3e}{:10.3f}{:10.3f}{:10.3f} {:11.5e} {:11.5e}".format(
                             e[ie],
                             x[ix],
                             y[iy],
@@ -591,7 +591,7 @@ class FMesh:
 
             print("\n", file=stream)
 
-    def total_by_energy(self, new_name: int = 0) -> "FMesh":
+    def total_by_energy(self, new_name: int = 0) -> FMesh:
         """Integrate over energy bins.
 
         Args:
@@ -616,7 +616,7 @@ class FMesh:
         zmin=None,
         zmax=None,
         new_name=-1,
-    ) -> "FMesh":
+    ) -> FMesh:
         """Select subset of e-voxels within given geometry and energy limits.
 
         Args:
@@ -680,7 +680,7 @@ class FMesh:
         new_z: np.ndarray,
         new_name=-1,
         extra_process_threshold: int = 1000000,
-    ) -> "FMesh":
+    ) -> FMesh:
         """Extract data for a new spatial grid.
 
         Args:
@@ -744,7 +744,7 @@ class FMesh:
         new_y: np.ndarray,
         new_z: np.ndarray,
         new_name: int = -1,
-    ) -> "FMesh":
+    ) -> FMesh:
         """Create FMesh object corresponding to this one by fluxes, but over new mesh.
 
         Ags:
@@ -855,7 +855,7 @@ class FMesh:
 
 # noinspection PyTypeChecker,PyProtectedMember
 def merge_tallies(
-    name: int, kind: int, *tally_weight: Tuple[FMesh, float], comment: str = None
+    name: int, kind: int, *tally_weight: tuple[FMesh, float], comment: str = None
 ) -> FMesh:
     """Makes superposition of tallies with specific weights.
 
@@ -900,7 +900,7 @@ def merge_tallies(
     )
 
 
-def read_meshtal(stream: TextIO, select=None, mesh_file_info=None) -> List[FMesh]:
+def read_meshtal(stream: TextIO, select=None, mesh_file_info=None) -> list[FMesh]:
     """Reads fmesh tallies from a stream.
 
     Args:
@@ -914,7 +914,7 @@ def read_meshtal(stream: TextIO, select=None, mesh_file_info=None) -> List[FMesh
     next(stream)  # TODO dvp check if we need to store problem time stamp
     next(stream)  # TODO dvp check if we need to store problem title
     line = next(stream)
-    nps = int(float((line.strip().split("=")[1])))
+    nps = int(float(line.strip().split("=")[1]))
     if mesh_file_info is not None:
         mesh_file_info.nps = nps
     return list(iter_meshtal(stream, select))
@@ -932,7 +932,7 @@ def _iterate_bins(stream, _n, _with_ebins):
         pairs value - error
     """
     value_start, value_end = (41, 53) if _with_ebins else (32, 44)
-    for _i in range(_n):
+    for _ in range(_n):
         _line = next(stream)
         _value = float(_line[value_start:value_end])
         _error = float(_line[value_end:])
@@ -1052,7 +1052,7 @@ def iter_meshtal(
                     Yields:
                         total values and errors
                     """
-                    for _i in range(totals_number):
+                    for _ in range(totals_number):
                         _line = next(stream).split()
                         # TODO dvp: check for negative values in an MCNP meshtal file
                         assert _line[0] == "Total"
@@ -1087,7 +1087,7 @@ def iter_meshtal(
         pass
 
 
-def check_ebins(fid: Iterable[str], keys: List[str]) -> bool:
+def check_ebins(fid: Iterable[str], keys: list[str]) -> bool:
     """Check if energy bins present in a mesh tally output values.
 
     If next nonempty line starts with a word keys[0] (i.e. "Energy"), then the energy bins present.
@@ -1118,7 +1118,7 @@ def check_ebins(fid: Iterable[str], keys: List[str]) -> bool:
     return with_ebins
 
 
-def _next_not_empty_line(f: Iterable[str]) -> Optional[List[str]]:
+def _next_not_empty_line(f: Iterable[str]) -> list[str] | None:
     """Skip empty lines from a string sequence.
 
     Args:
@@ -1194,7 +1194,7 @@ def m_2_npz(
     next(stream)  # TODO dvp check if we need to store problem time stamp
     next(stream)  # TODO dvp check if we need to store problem title
     line = next(stream)
-    nps = int(float((line.strip().split("=")[1])))
+    nps = int(float(line.strip().split("=")[1]))
     if mesh_file_info is not None:
         mesh_file_info.nps = nps
     total = 0  # : ignore[SIM113]

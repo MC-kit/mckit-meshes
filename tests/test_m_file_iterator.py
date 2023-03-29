@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 
 from mckit_meshes.m_file_iterator import m_file_iterator
@@ -37,7 +39,7 @@ def assert_is_header(header, file_name, nps):
     assert_lines_are_trimmed(header)
     assert len(header) == 3, "The header is 3 lines long"
     assert header[0].startswith("mcnp"), 'The header starts with the word "mcnp"'
-    assert nps in header[-1], "The file {} has nps == {}".format(file_name, nps)
+    assert nps in header[-1], f"The file {file_name} has nps == {nps}"
 
 
 def assert_is_mesh_output(mesh):
@@ -53,4 +55,5 @@ def assert_is_mesh_output(mesh):
 
 def assert_has_no_empty_lines(a_text):
     for line in a_text:
-        assert len(line) > 0 and line != "\n", "The text does not contain empty lines"
+        assert len(line) > 0, "The text does not contain empty lines"
+        assert line != "\n", "The text does not contain empty lines"

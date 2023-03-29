@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 
 from mckit_meshes.particle_kind import ParticleKind
@@ -28,5 +30,5 @@ def test_heating_spec():
 
 def test_heating_spec_fail():
     e = ParticleKind.e
-    with pytest.raises(ValueError):
-        _ = e.heating_reactions
+    with pytest.raises(ValueError, match="Heating spec is not defined for electron"):
+        e.heating_reactions

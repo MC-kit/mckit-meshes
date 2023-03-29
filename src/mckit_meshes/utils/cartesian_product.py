@@ -1,5 +1,7 @@
 """Apply function to cartesian product of arrays."""
-from typing import Any, Callable, Dict, Sized
+from __future__ import annotations
+
+from typing import Any, Callable, Sized
 
 from itertools import product
 
@@ -7,7 +9,7 @@ import numpy as np
 
 
 def cartesian_product(
-    *arrays: Sized, aggregator: Callable[[Any, Dict], Any], **kw: Dict[Any, Any]
+    *arrays: Sized, aggregator: Callable[[Any, dict], Any], **kw: dict[Any, Any]
 ) -> np.ndarray:
     """Computes transformations of cartesian product of all the elements in arrays.
 

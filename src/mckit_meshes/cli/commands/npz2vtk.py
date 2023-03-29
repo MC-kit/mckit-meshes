@@ -8,14 +8,14 @@ import logging
 
 from pathlib import Path
 
-import mckit_meshes.fmesh as fmesh
+from mckit_meshes import fmesh
 
 from ...utils.io import check_if_path_exists
 
 __LOG = logging.getLogger(__name__)
 
 
-def revise_npz_files(npz_files: t.Optional[t.Iterable[t.Any]]) -> t.List[Path]:
+def revise_npz_files(npz_files: t.Iterable[t.Any] | None) -> list[Path]:
     """Use specified list of file to process, if any, or find them in current directory.
 
     Args:
@@ -47,11 +47,11 @@ def npz2vtk(prefix: str | Path, npz_files: t.Iterable[str | Path], override: boo
     prefix = Path(prefix)
     file_exists_strategy = check_if_path_exists(override)
     for npz in npz_files:
-        npz = Path(npz)
-        __LOG.info("Processing {}", npz)
+        _npz = Path(npz)
+        __LOG.info("Processing {}", _npz)
         __LOG.debug("Saving VTK file with prefix {}", prefix)
         prefix.mkdir(parents=True, exist_ok=True)
-        mesh = fmesh.FMesh.load_npz(npz)
+        mesh = fmesh.FMesh.load_npz(_npz)
         vtk_file_stem = f"{prefix / str(mesh.name)}"
         vtk_file_name = (
             vtk_file_stem + ".vtr"
