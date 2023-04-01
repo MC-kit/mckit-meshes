@@ -118,7 +118,7 @@ def test_read_write(tmpdir, wwinp):
 
 
 @pytest.mark.parametrize(
-    ["text", "expected"],
+    "text,expected",
     [
         ("0.0  1.0 10.0 1.0 1.0 100.0 1.0", a(0.0, 10.0, 100.0)),
         ("0.0  2.0 10.0 1.0 1.0 100.0 1.0", a(0.0, 5.0, 10.0, 100.0)),
@@ -191,7 +191,7 @@ def test_add_bad_path():
 
 
 @pytest.mark.parametrize(
-    ["nps", "weights", "expected"],
+    "nps,weights,expected",
     [
         (1, a(0, 1), (a(0, 1, dtype=int), a(0, 1))),
         (1, a(0, 2), (a(0, 1, dtype=int), a(0, 0.5))),

@@ -235,7 +235,7 @@ def test_get_totals(simple_bins):
 
 @pytest.mark.skip()
 @pytest.mark.parametrize(
-    ["x", "y", "z", "expected_total", "expected_rel_error", "msg"],
+    "x,y,z,expected_total,expected_rel_error,msg",
     [
         (0.5, None, None, 60.0, 0.16499, "# 1: slice over x=0.5"),
         (1.5, None, None, 120.0, 0.16499, "# 2: slice over x=1.5"),
@@ -307,15 +307,7 @@ Energy bin boundaries: 0 6 7 8
 
 
 @pytest.mark.parametrize(
-    [
-        "new_x",
-        "new_y",
-        "new_z",
-        "expected_data",
-        "expected_err",
-        "expected_total",
-        "expected_rel_error",
-    ],
+    "new_x,new_y,new_z,expected_data,expected_err,expected_total,expected_rel_error",
     [
         (
             # new binning with common edges with the old one
@@ -411,7 +403,7 @@ def test_rebin(
 
 
 @pytest.mark.parametrize(
-    ["msg", "emin", "emax", "xmin", "xmax", "ymin", "ymax", "zmin", "zmax", "expected_mesh"],
+    "msg,emin,emax,xmin,xmax,ymin,ymax,zmin,zmax,expected_mesh",
     [
         (
             "# select the first layer by x",
