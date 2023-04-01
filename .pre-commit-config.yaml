@@ -83,11 +83,6 @@ repos:
         types: [python]
         exclude: ^notebooks
     # Lint
-    # -   id: flake8
-    #     name: flake8
-    #     entry: poetry run flake8
-    #     language: system
-    #     types: [python]
     -   id: ruff
         name: ruff
         entry: poetry run ruff --force-exclude --fix --config pyproject.toml
