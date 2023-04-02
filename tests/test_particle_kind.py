@@ -31,4 +31,4 @@ def test_heating_spec():
 def test_heating_spec_fail():
     e = ParticleKind.e
     with pytest.raises(ValueError, match="Heating spec is not defined for electron"):
-        e.heating_reactions
+        e.heating_reactions  # noqa: B018
