@@ -9,7 +9,9 @@ import numpy as np
 
 
 def cartesian_product(
-    *arrays: Sized, aggregator: Callable[[Any, dict], Any], **kw: dict[Any, Any]
+    *arrays: Sized,
+    aggregator: Callable[[Any, dict], Any],
+    **kw: dict[Any, Any],
 ) -> np.ndarray:
     """Computes transformations of cartesian product of all the elements in arrays.
 
@@ -26,6 +28,6 @@ def cartesian_product(
     """
     res = np.stack([aggregator(x, **kw) for x in product(*arrays)])
     shape = tuple(map(len, arrays))
-    if 1 < len(res.shape):  # the aggregation result is vector
+    if len(res.shape) > 1:  # the aggregation result is vector
         shape = shape + res.shape[1:]
     return res.reshape(shape)

@@ -16,10 +16,8 @@ from loguru import logger
 # class PropagateHandler(logging.Handler):
 #     """Send events from loguru to standard logging"""
 #     def emit(self, record):
-#         logging.getLogger(record.name).handle(record)
 #
 #
-# logger.add(PropagateHandler(), format="{message}")
 
 
 class InterceptHandler(logging.Handler):

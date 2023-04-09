@@ -24,7 +24,7 @@ def test_cartesian_constructor():
     assert cartesian.y.dtype == float
     assert not hasattr(cartesian, "r")
     assert np.array_equal(a(7, 8, 9), cartesian.z)
-    assert 8 == cartesian.bins_size
+    assert cartesian.bins_size == 8
 
 
 def test_cylinder_constructor():
@@ -37,7 +37,7 @@ def test_cylinder_constructor():
     assert cylinder.axs.dtype == float
     assert not hasattr(cylinder, "x")
     assert_array_equal(a(4, 5, 6), cylinder.z)
-    assert 8 == cylinder.bins_size
+    assert cylinder.bins_size == 8
 
 
 def test_cylinder_constructor_with_wrong_theta():
@@ -126,19 +126,6 @@ def test_eq():
     assert gc1 != gc3
 
 
-# def test_print_geometry_spec():
-#     filename = common_test_data("data/mcnp/wwinp")
-#     with open(filename) as stream:
-#         m = WgtMesh.read(stream)
-#     ios = io.StringIO()
-#     m.print_meshtal_spec(ios)
-#     actual = ios.getvalue()
-#     spec_filename = common_test_data("data/mcnp/meshtal-spec.txt")
-#     with open(spec_filename) as stream:
-#         expected = stream.read()
-#     my_assert_array_equal(actual.lower().split(), expected.lower().split())
-
-
 def test_cylinder_mesh_trivial_constructor():
     origin = np.array([0.0, 0.0, -15.0])
     r = np.array([0.0, 1.0])
@@ -195,5 +182,6 @@ def test_select_indices(inp, value, expected):
 def test_select_indices_with_arrays(inp, values, expected):
     actual = select_indexes(inp, values)
     assert np.array_equal(
-        expected, actual
+        expected,
+        actual,
     ), f"for {inp} and {values}, we expect {expected}, actual {actual}"

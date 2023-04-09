@@ -13,5 +13,4 @@ def test_version(runner):
 def test_help(runner):
     result = runner.invoke(mckit_meshes, args=["--help"], catch_exceptions=False)
     assert result.exit_code == 0
-    # print(result.output)
     assert "Usage: " in result.output

@@ -139,7 +139,7 @@ def test_interpolate(msg, x_new, x, y, axis, expected_y):
                     [0.0, 1, 2],
                     [1.0, 2, 3],
                     [3.0, 4, 5],
-                ]
+                ],
             ),
             a(0, 1, 2, 3),
             1.0 + 0.01,
@@ -149,7 +149,7 @@ def test_interpolate(msg, x_new, x, y, axis, expected_y):
             np.array(
                 [
                     [1, 2, 3],
-                ]
+                ],
             ),
         ),
         (
@@ -159,7 +159,7 @@ def test_interpolate(msg, x_new, x, y, axis, expected_y):
                     [0.0, 1, 2],
                     [1.0, 2, 3],
                     [3.0, 4, 5],
-                ]
+                ],
             ),
             a(0, 1, 2, 3),
             1.0 + 0.01,
@@ -171,15 +171,15 @@ def test_interpolate(msg, x_new, x, y, axis, expected_y):
                     [1],
                     [2],
                     [4],
-                ]
+                ],
             ),
         ),
     ],
 )
 def test_shrink_1d(msg, array, bins, left, right, axis, expected_bins, expected_data):
     actual_bins, actual_data = shrink_1d(array, bins, left, right, axis)
-    assert_array_equal(expected_bins, actual_bins)
-    assert_array_equal(expected_data, actual_data)
+    assert_array_equal(expected_bins, actual_bins, err_msg=msg)
+    assert_array_equal(expected_data, actual_data, err_msg=msg)
 
 
 # noinspection PyTypeChecker
@@ -193,7 +193,7 @@ def test_shrink_1d(msg, array, bins, left, right, axis, expected_bins, expected_
                     [0.0, 1, 2],
                     [1.0, 2, 3],
                     [3.0, 4, 5],
-                ]
+                ],
             ),
             trim_spec_composer(
                 [a(0, 1, 2, 3), a(0, 1, 2, 3)],
@@ -213,7 +213,7 @@ def test_shrink_1d(msg, array, bins, left, right, axis, expected_bins, expected_
                     [0.0, 1, 2],
                     [1.0, 2, 3],
                     [3.0, 4, 5],
-                ]
+                ],
             ),
             trim_spec_composer(
                 [a(0, 1, 2, 3), a(0, 1, 2, 3)],
@@ -226,22 +226,6 @@ def test_shrink_1d(msg, array, bins, left, right, axis, expected_bins, expected_
             [np.array([0.0, 1]), np.array([0.0, 1.0, 2.0])],
             np.array([[0.0, 1.0]]),
         ),
-        # (
-        # '# 2D array shrink to the middle bin with not exact edges over axis 1',
-        # np.array([
-        #     [0., 1, 2],
-        #     [1., 2, 3],
-        #     [3., 4, 5],
-        # ]),
-        # a(0, 1, 2, 3),
-        # 1. - 0.01, 2. + 0.01, 1,
-        # a(1, 2),
-        # np.array([
-        #     [1],
-        #     [2],
-        #     [4],
-        # ]),
-        # ),
     ],
 )
 def test_shrink_nd(msg, array, trim_spec, expected_bins, expected_data):
@@ -342,7 +326,7 @@ def test_rebin_1d(rebinned_data, data, bins, new_bins, axis, grouped):
                     [0.0, 0.0, 0.25, 0.25],
                     [0.25, 0.25, 0.5, 0.5],
                     [0.25, 0.25, 0.5, 0.5],
-                ]
+                ],
             ),
         ),
         (
@@ -353,7 +337,7 @@ def test_rebin_1d(rebinned_data, data, bins, new_bins, axis, grouped):
                     [0.0, 0.0, 0.25, 0.25],
                     [0.25, 0.25, 0.5, 0.5],
                     [0.25, 0.25, 0.5, 0.5],
-                ]
+                ],
             ),
             rebin_spec_composer(
                 [
@@ -440,7 +424,7 @@ def test_rebin_nd(data, rebin_spec, rebinned_data):
                     [np.array([0.25, 0.5, 1.0, 1.5, 1.75])],
                     axes=[1],
                     grouped_flags=True,
-                )
+                ),
             ],  # check also passing the spec as list
             np.array([[0, 0, 1 / 2, 1 / 4], [1 / 4, 1 / 2, 2 / 2, 2 / 4]], dtype=float),
         ),

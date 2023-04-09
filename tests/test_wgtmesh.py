@@ -4,6 +4,7 @@ from typing import Callable
 
 import io
 
+from contextlib import suppress
 from functools import reduce
 from itertools import product
 from operator import mul
@@ -41,7 +42,9 @@ def weights_ijk() -> Callable[[float], WgtMesh]:
         result = np.zeros(wgt_shape, dtype=float)
         for ii, ji, ki in product(range(isz), range(jsz), range(ksz)):
             result[0, ii, ji, ki] = reduce(
-                mul, [0, ii, ji, ki], 1.0
+                mul,
+                [0, ii, ji, ki],
+                1.0,
             )  # TODO dvp: too high difference in far voxels
         return result + start_value
 
@@ -73,7 +76,9 @@ def weights_eijk() -> Callable[[float], WgtMesh]:
         result = np.zeros(wgt_shape, dtype=float)
         for ei, ii, ji, ki in product(range(esz), range(isz), range(jsz), range(ksz)):
             result[ei, ii, ji, ki] = reduce(
-                mul, [ei, ii, ji, ki], 1.0
+                mul,
+                [ei, ii, ji, ki],
+                1.0,
             )  # TODO dvp: too high difference in far voxels
         return result + start_value
 
@@ -90,7 +95,7 @@ def weights_eijk() -> Callable[[float], WgtMesh]:
 @pytest.fixture()
 def wwinp(data) -> WgtMesh:
     filename = data / "wwinp"
-    with open(filename) as stream:
+    with filename.open() as stream:
         return WgtMesh.read(stream)
 
 
@@ -107,12 +112,12 @@ def test_trivial_constructor():
 
 def test_read_write(tmpdir, wwinp):
     assert len(wwinp.energies) == 2
-    assert 16 == wwinp.energies[0].size
-    assert 2 == wwinp.energies[1].size
+    assert wwinp.energies[0].size == 16
+    assert wwinp.energies[1].size == 2
     new_filename = tmpdir.join("wwinp-new")
-    with open(new_filename, "w") as nf:
+    with new_filename.open("w") as nf:
         wwinp.write(nf)
-    with open(new_filename) as nf:
+    with new_filename.open() as nf:
         m2 = WgtMesh.read(nf)
     assert wwinp == m2
 
@@ -215,19 +220,17 @@ def test_merge(weights_eijk) -> None:
 
     actual = WgtMesh.merge((am, 2), (bm, 2))
     assert actual.wm.weights[0][-1, -1, -1, -1] == 4 / (2 / 103 + 2 / 3)
-    assert 4 == actual.nps
+    assert actual.nps == 4
 
     actual = WgtMesh.merge((am, 10), (bm, 2))
     assert_almost_equal(12 / (2 / 103 + 10 / 3), actual.wm.weights[0][-1, -1, -1, -1])
-    assert 12 == actual.nps
+    assert actual.nps == 12
 
 
 def my_assert_array_equal(actual, expected):
     for i, (ai, ei) in enumerate(zip(actual, expected)):
-        try:
+        with suppress(ValueError):
             ai, ei = _a, _b = map(float, [ai, ei])  # noqa: PLW2901
-        except ValueError:
-            pass
         assert ai == ei, f"{i} - items are not equal: {ai} != {ei}"
 
 
@@ -236,8 +239,7 @@ def test_print_mcnp_generator_spec(data, wwinp):
     wwinp.print_mcnp_generator_spec(ios)
     actual = ios.getvalue()
     spec_filename = data / "wwinp-spec.txt"
-    with open(spec_filename) as stream:
-        expected = stream.read()
+    expected = spec_filename.read_text()
     my_assert_array_equal(actual.lower().split(), expected.lower().split())
 
 
@@ -246,8 +248,7 @@ def test_print_meshtal_spec(data, wwinp):
     wwinp.print_meshtal_spec(ios)
     actual = ios.getvalue()
     spec_filename = data / "meshtal-spec.txt"
-    with open(spec_filename) as stream:
-        expected = stream.read()
+    expected = spec_filename.read_text()
     my_assert_array_equal(actual.lower().split(), expected.lower().split())
 
 

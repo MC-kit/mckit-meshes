@@ -21,7 +21,7 @@ def test_help(runner):
     assert "Usage: " in result.output
 
 
-def test_with_prefix(tmp_path, runner, data, source):
+def test_with_prefix(tmp_path, runner, source):
     prefix = tmp_path
     result = runner.invoke(
         mckit_meshes,
@@ -46,14 +46,15 @@ def test_multiple_files(tmp_path, runner, data):
         catch_exceptions=False,
     )
     assert result.exit_code == 0
-    # prefix = Path(prefix)
     for i in [1004, 2004]:
-        assert (prefix / f"{i}.vtr").exists(), (
-            "When multiple npz files are specified " "the vtr file should be created for every one."
+        assert (
+            prefix / f"{i}.vtr"
+        ).exists(), (
+            "When multiple npz files are specified the vtr file should be created for every one."
         )
 
 
-def test_without_prefix(cd_tmpdir, runner, source):
+def test_without_prefix(cd_tmpdir, runner, source):  # noqa: ARG001
     result = runner.invoke(mckit_meshes, args=["npz2vtk", str(source)], catch_exceptions=False)
     assert result.exit_code == 0
     cwd = Path.cwd()
@@ -61,9 +62,9 @@ def test_without_prefix(cd_tmpdir, runner, source):
     assert output_path.exists()
 
 
-def test_no_npz_files_and_not_specified_npz(cd_tmpdir, runner):
+def test_no_npz_files_and_not_specified_npz(cd_tmpdir, runner):  # noqa: ARG001
     assert not list(
-        Path.cwd().glob("*.npz")
+        Path.cwd().glob("*.npz"),
     ), "There shouldn't be any .npz files in current directory"
     result = runner.invoke(mckit_meshes, args=["npz2vtk"], catch_exceptions=False)
     assert result.exit_code == 0, "Should be noop, when nothing to do"
@@ -73,7 +74,9 @@ def test_no_npz_files_and_not_specified_npz(cd_tmpdir, runner):
 
 def test_not_existing_input_file(runner):
     result = runner.invoke(
-        mckit_meshes, args=["npz2vtk", "not-existing.npz"], catch_exceptions=False
+        mckit_meshes,
+        args=["npz2vtk", "not-existing.npz"],
+        catch_exceptions=False,
     )
     assert result.exit_code > 0
     assert "does not exist" in result.output

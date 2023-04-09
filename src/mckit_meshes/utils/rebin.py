@@ -4,7 +4,7 @@
 # for reuse in FMesh.shrink for equivalent grids or alike
 from __future__ import annotations
 
-from typing import Iterable
+from typing import TYPE_CHECKING, Iterable, Sequence
 
 import collections.abc
 import gc
@@ -13,7 +13,9 @@ import platform
 
 import numpy as np
 
-from numpy import ndarray
+if TYPE_CHECKING:
+    from numpy import ndarray
+    from numpy.typing import ArrayLike
 
 if platform.system() == "Linux":
     from mckit_meshes.utils.no_daemon_process import Pool
@@ -40,7 +42,8 @@ __EXTERNAL_PROCESS_THRESHOLD = 1000000
 
 
 # noinspection PyTypeChecker
-def is_monotonically_increasing(a: ndarray):
+def is_monotonically_increasing(a: ArrayLike) -> bool:
+    # noinspection PyUnresolvedReferences
     if not a.size:
         return False
     iterator = iter(a)
@@ -53,13 +56,15 @@ def is_monotonically_increasing(a: ndarray):
     return True
 
 
-def set_axis(indices, axis, a_shape):
+# noinspection PyUnresolvedReferences
+def set_axis(indices: ArrayLike, axis: int, a_shape: Sequence[int]) -> ArrayLike:
     shape = [1] * len(a_shape)
     shape[axis] = a_shape[axis]
     return indices.reshape(tuple(shape))
 
 
-def interpolate(x_new, x, y, axis=None):
+# noinspection PyUnresolvedReferences
+def interpolate(x_new: ArrayLike, x: ArrayLike, y: ArrayLike, axis: int = None) -> ArrayLike:
     if y.ndim == 1:
         return np.interp(x_new, x, y)
 
@@ -88,25 +93,28 @@ def interpolate(x_new, x, y, axis=None):
     return slope * new_deltas + y_lo
 
 
-def rebin_1d(a, bins, new_bins, axis=0, grouped=False, assume_sorted=False):
+# noinspection PyUnresolvedReferences
+def rebin_1d(
+    a: ArrayLike,
+    bins: ArrayLike,
+    new_bins: ArrayLike,
+    axis: int = 0,
+    grouped: bool = False,
+    assume_sorted: bool = False,
+) -> ArrayLike:
     """Transforms 1-D histogram defined as `data` on the limiting points.
 
     define like `bins` to equivalent (see the terms below) histogram defined
     on other limiting points defined as `new_bins`.
 
     Notes:
-    -----
-    The algorithm maintains the equality of integral on intervals defined on
-    new_bins for the original and rebinned distributions.
+        The algorithm maintains the equality of integral on intervals defined on
+        new_bins for the original and rebinned distributions.
 
-    Parameters
-    ----------
-        a: ndarray
-            The array to rebin
-        bins: ndarray
-            Defines 1-D array representing `a` binning along the given `axis
-        new_bins:  ndarray
-            The new binning required.
+    Args:
+        a: The array to rebin
+        bins: Defines 1-D array representing `a` binning along the given `axis
+        new_bins:  The new binning required.
         axis: int, optional
             An axis along which to rebin array `a`
         grouped: bool, optional
@@ -123,8 +131,7 @@ def rebin_1d(a, bins, new_bins, axis=0, grouped=False, assume_sorted=False):
             by default False - asserts the input_file data
 
     Returns:
-    -------
-        rebinned_data: ndarray
+        rebinned data
     """
     assert (
         bins[0] <= new_bins[0]
@@ -216,10 +223,15 @@ def rebin_nd(
         if n:
             del gc.garbage[:]
 
-    return res  # noqa RET504 - the code above is to be executed
+    return res  # noqa: RET504 - the code above is to be executed
 
 
-def rebin_spec_composer(bins_seq, new_bins_seq, axes=None, grouped_flags=None):
+def rebin_spec_composer(
+    bins_seq,
+    new_bins_seq,
+    axes=None,
+    grouped_flags=None,
+) -> tuple[ArrayLike, ArrayLike, ArrayLike, ArrayLike]:
     """Compose rebin_spec parameter.
 
     See also :py:func:`mckit_meshes.utils.rebin.rebin_nd` with reasonable defaults
@@ -254,11 +266,16 @@ def rebin_spec_composer(bins_seq, new_bins_seq, axes=None, grouped_flags=None):
 
 # @numba.jit
 def shrink_1d(
-    a: np.ndarray, bins: np.ndarray, low=None, high=None, axis=None, assume_sorted=False
+    a: np.ndarray,
+    bins: np.ndarray,
+    low=None,
+    high=None,
+    axis=None,
+    assume_sorted=False,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Select sub-arrays of a `a` and corresponding `bins` for minimal span.
 
-    of bins, which completely covers the range [`low`..`high`]
+    of bins, which completely covers the range [`low`...`high`]
     both sides included.
 
     Args:
@@ -305,13 +322,13 @@ def shrink_1d(
     if low < bins[0] or bins[-1] < low:
         raise ValueError(
             "Low shrink edge is beyond the bins range: %g is not in [%g..%g]"
-            % (low, bins[0], bins[-1])
+            % (low, bins[0], bins[-1]),
         )
 
     if high < bins[0] or bins[-1] < high:
         raise ValueError(
             "High shrink edge is beyond the bins range: %g is not in [%g..%g]"
-            % (high, bins[1], bins[-1])
+            % (high, bins[1], bins[-1]),
         )
 
     left_idx, right_idx = np.digitize([low, high], bins) - 1
@@ -335,7 +352,7 @@ def shrink_1d(
     return new_bins, new_a
 
 
-def shrink_nd(a, trim_spec, assume_sorted=False):
+def shrink_nd(a, trim_spec, assume_sorted=False) -> tuple[ArrayLike, ArrayLike]:
     """Perform multidimensional shrink.
 
     Args:
@@ -348,10 +365,7 @@ def shrink_nd(a, trim_spec, assume_sorted=False):
             by default False - asserts the input_file data
 
     Returns:
-        new_bins_seq: sequence of ndarrays
-            A sequence with  new bins.
-        recursed_data: ndarray
-            The shrunk grid.
+            A sequence with  new bins,        The shrunk grid.
     """
     if not isinstance(trim_spec, collections.abc.Iterator):
         trim_spec = iter(trim_spec)
@@ -361,34 +375,33 @@ def shrink_nd(a, trim_spec, assume_sorted=False):
         return None, a
     new_bins_seq, recursed_data = shrink_nd(a, trim_spec, assume_sorted)
     top_bins, top_data = shrink_1d(recursed_data, bins, left, right, axis, assume_sorted)
-    if new_bins_seq:
-        new_bins_seq = [top_bins] + new_bins_seq
-    else:
-        new_bins_seq = [top_bins]
+    new_bins_seq = [top_bins, *new_bins_seq] if new_bins_seq else [top_bins]
     return new_bins_seq, top_data
 
 
-def trim_spec_composer(bins_seq, lefts=None, rights=None, axes=None):
+def trim_spec_composer(
+    bins_seq,
+    lefts=None,
+    rights=None,
+    axes=None,
+) -> Iterable[tuple[ArrayLike, float, float, int]]:
     """Helps to compose trim_spec parameter in.
 
-    :py:func:`triniti_ne.rebin.trim_nd` with
+    :func:`triniti_ne.rebin.trim_nd` with
     reasonable defaults for lefts, rights and axes iterators.
 
-    Parameters
-    ----------
-    bins_seq: sequence of ndarrays
-        Iterates over the list of bins associated with a grid to be trimmed.
-    lefts: sequence of floats
-        Iterates over the list of left edges for trimming.
-    rights: sequence of floats
-        Iterates over the list of right edges for trimming.
-    axes: sequence of ints, optional
-        Iterates over the list of corresponding axes.
-        If not provided (default), then iterates over sequence 0..len(bins).
+    Args:
+        bins_seq: sequence of ndarrays
+            Iterates over the list of bins associated with a grid to be trimmed.
+        lefts: sequence of floats
+            Iterates over the list of left edges for trimming.
+        rights: sequence of floats
+            Iterates over the list of right edges for trimming.
+        axes: sequence of ints, optional
+            Iterates over the list of corresponding axes.
+            If not provided (default), then iterates over sequence 0..len(bins).
 
     Returns:
-    -------
-    trim_spec: sequence of tuples
         Iterator over the sequence of tuples (bins, lefts, rights, axis)
     """
     if not lefts:

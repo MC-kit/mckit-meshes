@@ -7,7 +7,7 @@ from mckit_meshes.m_file_iterator import m_file_iterator
 
 def test_file_with_single_mesh(data):
     fn = data / "1.m"
-    with open(fn) as fid:
+    with fn.open() as fid:
         it = m_file_iterator(fid)
         header = next(it)
         assert_is_header(header, fn, "323318560.00")
@@ -19,7 +19,7 @@ def test_file_with_single_mesh(data):
 
 def test_file_with_two_meshes(data):
     fn = data / "2.m"
-    with open(fn) as fid:
+    with fn.open() as fid:
         it = m_file_iterator(fid)
         header = next(it)
         assert_is_header(header, fn, "323318560.00")
@@ -46,10 +46,10 @@ def assert_is_mesh_output(mesh):
     assert_lines_are_trimmed(mesh)
     assert_has_no_empty_lines(mesh)
     assert mesh[0].startswith(
-        "Mesh Tally Number"
+        "Mesh Tally Number",
     ), 'The first line should start with "Mesh Tally Number"'
     assert mesh[-1].startswith(
-        "2.000E+01     7.500     7.500     7.500"
+        "2.000E+01     7.500     7.500     7.500",
     ), 'The last line should start with "2.000E+01     7.500     7.500     7.500"'
 
 
