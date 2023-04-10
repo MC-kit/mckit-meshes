@@ -15,7 +15,7 @@ class Pool(pl.Pool):
     """Nested Pool."""
 
     # noinspection PyPep8Naming
-    def Process(self, *args, **kwargs):  # noqa: N802
+    def Process(self, *args, **kwargs) -> pl.Pool:  # noqa: N802, ANN003
         proc = pl.Pool.Process(*args, **kwargs)
 
         class NonDaemonProcess(proc.__class__):

@@ -44,7 +44,10 @@ def check_if_path_exists(override: bool) -> t.Callable[[str | Path], None]:
 
 
 def print_cols(
-    seq: Iterable[Any], fid: TextIO = sys.stdout, max_columns: int = 6, fmt: str = "{}"
+    seq: Iterable[Any],
+    fid: TextIO = sys.stdout,
+    max_columns: int = 6,
+    fmt: str = "{}",
 ) -> int:
     """Print sequence in max_columns.
 
@@ -71,7 +74,10 @@ def print_cols(
 
 
 def print_n(
-    words: Iterable, io: TextIO = sys.stdout, indent: str = "", max_columns: int = 5
+    words: Iterable,
+    io: TextIO = sys.stdout,
+    indent: str = "",
+    max_columns: int = 5,
 ) -> None:
     """Print sequence in columns with indentation starting from the second row.
 
@@ -95,5 +101,5 @@ def print_n(
             to_print = f" {w}"
             column += 1
         print(to_print, end="", file=io)
-    if 0 < column:
+    if column > 0:
         print(file=io)

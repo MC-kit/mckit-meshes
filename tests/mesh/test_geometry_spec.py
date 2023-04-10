@@ -24,7 +24,7 @@ def test_cartesian_constructor():
     assert cartesian.y.dtype == float
     assert not hasattr(cartesian, "r")
     assert np.array_equal(a(7, 8, 9), cartesian.z)
-    assert 8 == cartesian.bins_size
+    assert cartesian.bins_size == 8
 
 
 def test_cylinder_constructor():
@@ -37,7 +37,7 @@ def test_cylinder_constructor():
     assert cylinder.axs.dtype == float
     assert not hasattr(cylinder, "x")
     assert_array_equal(a(4, 5, 6), cylinder.z)
-    assert 8 == cylinder.bins_size
+    assert cylinder.bins_size == 8
 
 
 def test_cylinder_constructor_with_wrong_theta():
@@ -53,7 +53,7 @@ def test_cartesian_local_coordinates():
 
 
 @pytest.mark.parametrize(
-    ["points", "origin", "expected"],
+    "points,origin,expected",
     [
         (
             a(2, 2, 3),
@@ -94,7 +94,7 @@ def test_boundaries():
 
 
 @pytest.mark.parametrize(
-    ["point", "expected"],
+    "point,expected",
     [
         (a(2, 5, 8), True),
         (a(1, 5, 8), False),
@@ -106,7 +106,7 @@ def test_surrounds_point_cartesian(point, expected):
 
 
 @pytest.mark.parametrize(
-    ["point", "expected"],
+    "point,expected",
     [
         (a(2, 2, 0), True),
         (a(2, 2, 2), False),
@@ -124,19 +124,6 @@ def test_eq():
     gc3 = CartesianGeometrySpec(a(1, 2, 3), a(4, 5, 6), a(7, 8, 2))
     assert gc1 == gc2
     assert gc1 != gc3
-
-
-# def test_print_geometry_spec():
-#     filename = common_test_data("data/mcnp/wwinp")
-#     with open(filename) as stream:
-#         m = WgtMesh.read(stream)
-#     ios = io.StringIO()
-#     m.print_meshtal_spec(ios)
-#     actual = ios.getvalue()
-#     spec_filename = common_test_data("data/mcnp/meshtal-spec.txt")
-#     with open(spec_filename) as stream:
-#         expected = stream.read()
-#     my_assert_array_equal(actual.lower().split(), expected.lower().split())
 
 
 def test_cylinder_mesh_trivial_constructor():
@@ -165,7 +152,7 @@ def test_adjust_axs_vec_for_mcnp():
 
 
 @pytest.mark.parametrize(
-    ["inp", "value", "expected"],
+    "inp,value,expected",
     [
         (a(0, 5, 10), -0.1, -1),
         (a(0, 5, 10), 0, 0),
@@ -183,7 +170,7 @@ def test_select_indices(inp, value, expected):
 
 
 @pytest.mark.parametrize(
-    ["inp", "values", "expected"],
+    "inp,values,expected",
     [
         (a(0, 5, 10), [-1, 0, 2], [-1, 0, 0]),
         (a(0, 5, 10), [-1, 0, 6], [-1, 0, 1]),
@@ -195,5 +182,6 @@ def test_select_indices(inp, value, expected):
 def test_select_indices_with_arrays(inp, values, expected):
     actual = select_indexes(inp, values)
     assert np.array_equal(
-        expected, actual
+        expected,
+        actual,
     ), f"for {inp} and {values}, we expect {expected}, actual {actual}"

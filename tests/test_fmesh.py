@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import os
-
 from collections import namedtuple
 from copy import copy
 from pathlib import Path
@@ -138,15 +136,15 @@ def test_m_2_npz(tmp_path, simple_bins):
     assert not (tmp_path / "2.npz").exists()
     actual = FMesh.load_npz(npz)
     assert actual == m1
-    os.remove(npz)
+    npz.unlink()
     prefix = tmp_path / "out"
     m_2_npz(tfn.open(), prefix=prefix)
     npz_index = {prefix / "14.npz": m1, prefix / "2.npz": m2}
-    for npz in npz_index.keys():
+    for npz in npz_index:
         assert npz.exists()
         actual = FMesh.load_npz(npz)
         assert actual == npz_index[npz]
-        os.remove(npz)
+        npz.unlink()
 
 
 def test_m_2_npz_with_comment(tmp_path, simple_bins):
@@ -166,7 +164,7 @@ def test_m_2_npz_with_comment(tmp_path, simple_bins):
     m2 = copy(m1)
     m2.name = 2
     tfn = tmp_path / "fmesh.m"
-    with open(tfn, "w") as fid:
+    with tfn.open("w") as fid:
         fid.write("timestamp\n")
         fid.write("problem title\n")
         fid.write("Number of histories used for normalizing tallies =      39594841.00\n\n")
@@ -179,15 +177,15 @@ def test_m_2_npz_with_comment(tmp_path, simple_bins):
     assert not (tmp_path / "2.npz").exists()
     actual = FMesh.load_npz(npz)
     assert actual == m1
-    os.remove(npz)
+    npz.unlink()
     prefix = tmp_path / "out/"
     m_2_npz(tfn.open(), prefix=prefix)
     npz_index = {prefix / "14.npz": m1, prefix / "2.npz": m2}
-    for npz in npz_index.keys():
-        assert os.path.exists(npz)
+    for npz in npz_index:
+        assert npz.exists()
         actual = FMesh.load_npz(npz)
         assert actual == npz_index[npz]
-        os.remove(npz)
+        npz.unlink()
 
 
 def test_total_by_energy(simple_bins):
@@ -209,13 +207,14 @@ def test_total_by_energy(simple_bins):
 
 def test_get_totals(simple_bins):
     name, kind, xbins, ybins, zbins, ebins = simple_bins(
-        name=34, ebins=np.array([0.0, 6.0, 7.0, 8.0])
+        name=34,
+        ebins=np.array([0.0, 6.0, 7.0, 8.0]),
     )
     data = np.array([[[[10.0]]], [[[20.0]]], [[[30.0]]]])
     errors = np.array([[[[0.1]]], [[[0.2]]], [[[0.3]]]])
     totals = np.asarray([[[60.0]]])
     totals_err = np.asarray(
-        [[[np.sqrt((10 * 0.1) ** 2 + (20 * 0.2) ** 2 + (30 * 0.3) ** 2) / 60.0]]]
+        [[[np.sqrt((10 * 0.1) ** 2 + (20 * 0.2) ** 2 + (30 * 0.3) ** 2) / 60.0]]],
     )
     m = FMesh(
         name,
@@ -235,7 +234,7 @@ def test_get_totals(simple_bins):
 
 @pytest.mark.skip()
 @pytest.mark.parametrize(
-    ["x", "y", "z", "expected_total", "expected_rel_error", "msg"],
+    "x,y,z,expected_total,expected_rel_error,msg",
     [
         (0.5, None, None, 60.0, 0.16499, "# 1: slice over x=0.5"),
         (1.5, None, None, 120.0, 0.16499, "# 2: slice over x=1.5"),
@@ -273,9 +272,9 @@ def test_get_totals_slice(tmpdir, x, y, z, expected_total, expected_rel_error, m
     with Path(tfn).open() as fid:
         meshes = read_meshtal(fid)
     assert meshes, msg
-    assert 1 == len(meshes), msg
+    assert len(meshes) == 1, msg
     m = meshes[0]
-    assert 14 == m.name
+    assert m.name == 14
     actual_total, actual_rel_error = m.get_totals(x=x, y=y, z=z)
     assert_array_equal(expected_total, actual_total)
     assert_array_equal(expected_rel_error, actual_rel_error)
@@ -307,15 +306,7 @@ Energy bin boundaries: 0 6 7 8
 
 
 @pytest.mark.parametrize(
-    [
-        "new_x",
-        "new_y",
-        "new_z",
-        "expected_data",
-        "expected_err",
-        "expected_total",
-        "expected_rel_error",
-    ],
+    "new_x,new_y,new_z,expected_data,expected_err,expected_total,expected_rel_error",
     [
         (
             # new binning with common edges with the old one
@@ -327,26 +318,26 @@ Energy bin boundaries: 0 6 7 8
                     [[[10.0]], [[20.0]]],
                     [[[20.0]], [[40.0]]],
                     [[[30.0]], [[60.0]]],
-                ]
+                ],
             ),
             np.array(
                 [
                     [[[0.1]], [[0.1]]],
                     [[[0.2]], [[0.2]]],
                     [[[0.3]], [[0.3]]],
-                ]
+                ],
             ),
             np.array(
                 [
                     [[60.0]],
                     [[120.0]],
-                ]
+                ],
             ),
             np.array(
                 [
                     [[0.16499]],
                     [[0.16499]],
-                ]
+                ],
             ),
         ),
         (
@@ -359,24 +350,24 @@ Energy bin boundaries: 0 6 7 8
                     [[[15.0]]],
                     [[[30.0]]],
                     [[[45.0]]],
-                ]
+                ],
             ),
             np.array(
                 [
                     [[[0.1]]],
                     [[[0.2]]],
                     [[[0.3]]],
-                ]
+                ],
             ),
             np.array(
                 [
                     [[90.0]],
-                ]
+                ],
             ),
             np.array(
                 [
                     [[0.16499]],
-                ]
+                ],
             ),
         ),
     ],
@@ -397,10 +388,10 @@ def test_rebin(
     with Path(tfn).open() as fid:
         meshes = read_meshtal(fid)
     assert meshes
-    assert 1 == len(meshes)
+    assert len(meshes) == 1
     m = meshes[0]
     new_mesh = m.rebin(new_x, new_y, new_z, new_name=20)
-    assert 20 == new_mesh.name
+    assert new_mesh.name == 20
     assert_array_equal(new_x, new_mesh.ibins)
     assert_array_equal(new_y, new_mesh.jbins)
     assert_array_equal(new_z, new_mesh.kbins)
@@ -411,7 +402,7 @@ def test_rebin(
 
 
 @pytest.mark.parametrize(
-    ["msg", "emin", "emax", "xmin", "xmax", "ymin", "ymax", "zmin", "zmax", "expected_mesh"],
+    "msg,emin,emax,xmin,xmax,ymin,ymax,zmin,zmax,expected_mesh",
     [
         (
             "# select the first layer by x",
@@ -463,11 +454,11 @@ Energy bin boundaries: 0 6 7 8
     tf = tmp_path / "gts.m"
     tf.write_text(text)
     meshes = read_meshtal(tf.open())
-    assert meshes
-    assert 1 == len(meshes)
+    assert meshes, msg
+    assert len(meshes) == 1, msg
     m = meshes[0]
     new_mesh = m.shrink(emin, emax, xmin, xmax, ymin, ymax, zmin, zmax, new_name=20)
-    assert expected_mesh == new_mesh
+    assert expected_mesh == new_mesh, msg
 
 
 def test_repr(simple_bins):
@@ -475,7 +466,7 @@ def test_repr(simple_bins):
     data = np.asarray([[[[5.0]]], [[[10.0]]]], dtype=float)
     errors = np.asarray([[[[0.2]]], [[[0.1]]]], dtype=float)
     m = FMesh(name, kind, CartesianGeometrySpec(xbins, ybins, zbins), a(*ebins), data, errors)
-    assert "Fmesh(14, 1, 0.0..1.0, 2.0..3.0, 4.0..5.0, 0.0..7.0)" == repr(m)
+    assert repr(m) == "Fmesh(14, 1, 0.0..1.0, 2.0..3.0, 4.0..5.0, 0.0..7.0)"
 
 
 def test_reading_mfile_with_negative(data):

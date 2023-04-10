@@ -20,7 +20,8 @@ def foo(x, depth=0):
 
 
 @pytest.mark.skipif(
-    platform.system() != "Linux", reason="Some issues with pickle, if OS is not Linux."
+    platform.system() != "Linux",
+    reason="Some issues with pickle, if OS is not Linux.",
 )
 def test_no_daemon_pool():
     actual = foo(10, depth=2)

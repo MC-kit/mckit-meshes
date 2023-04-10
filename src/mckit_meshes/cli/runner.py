@@ -4,26 +4,21 @@ The module applies :meth:`click` API to organize CLI interface for McKit-meshes 
 """
 from __future__ import annotations
 
-import typing as t
+from typing import TYPE_CHECKING
 
 import datetime
-
-from pathlib import Path
 
 import click
 import mckit_meshes.version as meta
 
 from mckit_meshes.cli.commands import do_mesh2npz, do_npz2vtk
-
-# from mckit_meshes.cli.commands.common import get_default_output_directory
 from mckit_meshes.cli.logging import init_logger, logger
 
-# from mckit_meshes.utils import MCNP_ENCODING
+if TYPE_CHECKING:
+    from pathlib import Path
 
 NAME = "mckit_meshes"
 VERSION = meta.__version__
-# LOG_FILE_RETENTION = 3
-# NO_LEVEL_BELOW = 30
 
 
 @click.group("mckit-meshes", help=meta.__summary__)
@@ -39,7 +34,11 @@ VERSION = meta.__version__
 @click.option("--logfile", default=None, help="File to log to")
 @click.version_option(VERSION, prog_name=NAME)
 def mckit_meshes(
-    ctx: click.Context, verbose: bool, quiet: bool, logfile: str, override: bool
+    ctx: click.Context,
+    verbose: bool,
+    quiet: bool,
+    logfile: str,
+    override: bool,
 ) -> None:
     """McKit-meshes command line interface."""
     init_logger(logfile, quiet, verbose)
@@ -66,7 +65,7 @@ if there are more than 1 input file""",
     nargs=-1,
     required=False,
 )
-def mesh2npz(ctx: click.Context, prefix: str | Path, mesh_tallies: list[t.Any]) -> None:
+def mesh2npz(ctx: click.Context, prefix: str | Path, mesh_tallies: list[click.Path]) -> None:
     """Converts mesh files to npz files."""
     do_mesh2npz(prefix, mesh_tallies, ctx.obj["OVERRIDE"])
     #
@@ -89,7 +88,7 @@ if there are more than 1 input file""",
     nargs=-1,
     required=False,
 )
-def npz2vtk(ctx: click.Context, prefix: str | Path, npz_files: list[t.Any]) -> None:
+def npz2vtk(ctx: click.Context, prefix: str | Path, npz_files: list[click.Path]) -> None:
     """Converts npz files to VTK files."""
     do_npz2vtk(prefix, npz_files, ctx.obj["OVERRIDE"])
     # Don't remove these comments: this makes flake8 happy on absent arguments in the docstring.
@@ -97,6 +96,7 @@ def npz2vtk(ctx: click.Context, prefix: str | Path, npz_files: list[t.Any]) -> N
 
 
 if __name__ == "__main__":
-    ct = datetime.datetime.now()
+    tz = datetime.timezone(datetime.timedelta(0))
+    ct = datetime.datetime.now(tz)
     mckit_meshes(obj={})
-    logger.success(f"Elapsed time: {datetime.datetime.now() - ct}")
+    logger.success(f"Elapsed time: {datetime.datetime.now(tz) - ct}")

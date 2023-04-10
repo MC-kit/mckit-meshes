@@ -9,8 +9,7 @@ import logging
 from pathlib import Path
 
 from mckit_meshes import fmesh
-
-from ...utils.io import check_if_path_exists
+from mckit_meshes.utils.io import check_if_path_exists
 
 __LOG = logging.getLogger(__name__)
 
