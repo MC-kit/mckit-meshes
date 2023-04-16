@@ -229,7 +229,6 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
 
 
 class CartesianGeometrySpec(AbstractGeometrySpec):
-
     # TODO dvp: add transformation
 
     @property
