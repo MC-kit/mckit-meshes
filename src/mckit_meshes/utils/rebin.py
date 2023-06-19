@@ -2,8 +2,9 @@
 
 # TODO: DVP: implement propagation in result the indexes computed on shrink
 # for reuse in FMesh.shrink for equivalent grids or alike
+from __future__ import annotations
 
-from typing import Iterable, Tuple
+from typing import TYPE_CHECKING, Iterable, Sequence
 
 import collections.abc
 import gc
@@ -12,7 +13,9 @@ import platform
 
 import numpy as np
 
-from numpy import ndarray
+if TYPE_CHECKING:
+    from numpy import ndarray
+    from numpy.typing import ArrayLike
 
 if platform.system() == "Linux":
     from mckit_meshes.utils.no_daemon_process import Pool
@@ -39,7 +42,8 @@ __EXTERNAL_PROCESS_THRESHOLD = 1000000
 
 
 # noinspection PyTypeChecker
-def is_monotonically_increasing(a: ndarray):
+def is_monotonically_increasing(a: ArrayLike) -> bool:
+    # noinspection PyUnresolvedReferences
     if not a.size:
         return False
     iterator = iter(a)
@@ -52,13 +56,15 @@ def is_monotonically_increasing(a: ndarray):
     return True
 
 
-def set_axis(indices, axis, a_shape):
+# noinspection PyUnresolvedReferences
+def set_axis(indices: ArrayLike, axis: int, a_shape: Sequence[int]) -> ArrayLike:
     shape = [1] * len(a_shape)
     shape[axis] = a_shape[axis]
     return indices.reshape(tuple(shape))
 
 
-def interpolate(x_new, x, y, axis=None):
+# noinspection PyUnresolvedReferences
+def interpolate(x_new: ArrayLike, x: ArrayLike, y: ArrayLike, axis: int = None) -> ArrayLike:
     if y.ndim == 1:
         return np.interp(x_new, x, y)
 
@@ -84,29 +90,31 @@ def interpolate(x_new, x, y, axis=None):
     slope = y_deltas / deltas
     new_deltas = x_new - x_lo
     new_deltas = set_axis(new_deltas, axis, slope.shape)
-    y_new = slope * new_deltas + y_lo
-    return y_new
+    return slope * new_deltas + y_lo
 
 
-def rebin_1d(a, bins, new_bins, axis=0, grouped=False, assume_sorted=False):
+# noinspection PyUnresolvedReferences
+def rebin_1d(
+    a: ArrayLike,
+    bins: ArrayLike,
+    new_bins: ArrayLike,
+    axis: int = 0,
+    grouped: bool = False,
+    assume_sorted: bool = False,
+) -> ArrayLike:
     """Transforms 1-D histogram defined as `data` on the limiting points.
 
     define like `bins` to equivalent (see the terms below) histogram defined
     on other limiting points defined as `new_bins`.
 
-    Notes
-    -----
-    The algorithm maintains the equality of integral on intervals defined on
-    new_bins for the original and rebinned distributions.
+    Notes:
+        The algorithm maintains the equality of integral on intervals defined on
+        new_bins for the original and rebinned distributions.
 
-    Parameters
-    ----------
-        a: ndarray
-            The array to rebin
-        bins: ndarray
-            Defines 1-D array representing `a` binning along the given `axis
-        new_bins:  ndarray
-            The new binning required.
+    Args:
+        a: The array to rebin
+        bins: Defines 1-D array representing `a` binning along the given `axis
+        new_bins:  The new binning required.
         axis: int, optional
             An axis along which to rebin array `a`
         grouped: bool, optional
@@ -122,13 +130,15 @@ def rebin_1d(a, bins, new_bins, axis=0, grouped=False, assume_sorted=False):
             If True, then skip assertion of bins sorting order,
             by default False - asserts the input_file data
 
-    Returns
-    -------
-        rebinned_data: ndarray
+    Returns:
+        rebinned data
     """
     assert (
-        bins[0] <= new_bins[0] and new_bins[-1] <= bins[-1]
-    ), "Rebinning doesn't provide extrapolation out of the original bins"
+        bins[0] <= new_bins[0]
+    ), "Rebinning doesn't provide extrapolation lower of the original bins"
+    assert (
+        new_bins[-1] <= bins[-1]
+    ), "Rebinning doesn't provide extrapolation upper of the original bins"
     assert (
         bins.size == a.shape[axis] + 1
     ), "The `a` array shape doesn't match the given bins and axis"
@@ -171,7 +181,7 @@ def rebin_1d(a, bins, new_bins, axis=0, grouped=False, assume_sorted=False):
 
 def rebin_nd(
     a: ndarray,
-    rebin_spec: Iterable[Tuple[ndarray, ndarray, int, bool]],
+    rebin_spec: Iterable[tuple[ndarray, ndarray, int, bool]],
     assume_sorted: bool = False,
     external_process_threshold: int = __EXTERNAL_PROCESS_THRESHOLD,
 ) -> ndarray:
@@ -189,6 +199,7 @@ def rebin_nd(
         external_process_threshold: int
             If size of `a` is greater than that, then the computation is executed in external process,
             to achieve immediate memory cleanup.
+
     Returns:
         Rebinned data.
     """
@@ -212,10 +223,15 @@ def rebin_nd(
         if n:
             del gc.garbage[:]
 
-    return res
+    return res  # noqa: RET504 - the code above is to be executed
 
 
-def rebin_spec_composer(bins_seq, new_bins_seq, axes=None, grouped_flags=None):
+def rebin_spec_composer(
+    bins_seq,
+    new_bins_seq,
+    axes=None,
+    grouped_flags=None,
+) -> tuple[ArrayLike, ArrayLike, ArrayLike, ArrayLike]:
     """Compose rebin_spec parameter.
 
     See also :py:func:`mckit_meshes.utils.rebin.rebin_nd` with reasonable defaults
@@ -250,11 +266,16 @@ def rebin_spec_composer(bins_seq, new_bins_seq, axes=None, grouped_flags=None):
 
 # @numba.jit
 def shrink_1d(
-    a: np.ndarray, bins: np.ndarray, low=None, high=None, axis=None, assume_sorted=False
-) -> Tuple[np.ndarray, np.ndarray]:
+    a: np.ndarray,
+    bins: np.ndarray,
+    low=None,
+    high=None,
+    axis=None,
+    assume_sorted=False,
+) -> tuple[np.ndarray, np.ndarray]:
     """Select sub-arrays of a `a` and corresponding `bins` for minimal span.
 
-    of bins, which completely covers the range [`low`..`high`]
+    of bins, which completely covers the range [`low`...`high`]
     both sides included.
 
     Args:
@@ -280,7 +301,6 @@ def shrink_1d(
         new_data: ndarray
             The shrank grid
     """
-
     if low is None and high is None:
         return bins, a
 
@@ -301,14 +321,12 @@ def shrink_1d(
 
     if low < bins[0] or bins[-1] < low:
         raise ValueError(
-            "Low shrink edge is beyond the bins range: %g is not in [%g..%g]"
-            % (low, bins[0], bins[-1])
+            f"Low shrink edge is beyond the bins range: {low:g} is not in [{bins[0]:g}..{bins[-1]:g}]",
         )
 
     if high < bins[0] or bins[-1] < high:
         raise ValueError(
-            "High shrink edge is beyond the bins range: %g is not in [%g..%g]"
-            % (high, bins[1], bins[-1])
+            f"High shrink edge is beyond the bins range: {high:g} is not in [{bins[1]:g}..{bins[-1]:g}]",
         )
 
     left_idx, right_idx = np.digitize([low, high], bins) - 1
@@ -332,7 +350,7 @@ def shrink_1d(
     return new_bins, new_a
 
 
-def shrink_nd(a, trim_spec, assume_sorted=False):
+def shrink_nd(a, trim_spec, assume_sorted=False) -> tuple[ArrayLike, ArrayLike]:
     """Perform multidimensional shrink.
 
     Args:
@@ -345,10 +363,7 @@ def shrink_nd(a, trim_spec, assume_sorted=False):
             by default False - asserts the input_file data
 
     Returns:
-        new_bins_seq: sequence of ndarrays
-            A sequence with  new bins.
-        recursed_data: ndarray
-            The shrunk grid.
+            A sequence with  new bins,        The shrunk grid.
     """
     if not isinstance(trim_spec, collections.abc.Iterator):
         trim_spec = iter(trim_spec)
@@ -358,34 +373,33 @@ def shrink_nd(a, trim_spec, assume_sorted=False):
         return None, a
     new_bins_seq, recursed_data = shrink_nd(a, trim_spec, assume_sorted)
     top_bins, top_data = shrink_1d(recursed_data, bins, left, right, axis, assume_sorted)
-    if new_bins_seq:
-        new_bins_seq = [top_bins] + new_bins_seq
-    else:
-        new_bins_seq = [top_bins]
+    new_bins_seq = [top_bins, *new_bins_seq] if new_bins_seq else [top_bins]
     return new_bins_seq, top_data
 
 
-def trim_spec_composer(bins_seq, lefts=None, rights=None, axes=None):
+def trim_spec_composer(
+    bins_seq,
+    lefts=None,
+    rights=None,
+    axes=None,
+) -> Iterable[tuple[ArrayLike, float, float, int]]:
     """Helps to compose trim_spec parameter in.
 
-    :py:func:`triniti_ne.rebin.trim_nd` with
+    :func:`triniti_ne.rebin.trim_nd` with
     reasonable defaults for lefts, rights and axes iterators.
 
-    Parameters
-    ----------
-    bins_seq: sequence of ndarrays
-        Iterates over the list of bins associated with a grid to be trimmed.
-    lefts: sequence of floats
-        Iterates over the list of left edges for trimming.
-    rights: sequence of floats
-        Iterates over the list of right edges for trimming.
-    axes: sequence of ints, optional
-        Iterates over the list of corresponding axes.
-        If not provided (default), then iterates over sequence 0..len(bins).
+    Args:
+        bins_seq: sequence of ndarrays
+            Iterates over the list of bins associated with a grid to be trimmed.
+        lefts: sequence of floats
+            Iterates over the list of left edges for trimming.
+        rights: sequence of floats
+            Iterates over the list of right edges for trimming.
+        axes: sequence of ints, optional
+            Iterates over the list of corresponding axes.
+            If not provided (default), then iterates over sequence 0..len(bins).
 
-    Returns
-    -------
-    trim_spec: sequence of tuples
+    Returns:
         Iterator over the sequence of tuples (bins, lefts, rights, axis)
     """
     if not lefts:

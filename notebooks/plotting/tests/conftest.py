@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 
 from pathlib import Path
@@ -12,7 +14,7 @@ def data() -> Path:
     return path_resolver("tests")("data")
 
 
-@pytest.fixture
+@pytest.fixture()
 def cd_tmpdir(tmpdir):
     old_dir = tmpdir.chdir()
     try:

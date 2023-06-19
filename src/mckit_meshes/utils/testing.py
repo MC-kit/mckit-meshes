@@ -1,3 +1,6 @@
+"""Utilities fof testing."""
+from __future__ import annotations
+
 from typing import cast
 
 import numpy as np
@@ -18,7 +21,6 @@ def a(*args, dtype=float) -> np.ndarray:
         np.ndarray:  The ndarray with the given numbers and type.
 
     Examples:
-
     >>> a(1, 2, 3)
     array([1., 2., 3.])
     >>> a(1, 2, 3, dtype=np.int32)

@@ -1,4 +1,6 @@
-from typing import Generator, Iterator, List, TextIO
+from __future__ import annotations
+
+from typing import Generator, Iterator, TextIO
 
 import datetime as dt
 import re
@@ -21,7 +23,7 @@ PLOTM_ORIGIN = np.array([1875.0, 1125.0], float)
 
 
 @dataclass
-class Page(object):
+class Page:
     lines: array
     basis: array
     origin: array
@@ -50,7 +52,7 @@ class Page(object):
             self.rescaled = True
             self.lines = res
 
-    def convert_to_meters(self) -> "Page":
+    def convert_to_meters(self) -> Page:
         lines = self.lines * 0.01
         return Page(
             lines=lines,
@@ -79,12 +81,12 @@ def read(input_stream: TextIO) -> Generator[Page, None, None]:
         yield transform_page(page)
 
 
-def load(ps_file: Path) -> List[Page]:
+def load(ps_file: Path) -> list[Page]:
     with ps_file.open() as fid:
         return list(read(fid))
 
 
-def load_pages(input_stream: TextIO) -> Iterator[List[str]]:
+def load_pages(input_stream: TextIO) -> Iterator[list[str]]:
     page = []
     for line in input_stream:
         if not line.startswith("%"):
@@ -95,7 +97,7 @@ def load_pages(input_stream: TextIO) -> Iterator[List[str]]:
                 page.append(line)
 
 
-def extract_description_lines(lines: List[str]) -> List[str]:
+def extract_description_lines(lines: list[str]) -> list[str]:
     description_lines = []
     for line in lines:
         if description_lines or line.startswith("     30   2205"):
@@ -105,7 +107,7 @@ def extract_description_lines(lines: List[str]) -> List[str]:
     return description_lines
 
 
-def parse_description_lines(description_lines: List[str]):
+def parse_description_lines(description_lines: list[str]):
     date = extract_date(description_lines[0])
     title = select_part_in_parenthesis(description_lines[1])
     line_no = 2
@@ -125,7 +127,7 @@ def parse_description_lines(description_lines: List[str]):
 
 
 def transform_page(
-    page: List[str],
+    page: list[str],
 ) -> Page:
     lines = collect_lines(page)
     description_lines = extract_description_lines(page[-20:])
@@ -133,7 +135,7 @@ def transform_page(
     return Page(lines, basis, origin, extent, date, title, probid)
 
 
-def collect_lines(page: List[str]) -> array:
+def collect_lines(page: list[str]) -> array:
     lines = []
     for line in page[:-9]:
         line = line.split()

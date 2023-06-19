@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 
 from mckit_meshes.m_file_iterator import m_file_iterator
@@ -5,7 +7,7 @@ from mckit_meshes.m_file_iterator import m_file_iterator
 
 def test_file_with_single_mesh(data):
     fn = data / "1.m"
-    with open(fn) as fid:
+    with fn.open() as fid:
         it = m_file_iterator(fid)
         header = next(it)
         assert_is_header(header, fn, "323318560.00")
@@ -17,7 +19,7 @@ def test_file_with_single_mesh(data):
 
 def test_file_with_two_meshes(data):
     fn = data / "2.m"
-    with open(fn) as fid:
+    with fn.open() as fid:
         it = m_file_iterator(fid)
         header = next(it)
         assert_is_header(header, fn, "323318560.00")
@@ -37,20 +39,21 @@ def assert_is_header(header, file_name, nps):
     assert_lines_are_trimmed(header)
     assert len(header) == 3, "The header is 3 lines long"
     assert header[0].startswith("mcnp"), 'The header starts with the word "mcnp"'
-    assert nps in header[-1], "The file {} has nps == {}".format(file_name, nps)
+    assert nps in header[-1], f"The file {file_name} has nps == {nps}"
 
 
 def assert_is_mesh_output(mesh):
     assert_lines_are_trimmed(mesh)
     assert_has_no_empty_lines(mesh)
     assert mesh[0].startswith(
-        "Mesh Tally Number"
+        "Mesh Tally Number",
     ), 'The first line should start with "Mesh Tally Number"'
     assert mesh[-1].startswith(
-        "2.000E+01     7.500     7.500     7.500"
+        "2.000E+01     7.500     7.500     7.500",
     ), 'The last line should start with "2.000E+01     7.500     7.500     7.500"'
 
 
 def assert_has_no_empty_lines(a_text):
     for line in a_text:
-        assert len(line) > 0 and line != "\n", "The text does not contain empty lines"
+        assert len(line) > 0, "The text does not contain empty lines"
+        assert line != "\n", "The text does not contain empty lines"

@@ -28,16 +28,17 @@
 """
 from __future__ import annotations
 
-from typing import Final, Iterable, List, Optional, Sequence, TextIO, Tuple, Union, cast
+from typing import Final, Iterable, Sequence, TextIO, cast
 
 import abc
 
 from dataclasses import dataclass, field
 
-import mckit_meshes.utils as ut
-import mckit_meshes.utils.io
 import numpy as np
-import numpy.linalg as linalg
+
+from numpy import linalg
+
+import mckit_meshes.utils.io
 
 from mckit_meshes.utils.cartesian_product import cartesian_product
 
@@ -91,14 +92,14 @@ class AbstractGeometrySpecData:
     def __hash__(self) -> int:
         return hash(self.bins)
 
-    def __eq__(self, other: "AbstractGeometrySpecData") -> bool:
+    def __eq__(self, other: AbstractGeometrySpecData) -> bool:
         if not isinstance(other, AbstractGeometrySpecData):
             return False
         a, b = self.bins, other.bins
         return len(a) == len(b) and arrays_equal(zip(a, b))
 
     @property
-    def bins(self) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    def bins(self) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """Pack the fields to tuple.
 
         Returns:
@@ -152,7 +153,7 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
     # Generic methods
 
     @property
-    def bins_shape(self) -> Tuple[int, int, int]:
+    def bins_shape(self) -> tuple[int, int, int]:
         """Shape of data corresponding to spatial bins.
 
         Returns:
@@ -181,7 +182,7 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
         )
 
     @property
-    def boundaries_shape(self) -> Tuple[int, int, int]:
+    def boundaries_shape(self) -> tuple[int, int, int]:
         """Bins (boundaries) shape."""
         return self.ibins.size, self.jbins.size, self.kbins.size
 
@@ -196,12 +197,12 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
         return cast(bool, (xmin < x < xmax) and (ymin < y < ymax) and (zmin < z < zmax))
 
     def select_indexes(
-        self, *, i_values=None, j_values=None, k_values=None
-    ) -> Tuple[
-        Union[int, slice, np.ndarray],
-        Union[int, slice, np.ndarray],
-        Union[int, slice, np.ndarray],
-    ]:
+        self,
+        *,
+        i_values=None,
+        j_values=None,
+        k_values=None,
+    ) -> tuple[int | slice | np.ndarray, int | slice | np.ndarray, int | slice | np.ndarray]:
         """Select indices for data corresponding to given spatial values.
 
         Args:
@@ -218,7 +219,7 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
             select_indexes(self.kbins, k_values),
         )
 
-    def print(self, io: TextIO, columns: int = 6) -> None:
+    def print_specification(self, io: TextIO, columns: int = 6) -> None:
         indent = " " * 8
         self.print_geom(io, indent)
         print(indent, "origin=", " ".join(format_floats(self.origin)), sep="", file=io)
@@ -228,7 +229,6 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
 
 
 class CartesianGeometrySpec(AbstractGeometrySpec):
-
     # TODO dvp: add transformation
 
     @property
@@ -251,10 +251,10 @@ class CartesianGeometrySpec(AbstractGeometrySpec):
         assert points.shape[-1] == 3, "Expected cartesian point array or single point"
         if self.origin is not ZERO_ORIGIN:
             return cast(
-                np.ndarray, points - ZERO_ORIGIN
+                np.ndarray,
+                points - ZERO_ORIGIN,
             )  # TODO dvp: recall what is this subtraction for?
-        else:
-            return points
+        return points
 
     def print_geom(self, io: TextIO, indent: str) -> None:
         pass  # Defaults will do for cartesian mesh
@@ -268,9 +268,9 @@ class CartesianGeometrySpec(AbstractGeometrySpec):
             bins_square = bins_square[:-1] + bins_square[1:] + bins_mult
             return bins_square
 
-        x_square, y_square, z_square = [
+        x_square, y_square, z_square = (
             calc_sum(x - px) for x, px in zip((self.ibins, self.jbins, self.kbins), point)
-        ]
+        )
         w = np.zeros((ni, nj, nk), dtype=float)
         for i in range(ni):
             for j in range(nj):
@@ -284,7 +284,7 @@ class CartesianGeometrySpec(AbstractGeometrySpec):
 
     def calc_cell_centers(self):
         raise NotImplementedError(
-            f"{self.__class__.__name__} has not implemented method calc_cell_centers"
+            f"{self.__class__.__name__} has not implemented method calc_cell_centers",
         )
 
 
@@ -303,20 +303,18 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
     def __post_init__(self):
         super().__post_init__()
 
-        if self.axs is not DEFAULT_AXIS:
-            if not isinstance(self.axs, np.ndarray):
-                raise TypeError(f"Expected axs as numpy array, actual {self.axs}")
+        if self.axs is not DEFAULT_AXIS and not isinstance(self.axs, np.ndarray):
+            raise TypeError(f"Expected axs as numpy array, actual {self.axs}")
 
-        if self.vec is not DEFAULT_VEC:
-            if not isinstance(self.vec, np.ndarray):
-                raise TypeError(f"Expected vec as numpy array, actual {self.vec}")
+        if self.vec is not DEFAULT_VEC and not isinstance(self.vec, np.ndarray):
+            raise TypeError(f"Expected vec as numpy array, actual {self.vec}")
 
         if not (self.theta[0] == 0.0 and self.theta[-1] == 1.0):
             raise ValueError("Theta is expected in rotations only")
 
     @property
     def bins(self):
-        return super().bins + (self.axs, self.vec)
+        return (*super().bins, self.axs, self.vec)
 
     @property
     def cylinder(self) -> bool:
@@ -336,15 +334,14 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
 
     def local_coordinates(self, points: np.ndarray) -> np.ndarray:
         assert points.shape[-1] == 3, "Expected cartesian point array or single point"
-        assert np.array_equal(self.axs, DEFAULT_AXIS) and (
+        assert np.array_equal(
+            self.axs,
+            DEFAULT_AXIS,
+        ), "Tilted cylinder meshes are not implemented yet"
+        assert (
             np.array_equal(self.vec, DEFAULT_VEC) or self.vec[1] == 0.0  # vec is in xz plane
         ), "Tilted cylinder meshes are not implemented yet"
         # TODO dvp: implement tilted cylinder meshes
-        # ez = self.axs / np.linalg.norm(self.axs)
-        # ey = np.cross(ez, self.vec)
-        # ey /= np.linalg.norm(ey)
-        # ex = np.cross(ey, ez)
-        # ex /= np.linalg.norm(ex)
         local_points: np.ndarray = points - self.origin
         local_points[..., :] = (
             np.sqrt(local_points[..., 0] ** 2 + local_points[..., 1] ** 2),  # r
@@ -385,7 +382,7 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
         )  # TODO dvp: apply local_coordinates instead of the following
         l1_square = px**2 + py**2
         l1 = np.sqrt(l1_square)  # distance to origin from point projection on z=0 plane
-        assert 0.0 < l1
+        assert l1 > 0.0
         # Terms of integration of L^2 in cylindrical coordinates
         # r^2
         gamma = np.arcsin(py / l1)
@@ -443,18 +440,14 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
         return cell_centers
 
     # def __hash__(self):
-    #     return hash((super().__hash__(), self.axs, self.vec))
     #
     # def __eq__(self, other):
     #     if not isinstance(other, CylinderGeometrySpec):
-    #         return False
     #     return (
-    #         super().__eq__(other)
     #         and np.array_equal(self.axs, other.axs)
     #         and np.array_equal(self.vec, other.vec)
-    #     )
 
-    def adjust_axs_vec_for_mcnp(self) -> "CylinderGeometrySpec":
+    def adjust_axs_vec_for_mcnp(self) -> CylinderGeometrySpec:
         """Set `axs` and `vec` attributes to the values, which MCNP considers orthogonal.
 
         Assumptions
@@ -464,7 +457,7 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
             - `self.vec` is in PY=0 plane
             - `self.axs` is vertical
 
-        Returns
+        Returns:
         -------
         gs:
             new CylinderGeometrySpec with adjusted `axs` and `vec` attributes.
@@ -473,7 +466,12 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
         axs = self.origin + DEFAULT_AXIS * self.z[-1]
         vec = self.origin + DEFAULT_VEC * self.r[-1]
         return CylinderGeometrySpec(
-            self.r, self.z, self.theta, origin=self.origin, axs=axs, vec=vec
+            self.r,
+            self.z,
+            self.theta,
+            origin=self.origin,
+            axs=axs,
+            vec=vec,
         )
 
 
@@ -493,14 +491,14 @@ def _print_bins(indent, prefix, _ibins, io, columns: int = 6) -> None:
 
 
 def select_indexes(
-    a: np.ndarray, x: Optional[Union[float, List[float], np.ndarray]]
-) -> Union[int, slice, np.ndarray]:
+    a: np.ndarray,
+    x: float | list[float] | np.ndarray | None,
+) -> int | slice | np.ndarray:
     """Find indexes for a mesh bin, corresponding given coordinates.
 
     Assumes that `a` is sorted.
 
     Examples:
-
         >>> r = np.arange(5)
         >>> r
         array([0, 1, 2, 3, 4])
@@ -542,17 +540,16 @@ def select_indexes(
     Returns:
         out: index or indices for each given coordinate
     """
-    assert 1 < a.size, "Parameter a doesn't represent binning"
+    assert a.size > 1, "Parameter a doesn't represent binning"
 
     if x is None:
-        return slice(0, a.size) if 2 < a.size else 0  # squeeze if there's only one bin
+        return slice(0, a.size) if a.size > 2 else 0  # squeeze if there's only one bin
 
     i: np.ndarray = a.searchsorted(x) - 1
 
     if np.isscalar(i):
-        if i < 0:
-            if x == a[0]:
-                return 0
+        if i < 0 and x == a[0]:
+            return 0
     else:
         neg = i < 0
         if np.any(neg):
@@ -567,12 +564,12 @@ def format_floats(floats: Iterable[float], _format="{:.6g}") -> Iterable[str]:
 
 
 def compute_intervals_and_coarse_bins(
-    arr: Sequence[float], tolerance: float = 1.0e-4
-) -> Tuple[List[int], Sequence[float]]:
+    arr: Sequence[float],
+    tolerance: float = 1.0e-4,
+) -> tuple[list[int], Sequence[float]]:
     """Compute fine intervals and coarse binning.
 
     Examples:
-
     Find equidistant bins and report as intervals
     >>> arr = np.array([1, 2, 3, 4], dtype=float)
     >>> arr
@@ -625,8 +622,5 @@ def compute_intervals_and_coarse_bins(
     return fine_intervals, coarse_bins
 
 
-def arrays_equal(arrays: Iterable[Tuple[np.ndarray, np.ndarray]]) -> bool:
-    for a, b in arrays:
-        if not (a is b or np.array_equal(a, b)):
-            return False
-    return True
+def arrays_equal(arrays: Iterable[tuple[np.ndarray, np.ndarray]]) -> bool:
+    return all(a is b or np.array_equal(a, b) for a, b in arrays)

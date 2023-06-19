@@ -1,11 +1,15 @@
+from __future__ import annotations
+
 import datetime as dt
 
-import notebooks.plotting.read_plotm_file as rpf
 import numpy as np
+
+from numpy.testing import assert_almost_equal, assert_array_almost_equal
+
+import notebooks.plotting.read_plotm_file as rpf
 import pytest
 
 from mckit_meshes.utils.testing import a
-from numpy.testing import assert_almost_equal, assert_array_almost_equal
 
 
 @pytest.fixture(scope="module")
@@ -16,7 +20,7 @@ def test_file(data):
 
 
 @pytest.mark.parametrize(
-    "path, pages",
+    ["path", "pages"],
     [
         ("ng-2.3.5.ps", 1),
         ("plotm-1.ps", 2),
@@ -69,7 +73,7 @@ def test_first_page_from_contour_file_meta_info_is_complete(test_file):
 
 
 @pytest.mark.parametrize(
-    "msg,lines,expected,x,y,scale",
+    ["msg", "lines", "expected", "x", "y", "scale"],
     [
         (
             "# bottom -> origin ",
