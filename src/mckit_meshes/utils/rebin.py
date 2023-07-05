@@ -64,7 +64,7 @@ def set_axis(indices: ArrayLike, axis: int, a_shape: Sequence[int]) -> ArrayLike
 
 
 # noinspection PyUnresolvedReferences
-def interpolate(x_new: ArrayLike, x: ArrayLike, y: ArrayLike, axis: int = None) -> ArrayLike:
+def interpolate(x_new: ArrayLike, x: ArrayLike, y: ArrayLike, axis: int | None = None) -> ArrayLike:
     if y.ndim == 1:
         return np.interp(x_new, x, y)
 
@@ -223,7 +223,7 @@ def rebin_nd(
         if n:
             del gc.garbage[:]
 
-    return res  # noqa: RET504 - the code above is to be executed
+    return res
 
 
 def rebin_spec_composer(
