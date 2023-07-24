@@ -51,7 +51,7 @@ def npz2vtk(prefix: str | Path, npz_files: t.Iterable[str | Path], override: boo
         __LOG.debug("Saving VTK file with prefix {}", prefix)
         prefix.mkdir(parents=True, exist_ok=True)
         mesh = fmesh.FMesh.load_npz(_npz)
-        vtk_file_stem = f"{prefix / str(mesh.name)}"
+        vtk_file_stem = f"{prefix / _npz.stem}"
         vtk_file_name = (
             vtk_file_stem + ".vtr"
         )  # TODO dvp: revise this when it comes to saving structured mesh
