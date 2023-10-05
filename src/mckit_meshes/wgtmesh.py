@@ -648,8 +648,7 @@ def parse_coordinates(inp: list[str]) -> np.ndarray:
                     endpoint=True,
                     dtype=float,
                 )
-                for coord in res[:-1]:
-                    yield coord
+                yield from res[:-1]
             prev_coordinate = coordinate
             prev_fine_bins = fine_bins
         yield prev_coordinate
