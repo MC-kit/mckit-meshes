@@ -470,7 +470,7 @@ class FMesh:
                 )
             raise FMesh.FMeshError("Invalid version for FMesh file %d" % version)
 
-    def save2vtk(self, filename: str = None, data_name: str = None) -> str:
+    def save2vtk(self, filename: str | None = None, data_name: str | None = None) -> str:
         """Saves this fmesh data to vtk file.
 
         Data is saved for every energy bin and, if there are multiple energy bins,
@@ -873,7 +873,7 @@ def merge_tallies(
     name: int,
     kind: int,
     *tally_weight: tuple[FMesh, float],
-    comment: str = None,
+    comment: str | None = None,
 ) -> FMesh:
     """Makes superposition of tallies with specific weights.
 
@@ -964,8 +964,8 @@ def _iterate_bins(stream, _n, _with_ebins):
 # noinspection PyTypeChecker
 def iter_meshtal(
     fid: TextIO,
-    name_select: Callable[[int], bool] = None,
-    tally_select: Callable[[FMesh], bool] = None,
+    name_select: Callable[[int], bool] | None = None,
+    tally_select: Callable[[FMesh], bool] | None = None,
 ) -> Generator[FMesh, None, None]:
     """Iterates fmesh tallies from fid.
 
@@ -1252,7 +1252,7 @@ def fix_mesh_comment(mesh_no: int, comment: str) -> str:
 
 def meshes_to_vtk(
     *meshes: FMesh,
-    out_dir: Path = None,
+    out_dir: Path | None = None,
     get_mesh_description_strategy: Callable[[FMesh], str],
 ) -> None:
     """Export FMesh objects to VTK files.

@@ -72,7 +72,7 @@ class WgtMesh:
 
     def print_meshtal_spec(
         self,
-        io: TextIO = None,
+        io: TextIO | None = None,
         tally_n_number: int = 14,
         tally_p_number: int = 24,
         columns: int = 6,
