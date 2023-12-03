@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from collections import namedtuple
+from typing import NamedTuple
+
 from copy import copy
 from pathlib import Path
 
@@ -76,7 +77,11 @@ def test_read_mesh_tall(tmp_path, simple_bins):
     actual = actual[0]
     assert actual == m
     # now use already opened file
-    mesh_file_info = namedtuple("MFI", "nps")
+
+    class MeshFileInfo(NamedTuple):
+        nps: int
+
+    mesh_file_info = MeshFileInfo()
     with tfp.open() as inp:
         actual = read_meshtal(inp, mesh_file_info=mesh_file_info)
         assert len(actual) == 1
