@@ -4,7 +4,7 @@
 # for reuse in FMesh.shrink for equivalent grids or alike
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Iterable, Sequence
+from typing import TYPE_CHECKING
 
 import collections.abc
 import gc
@@ -14,6 +14,8 @@ import platform
 import numpy as np
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable, Sequence
+
     from numpy import ndarray
     from numpy.typing import ArrayLike
 

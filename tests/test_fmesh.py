@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from typing import NamedTuple
-
 from copy import copy
+from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
@@ -78,8 +77,9 @@ def test_read_mesh_tall(tmp_path, simple_bins):
     assert actual == m
     # now use already opened file
 
-    class MeshFileInfo(NamedTuple):
-        nps: int
+    @dataclass
+    class MeshFileInfo:
+        nps: int = 0
 
     mesh_file_info = MeshFileInfo()
     with tfp.open() as inp:

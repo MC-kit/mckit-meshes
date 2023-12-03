@@ -645,6 +645,17 @@ files = [
 ]
 
 [[package]]
+name = "eradicate"
+version = "2.3.0"
+description = "Removes commented-out code."
+optional = false
+python-versions = "*"
+files = [
+    {file = "eradicate-2.3.0-py3-none-any.whl", hash = "sha256:2b29b3dd27171f209e4ddd8204b70c02f0682ae95eecb353f10e8d72b149c63e"},
+    {file = "eradicate-2.3.0.tar.gz", hash = "sha256:06df115be3b87d0fc1c483db22a2ebb12bcf40585722810d809cc770f5031c37"},
+]
+
+[[package]]
 name = "et-xmlfile"
 version = "1.1.0"
 description = "An implementation of lxml.xmlfile for the standard library"
@@ -668,20 +679,6 @@ files = [
 
 [package.extras]
 test = ["pytest (>=6)"]
-
-[[package]]
-name = "execnet"
-version = "2.0.2"
-description = "execnet: rapid multi-Python deployment"
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "execnet-2.0.2-py3-none-any.whl", hash = "sha256:88256416ae766bc9e8895c76a87928c0012183da3cc4fc18016e6f050e025f41"},
-    {file = "execnet-2.0.2.tar.gz", hash = "sha256:cc59bc4423742fd71ad227122eb0dd44db51efb3dc4095b45ac9a08c770096af"},
-]
-
-[package.extras]
-testing = ["hatch", "pre-commit", "pytest", "tox"]
 
 [[package]]
 name = "fastjsonschema"
@@ -907,6 +904,22 @@ files = [
 [package.dependencies]
 flake8 = ">=3"
 pydocstyle = ">=2.1"
+
+[[package]]
+name = "flake8-eradicate"
+version = "1.5.0"
+description = "Flake8 plugin to find commented out code"
+optional = false
+python-versions = ">=3.8,<4.0"
+files = [
+    {file = "flake8_eradicate-1.5.0-py3-none-any.whl", hash = "sha256:18acc922ad7de623f5247c7d5595da068525ec5437dd53b22ec2259b96ce9d22"},
+    {file = "flake8_eradicate-1.5.0.tar.gz", hash = "sha256:aee636cb9ecb5594a7cd92d67ad73eb69909e5cc7bd81710cf9d00970f3983a6"},
+]
+
+[package.dependencies]
+attrs = "*"
+eradicate = ">=2.0,<3.0"
+flake8 = ">5"
 
 [[package]]
 name = "flake8-expression-complexity"
@@ -2376,20 +2389,6 @@ tomli = {version = ">=1.0.0", markers = "python_version < \"3.11\""}
 testing = ["argcomplete", "attrs (>=19.2.0)", "hypothesis (>=3.56)", "mock", "nose", "pygments (>=2.7.2)", "requests", "setuptools", "xmlschema"]
 
 [[package]]
-name = "pytest-cache"
-version = "1.0"
-description = "pytest plugin with mechanisms for caching across test runs"
-optional = false
-python-versions = "*"
-files = [
-    {file = "pytest-cache-1.0.tar.gz", hash = "sha256:be7468edd4d3d83f1e844959fd6e3fd28e77a481440a7118d430130ea31b07a9"},
-]
-
-[package.dependencies]
-execnet = ">=1.1.dev1"
-pytest = ">=2.2"
-
-[[package]]
 name = "pytest-cov"
 version = "4.1.0"
 description = "Pytest plugin for measuring coverage."
@@ -2406,38 +2405,6 @@ pytest = ">=4.6"
 
 [package.extras]
 testing = ["fields", "hunter", "process-tests", "pytest-xdist", "six", "virtualenv"]
-
-[[package]]
-name = "pytest-mock"
-version = "3.12.0"
-description = "Thin-wrapper around the mock package for easier use with pytest"
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "pytest-mock-3.12.0.tar.gz", hash = "sha256:31a40f038c22cad32287bb43932054451ff5583ff094bca6f675df2f8bc1a6e9"},
-    {file = "pytest_mock-3.12.0-py3-none-any.whl", hash = "sha256:0972719a7263072da3a21c7f4773069bcc7486027d7e8e1f81d98a47e701bc4f"},
-]
-
-[package.dependencies]
-pytest = ">=5.0"
-
-[package.extras]
-dev = ["pre-commit", "pytest-asyncio", "tox"]
-
-[[package]]
-name = "pytest-randomly"
-version = "3.15.0"
-description = "Pytest plugin to randomly order tests and control random.seed."
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "pytest_randomly-3.15.0-py3-none-any.whl", hash = "sha256:0516f4344b29f4e9cdae8bce31c4aeebf59d0b9ef05927c33354ff3859eeeca6"},
-    {file = "pytest_randomly-3.15.0.tar.gz", hash = "sha256:b908529648667ba5e54723088edd6f82252f540cc340d748d1fa985539687047"},
-]
-
-[package.dependencies]
-importlib-metadata = {version = ">=3.6.0", markers = "python_version < \"3.10\""}
-pytest = "*"
 
 [[package]]
 name = "python-dateutil"
@@ -2554,6 +2521,20 @@ files = [
     {file = "pytz-2023.3.post1-py2.py3-none-any.whl", hash = "sha256:ce42d816b81b68506614c11e8937d3aa9e41007ceb50bfdcb0749b921bf646c7"},
     {file = "pytz-2023.3.post1.tar.gz", hash = "sha256:7b4fddbeb94a1eba4b557da24f19fdf9db575192544270a9101d8509f9f43d7b"},
 ]
+
+[[package]]
+name = "pyupgrade"
+version = "3.15.0"
+description = "A tool to automatically upgrade syntax for newer versions."
+optional = false
+python-versions = ">=3.8.1"
+files = [
+    {file = "pyupgrade-3.15.0-py2.py3-none-any.whl", hash = "sha256:8dc8ebfaed43566e2c65994162795017c7db11f531558a74bc8aa077907bc305"},
+    {file = "pyupgrade-3.15.0.tar.gz", hash = "sha256:a7fde381060d7c224f55aef7a30fae5ac93bbc428367d27e70a603bc2acd4f00"},
+]
+
+[package.dependencies]
+tokenize-rt = ">=5.2.0"
 
 [[package]]
 name = "pywin32"
@@ -3016,23 +2997,24 @@ files = [
 
 [[package]]
 name = "ruff-lsp"
-version = "0.0.24"
+version = "0.0.45"
 description = "A Language Server Protocol implementation for Ruff."
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "ruff_lsp-0.0.24-py3-none-any.whl", hash = "sha256:71207b0a64f40577db3e9aef0b1331fcf4122f9b98bba66b905d41706d639e65"},
-    {file = "ruff_lsp-0.0.24.tar.gz", hash = "sha256:d617bf19893c3bd2ea3d71f79aeede196b91ca08831b53a727e24d4f63f29f3a"},
+    {file = "ruff_lsp-0.0.45-py3-none-any.whl", hash = "sha256:6be86369fc2ed7a363d9377301beeb60130477d89d09339a2401717e158e9936"},
+    {file = "ruff_lsp-0.0.45.tar.gz", hash = "sha256:11c2d4979eabf81327b714f9395b91be1f3620a8861009ae4967f67e7de2671d"},
 ]
 
 [package.dependencies]
 lsprotocol = ">=2023.0.0a1"
-pygls = ">=1.0.1"
-ruff = ">=0.0.253"
+packaging = ">=23.1"
+pygls = ">=1.1.0"
+ruff = ">=0.0.274"
 typing-extensions = "*"
 
 [package.extras]
-dev = ["black (==22.12.0)", "mypy (==0.991)", "python-lsp-jsonrpc (==1.0.0)"]
+dev = ["mypy (==1.4.1)", "pip-tools (>=6.13.0,<7.0.0)", "pytest (>=7.3.1,<8.0.0)", "pytest-asyncio (==0.21.1)", "python-lsp-jsonrpc (==1.0.0)"]
 
 [[package]]
 name = "setuptools"
@@ -3332,6 +3314,17 @@ webencodings = ">=0.4"
 [package.extras]
 doc = ["sphinx", "sphinx_rtd_theme"]
 test = ["flake8", "isort", "pytest"]
+
+[[package]]
+name = "tokenize-rt"
+version = "5.2.0"
+description = "A wrapper around the stdlib `tokenize` which roundtrips."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "tokenize_rt-5.2.0-py2.py3-none-any.whl", hash = "sha256:b79d41a65cfec71285433511b50271b05da3584a1da144a0752e9c621a285289"},
+    {file = "tokenize_rt-5.2.0.tar.gz", hash = "sha256:9fe80f8a5c1edad2d3ede0f37481cc0cc1538a2f442c9c2f9e4feacd2792d054"},
+]
 
 [[package]]
 name = "toml"
@@ -3760,4 +3753,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8.1,<4.0"
-content-hash = "db1358938718e6d920c6c99915c3edb6ffbc7b0177a6ff6a9cb5cb28ba8a6f78"
+content-hash = "e19699c32f46e0cc6a46f791f1cad3aa6815887e0514901dcb61335ace9df266"

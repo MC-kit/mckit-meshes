@@ -1,11 +1,14 @@
 """Apply function to cartesian product of arrays."""
 from __future__ import annotations
 
-from typing import Any, Callable, Sized
+from typing import TYPE_CHECKING, Any, Callable
 
 from itertools import product
 
 import numpy as np
+
+if TYPE_CHECKING:
+    from collections.abc import Sized
 
 
 def cartesian_product(
