@@ -1,10 +1,15 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import os
 
 from pathlib import Path
 
 import pytest
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
 
 _DATA = Path(__file__).parent / "data"
 
@@ -20,7 +25,7 @@ def data() -> Path:
 
 
 @pytest.fixture()
-def cd_tmpdir(tmp_path):
+def cd_tmpdir(tmp_path) -> Generator[Path, None, None]:
     """Temporarily change to temp directory.
 
     Yields:

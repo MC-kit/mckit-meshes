@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable, Generator, Iterable, TextIO
+from typing import TYPE_CHECKING, Callable, TextIO
 
 import logging
 
@@ -24,6 +24,8 @@ from pyevtk.hl import gridToVTK
 from toolz.itertoolz import concatv
 
 if TYPE_CHECKING:
+    from collections.abc import Generator, Iterable
+
     from numpy.typing import ArrayLike
 
 __LOG = logging.getLogger(__name__)

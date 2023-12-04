@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mckit-meshes"
-version = "0.1.5a0"
+version = "0.1.4"
 description = "Python tools to work with MCNP meshtallies and weight meshes."
 authors = ["dvp2015 <dmitri_portnov@yahoo.com>"]
 license = "MIT"
@@ -36,10 +36,10 @@ Chnagelog = "https://github.com/MC-kit/mckit-meshes/releases"
 
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.13"
+python = ">=3.8.1,<4.0"
 click = ">=8.0.1"
 loguru = ">=0.6.0"
-numpy = ">=1.26.0"
+numpy = ">=1.24.2"
 openpyxl = ">=3.0.9"
 pandas = ">=2.0.0"
 pyevtk = ">=1.4.1"
@@ -61,6 +61,7 @@ tomli = { version = ">=2.0.1", python="<3.11" }
 pre-commit = ">=2.15.0"
 rstcheck = ">=6.1.2"
 pydocstringformatter = ">=0.7.3"
+pyupgrade = ">=3.15.0"
 
 [tool.poetry.group.black.dependencies]
 black = ">=22.8.0"
@@ -148,7 +149,7 @@ ruff = ">=0.0.259"
 [tool.isort]
 atomic = true
 ensure_newline_before_comments = true
-known_first_party = "src"
+known_first_party = "mckit_meshes"
 known_third_party = "mpl_toolkits,matplotlib,numpy,scipy"
 known_typing = "typing,types,typing_extensions,mypy,mypy_extensions"
 sections = "FUTURE,TYPING,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
@@ -524,6 +525,9 @@ exclude = [
 # Unlike Flake8, default to a complexity level of 10.
 max-complexity = 15
 
+[tool.ruff.flake8-annotations]
+mypy-init-return = true  # skip return type for __init__() methods
+
 [tool.ruff.flake8-type-checking]
 strict = true
 
@@ -537,5 +541,4 @@ required-imports = ["from __future__ import annotations"]
 parametrize-names-type = "csv"
 
 [tool.ruff.pydocstyle]
-# Use Google-style docstrings.
-convention = "google"
+convention = "google"  # Use Google-style docstrings.

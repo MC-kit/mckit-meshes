@@ -78,10 +78,10 @@ def test_read_mesh_tall(tmp_path, simple_bins):
     # now use already opened file
 
     @dataclass
-    class MFI:
+    class MeshFileInfo:
         nps: int = 0
 
-    mesh_file_info = MFI()
+    mesh_file_info = MeshFileInfo()
     with tfp.open() as inp:
         actual = read_meshtal(inp, mesh_file_info=mesh_file_info)
         assert len(actual) == 1

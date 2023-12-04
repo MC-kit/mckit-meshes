@@ -28,7 +28,7 @@
 """
 from __future__ import annotations
 
-from typing import Final, Iterable, Sequence, TextIO, cast
+from typing import TYPE_CHECKING, Final, TextIO, cast
 
 import abc
 
@@ -41,6 +41,9 @@ from numpy import linalg
 import mckit_meshes.utils.io
 
 from mckit_meshes.utils.cartesian_product import cartesian_product
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable, Sequence
 
 _2PI: Final[float] = 2.0 * np.pi
 _1_TO_2PI: Final[float] = 1 / _2PI
