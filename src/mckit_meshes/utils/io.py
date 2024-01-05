@@ -3,11 +3,14 @@ from __future__ import annotations
 
 import typing as t
 
-from typing import Any, Iterable, TextIO
+from typing import Any, TextIO
 
 import sys
 
 from pathlib import Path
+
+if t.TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 def ignore_existing_file_strategy(_: str | Path) -> None:

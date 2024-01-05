@@ -1,7 +1,10 @@
 """Shared utilities."""
 from __future__ import annotations
 
-from typing import Any, Callable, Iterable
+from typing import TYPE_CHECKING, Any, Callable
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 def foreach(

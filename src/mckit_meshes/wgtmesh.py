@@ -1,7 +1,7 @@
 """Weight mesh class and functions."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Generator, NamedTuple, TextIO, Union
+from typing import TYPE_CHECKING, NamedTuple, TextIO, Union
 
 import sys
 
@@ -14,6 +14,8 @@ import mckit_meshes.mesh.geometry_spec as gs
 import mckit_meshes.utils.io
 
 if TYPE_CHECKING:
+    from collections.abc import Generator
+
     from numpy.typing import ArrayLike
 
 GeometrySpec = Union[gs.CartesianGeometrySpec, gs.CylinderGeometrySpec]
@@ -72,7 +74,7 @@ class WgtMesh:
 
     def print_meshtal_spec(
         self,
-        io: TextIO = None,
+        io: TextIO | None = None,
         tally_n_number: int = 14,
         tally_p_number: int = 24,
         columns: int = 6,
@@ -648,8 +650,7 @@ def parse_coordinates(inp: list[str]) -> np.ndarray:
                     endpoint=True,
                     dtype=float,
                 )
-                for coord in res[:-1]:
-                    yield coord
+                yield from res[:-1]
             prev_coordinate = coordinate
             prev_fine_bins = fine_bins
         yield prev_coordinate

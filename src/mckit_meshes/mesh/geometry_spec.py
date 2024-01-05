@@ -28,7 +28,7 @@
 """
 from __future__ import annotations
 
-from typing import Final, Iterable, Sequence, TextIO, cast
+from typing import TYPE_CHECKING, Final, TextIO, cast
 
 import abc
 
@@ -41,6 +41,9 @@ from numpy import linalg
 import mckit_meshes.utils.io
 
 from mckit_meshes.utils.cartesian_product import cartesian_product
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable, Sequence
 
 _2PI: Final[float] = 2.0 * np.pi
 _1_TO_2PI: Final[float] = 1 / _2PI
@@ -265,8 +268,7 @@ class CartesianGeometrySpec(AbstractGeometrySpec):
         def calc_sum(bins):
             bins_square = np.square(bins)
             bins_mult = bins[:-1] * bins[1:]
-            bins_square = bins_square[:-1] + bins_square[1:] + bins_mult
-            return bins_square
+            return bins_square[:-1] + bins_square[1:] + bins_mult
 
         x_square, y_square, z_square = (
             calc_sum(x - px) for x, px in zip((self.ibins, self.jbins, self.kbins), point)
@@ -278,9 +280,7 @@ class CartesianGeometrySpec(AbstractGeometrySpec):
                     w[i, j, k] = x_square[i] + y_square[j] + z_square[k]
         w = (1.0 / 3.0) * w
 
-        w = w * (1024.0 / np.max(w))
-
-        return w
+        return w * (1024.0 / np.max(w))
 
     def calc_cell_centers(self):
         raise NotImplementedError(
@@ -409,9 +409,7 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
                     d = z_sum[j]
                     w[i, j, k] = a + b + d
         w = w + l1_square
-        w = w * (1024.0 / np.max(w))
-
-        return w
+        return w * (1024.0 / np.max(w))
 
     def calc_cell_centers(self) -> np.ndarray:
         _x0, _y0, _z0 = self.origin

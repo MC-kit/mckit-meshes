@@ -11,7 +11,7 @@ import datetime
 import click
 import mckit_meshes.version as meta
 
-from mckit_meshes.cli.commands import do_mesh2npz, do_npz2vtk
+from mckit_meshes.cli.commands import do_add, do_mesh2npz, do_npz2vtk
 from mckit_meshes.cli.logging import init_logger, logger
 
 if TYPE_CHECKING:
@@ -91,6 +91,47 @@ if there are more than 1 input file""",
 def npz2vtk(ctx: click.Context, prefix: str | Path, npz_files: list[click.Path]) -> None:
     """Converts npz files to VTK files."""
     do_npz2vtk(prefix, npz_files, ctx.obj["OVERRIDE"])
+    # Don't remove these comments: this makes flake8 happy on absent arguments in the docstring.
+    #
+
+
+@mckit_meshes.command()
+@click.pass_context
+@click.option(
+    "--out",
+    "-o",
+    default="",
+    help="""An output file to save sum of meshes (default: "<name1>+<name2>...+<nameN>.npz")""",
+)
+@click.option(
+    "--comment",
+    "-c",
+    default="",
+    help="""Comment for a new mesh""",
+)
+@click.option(
+    "--number",
+    "-n",
+    default=1,
+    type=int,
+    help="""Comment for a new mesh""",
+)
+@click.argument(
+    "npz_files",
+    metavar="[<npz_file>...]",
+    type=click.Path(exists=True),
+    nargs=-1,
+    required=False,
+)
+def add(
+    ctx: click.Context,
+    out: str | Path,
+    comment: str,
+    number: int,
+    npz_files: list[click.Path],
+) -> None:
+    """Add meshes from npz files."""
+    do_add(out, comment, number, npz_files, ctx.obj["OVERRIDE"])
     # Don't remove these comments: this makes flake8 happy on absent arguments in the docstring.
     #
 

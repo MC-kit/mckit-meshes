@@ -4,7 +4,7 @@
 # for reuse in FMesh.shrink for equivalent grids or alike
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Iterable, Sequence
+from typing import TYPE_CHECKING
 
 import collections.abc
 import gc
@@ -14,6 +14,8 @@ import platform
 import numpy as np
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable, Sequence
+
     from numpy import ndarray
     from numpy.typing import ArrayLike
 
@@ -64,7 +66,7 @@ def set_axis(indices: ArrayLike, axis: int, a_shape: Sequence[int]) -> ArrayLike
 
 
 # noinspection PyUnresolvedReferences
-def interpolate(x_new: ArrayLike, x: ArrayLike, y: ArrayLike, axis: int = None) -> ArrayLike:
+def interpolate(x_new: ArrayLike, x: ArrayLike, y: ArrayLike, axis: int | None = None) -> ArrayLike:
     if y.ndim == 1:
         return np.interp(x_new, x, y)
 
@@ -223,7 +225,7 @@ def rebin_nd(
         if n:
             del gc.garbage[:]
 
-    return res  # noqa: RET504 - the code above is to be executed
+    return res
 
 
 def rebin_spec_composer(
@@ -385,7 +387,7 @@ def trim_spec_composer(
 ) -> Iterable[tuple[ArrayLike, float, float, int]]:
     """Helps to compose trim_spec parameter in.
 
-    :func:`triniti_ne.rebin.trim_nd` with
+    :func:`mckit_meshes.utils.rebin.trim_nd` with
     reasonable defaults for lefts, rights and axes iterators.
 
     Args:

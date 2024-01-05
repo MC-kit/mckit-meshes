@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable, Generator, Iterable, TextIO
+from typing import TYPE_CHECKING, Callable, TextIO
 
 import logging
 
@@ -24,6 +24,8 @@ from pyevtk.hl import gridToVTK
 from toolz.itertoolz import concatv
 
 if TYPE_CHECKING:
+    from collections.abc import Generator, Iterable
+
     from numpy.typing import ArrayLike
 
 __LOG = logging.getLogger(__name__)
@@ -75,7 +77,7 @@ class FMesh:
 
         Args:
             name: FMESH tally number
-            kind: neutron, photon
+            kind: neutron, photon or generic number if not a particle kind
             geometry_spec: mesh geometry specification
             ebins: Energy bin boundaries.
             data: Data values at centers of mesh cells.
@@ -92,7 +94,7 @@ class FMesh:
             comment: Comment from a meshtal file (content of FC card in MCNP model).
         """
         self.name = int(name)
-        self.kind = Kind(kind)
+        self.kind = Kind(kind)  # may be not a particle kind, when this is a sum of heating
 
         self._geometry_spec: gc.CartesianGeometrySpec | gc.CylinderGeometrySpec | gc.AbstractGeometrySpec = (
             geometry_spec
@@ -192,7 +194,7 @@ class FMesh:
 
     @property
     def vec(self) -> np.ndarray:
-        """Get Theta reference direction for cylinder mesth."""
+        """Get Theta reference direction for cylinder mesh."""
         return self._geometry_spec.vec
 
     @property
@@ -207,6 +209,12 @@ class FMesh:
             True if this is a cylinder mesh.
         """
         return self._geometry_spec.cylinder
+
+    @property
+    def geometry_spec(
+        self,
+    ) -> gc.CartesianGeometrySpec | gc.CylinderGeometrySpec | gc.AbstractGeometrySpec:
+        return self._geometry_spec
 
     @property
     def total_precision(self) -> float:
@@ -234,6 +242,17 @@ class FMesh:
             and self._totals.shape == self._geometry_spec.bins_shape
         )
 
+    def is_equal_by_geometry(self, other: FMesh) -> bool:
+        """Check if the meshes are equivalent by geometry.
+
+        Args:
+          other: mesh to compare to
+
+        Returns:
+            True, if this mesh is equal to other by geometry, otherwise False
+        """
+        return self._geometry_spec == other._geometry_spec
+
     def is_equal_by_mesh(self, other: FMesh) -> bool:
         """Check if the meshes are equivalent by kind and geometry.
 
@@ -245,8 +264,8 @@ class FMesh:
         """
         return (
             self.kind == other.kind
-            and self._geometry_spec == other._geometry_spec
             and np.array_equal(self.e, other.e)
+            and self.is_equal_by_geometry(other)
         )
 
     def has_better_precision_than(self, other: FMesh) -> bool:
@@ -311,9 +330,9 @@ class FMesh:
     def select_indexes(
         self,
         *,
-        x: ArrayLike = None,
-        y: ArrayLike = None,
-        z: ArrayLike = None,
+        x: ArrayLike | None = None,
+        y: ArrayLike | None = None,
+        z: ArrayLike | None = None,
     ) -> tuple[int | slice | np.ndarray, int | slice | np.ndarray, int | slice | np.ndarray]:
         """Select indexes in spatial bins corresponding to given coordinates.
 
@@ -338,7 +357,7 @@ class FMesh:
     ) -> tuple[np.ndarray, np.ndarray] | None:
         """Get total values for specified grid points.
 
-        If a coordinate is not specified, than all the points along this coordinate.
+        If a coordinate is not specified, then all the points along this coordinate.
 
         Args:
             x:  (Default value = None)
@@ -470,7 +489,7 @@ class FMesh:
                 )
             raise FMesh.FMeshError("Invalid version for FMesh file %d" % version)
 
-    def save2vtk(self, filename: str = None, data_name: str = None) -> str:
+    def save2vtk(self, filename: str | None = None, data_name: str | None = None) -> str:
         """Saves this fmesh data to vtk file.
 
         Data is saved for every energy bin and, if there are multiple energy bins,
@@ -873,7 +892,7 @@ def merge_tallies(
     name: int,
     kind: int,
     *tally_weight: tuple[FMesh, float],
-    comment: str = None,
+    comment: str | None = None,
 ) -> FMesh:
     """Makes superposition of tallies with specific weights.
 
@@ -964,8 +983,8 @@ def _iterate_bins(stream, _n, _with_ebins):
 # noinspection PyTypeChecker
 def iter_meshtal(
     fid: TextIO,
-    name_select: Callable[[int], bool] = None,
-    tally_select: Callable[[FMesh], bool] = None,
+    name_select: Callable[[int], bool] | None = None,
+    tally_select: Callable[[FMesh], bool] | None = None,
 ) -> Generator[FMesh, None, None]:
     """Iterates fmesh tallies from fid.
 
@@ -1252,7 +1271,7 @@ def fix_mesh_comment(mesh_no: int, comment: str) -> str:
 
 def meshes_to_vtk(
     *meshes: FMesh,
-    out_dir: Path = None,
+    out_dir: Path | None = None,
     get_mesh_description_strategy: Callable[[FMesh], str],
 ) -> None:
     """Export FMesh objects to VTK files.
