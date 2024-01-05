@@ -193,9 +193,3 @@ repos:
 #  hooks:
 #  - id: clang-format
 #    types_or: [c++, c, cuda]
-
-# Automatic pre-commit check and updates with precommit.ci
-# See https://results.pre-commit.ci/
-ci:
-    autofix_commit_msg: 🎨 [pre-commit.ci] Auto format from pre-commit.com hooks
-    autoupdate_commit_msg: ⬆ [pre-commit.ci] pre-commit autoupdate
