@@ -211,7 +211,9 @@ class FMesh:
         return self._geometry_spec.cylinder
 
     @property
-    def geometry_spec(self):
+    def geometry_spec(
+        self,
+    ) -> gc.CartesianGeometrySpec | gc.CylinderGeometrySpec | gc.AbstractGeometrySpec:
         return self._geometry_spec
 
     @property
@@ -328,9 +330,9 @@ class FMesh:
     def select_indexes(
         self,
         *,
-        x: ArrayLike = None,
-        y: ArrayLike = None,
-        z: ArrayLike = None,
+        x: ArrayLike | None = None,
+        y: ArrayLike | None = None,
+        z: ArrayLike | None = None,
     ) -> tuple[int | slice | np.ndarray, int | slice | np.ndarray, int | slice | np.ndarray]:
         """Select indexes in spatial bins corresponding to given coordinates.
 
