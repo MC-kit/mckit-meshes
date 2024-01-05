@@ -387,7 +387,7 @@ def trim_spec_composer(
 ) -> Iterable[tuple[ArrayLike, float, float, int]]:
     """Helps to compose trim_spec parameter in.
 
-    :func:`triniti_ne.rebin.trim_nd` with
+    :func:`mckit_meshes.utils.rebin.trim_nd` with
     reasonable defaults for lefts, rights and axes iterators.
 
     Args:
