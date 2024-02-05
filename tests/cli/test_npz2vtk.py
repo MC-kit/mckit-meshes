@@ -1,4 +1,5 @@
 """Tests for npz2vtk CLI module."""
+
 from __future__ import annotations
 
 import shutil

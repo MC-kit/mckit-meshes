@@ -1,4 +1,5 @@
 """The meta information on the mckit_meshes package."""
+
 from __future__ import annotations
 
 from importlib import metadata as _meta

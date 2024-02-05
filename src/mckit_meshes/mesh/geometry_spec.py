@@ -26,6 +26,7 @@
     For the old callers we will use ZERO_ORIGIN for Geometry Specification being
     used in FMesh.
 """
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Final, TextIO, cast

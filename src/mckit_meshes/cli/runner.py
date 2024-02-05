@@ -2,6 +2,7 @@
 
 The module applies :meth:`click` API to organize CLI interface for McKit-meshes package.
 """
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

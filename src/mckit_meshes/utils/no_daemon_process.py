@@ -6,6 +6,7 @@ https://stackoverflow.com/questions/17223301/python-multiprocessing-is-it-possib
 https://stackoverflow.com/questions/52948447/error-group-argument-must-be-none-for-now-in-multiprocessing-pool
 https://github.com/nipy/nipype/pull/2754
 """
+
 from __future__ import annotations
 
 import multiprocessing.pool as pl

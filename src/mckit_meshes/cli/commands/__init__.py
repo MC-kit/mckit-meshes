@@ -1,4 +1,5 @@
 """CLI implmentation."""
+
 from __future__ import annotations
 
 from .addnpz import add as do_add

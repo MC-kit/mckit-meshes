@@ -23,7 +23,6 @@ repos:
     hooks:
       - id: check-added-large-files
       - id: check-case-conflict
-      #    - id: check-docstring-first
       - id: check-executables-have-shebangs
       - id: check-json
       - id: check-merge-conflict
@@ -38,7 +37,6 @@ repos:
       - id: name-tests-test
         args:
           - --pytest-test-first
-      #    - id: no-commit-to-branch
       - id: mixed-line-ending
       - id: requirements-txt-fixer
       - id: trailing-whitespace
@@ -49,6 +47,7 @@ repos:
     rev: "v1.5.4"
     hooks:
       - id: remove-tabs
+
   # Format doc strings
   - repo: https://github.com/DanielNoord/pydocstringformatter
     rev: "v0.7.3"
@@ -58,7 +57,6 @@ repos:
 
   - repo: local
     hooks:
-
       # Upgrade Python code
       - id: pyupgrade
         name: pyupgrade
@@ -85,13 +83,13 @@ repos:
         types: [ python ]
         exclude: ^notebooks
 
-      # Lint
+      # Lint and fix Python code
       - id: ruff
         name: ruff
         entry: ruff --force-exclude --fix --config pyproject.toml
         language: system
         types: [ python ]
-        exclude: ^notebooks
+        exclude: ^notebooks|^extern
 
   # Check for common shell mistakes
   - repo: https://github.com/shellcheck-py/shellcheck-py

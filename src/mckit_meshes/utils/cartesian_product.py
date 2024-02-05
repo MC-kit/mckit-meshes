@@ -1,4 +1,5 @@
 """Apply function to cartesian product of arrays."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Callable

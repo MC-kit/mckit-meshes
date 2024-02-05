@@ -96,9 +96,9 @@ class FMesh:
         self.name = int(name)
         self.kind = Kind(kind)  # may be not a particle kind, when this is a sum of heating
 
-        self._geometry_spec: gc.CartesianGeometrySpec | gc.CylinderGeometrySpec | gc.AbstractGeometrySpec = (
-            geometry_spec
-        )
+        self._geometry_spec: (
+            gc.CartesianGeometrySpec | gc.CylinderGeometrySpec | gc.AbstractGeometrySpec
+        ) = geometry_spec
         self.bins = {}
         self.bins["X"] = self._x = geometry_spec.ibins
         self.bins["Y"] = self._y = geometry_spec.jbins
