@@ -66,11 +66,11 @@ class FMesh:
         name: int,
         kind: int | Kind,
         geometry_spec: gc.AbstractGeometrySpec,
-        ebins: np.ndarray,
-        data: np.ndarray,
-        errors: np.ndarray,
-        totals: np.ndarray | None = None,
-        totals_err: np.ndarray | None = None,
+        ebins: ArrayLike,
+        data: ArrayLike,
+        errors: ArrayLike,
+        totals: ArrayLike | None = None,
+        totals_err: ArrayLike | None = None,
         comment: str | None = None,
     ) -> None:
         """Construct FMesh instance object.
@@ -592,28 +592,14 @@ class FMesh:
                         row = f" {e[ie]:10.3e}{x[ix]:10.3f}{y[iy]:10.3f}{z[iz]:10.3f} {value:11.5e} {err:11.5e}"
                         print(row, file=stream)
 
-        for ix in range(x.size):
-            for iy in range(y.size):
-                for iz in range(z.size):
-                    if self._totals:
+        if self._totals:
+            for ix in range(x.size):
+                for iy in range(y.size):
+                    for iz in range(z.size):
                         value = self._totals[ix, iy, iz]
                         err = self._totals_err[ix, iy, iz]
-                    else:
-                        portion = self.data[:, ix, iy, iz]
-                        value = np.sum(portion)
-                        err = portion * self.errors[:, ix, iy, iz]
-                        err = np.sqrt(np.sum(err * err)) / value
-                    row = "%11s%10.3f%10.3f%10.3f %11.5e %11.5e" % (
-                        "   Total   ",
-                        x[ix],
-                        y[iy],
-                        z[iz],
-                        value,
-                        err,
-                    )
-                    print(row, file=stream, end="")
-
-            print("\n", file=stream)
+                        row = f"   Total   {x[ix]:10.3f}{y[iy]:10.3f}{z[iz]:10.3f} {value:11.5e} {err:11.5e}"
+                        print(row, file=stream)
 
     def total_by_energy(self, new_name: int = 0) -> FMesh:
         """Integrate over energy bins.

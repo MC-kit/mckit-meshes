@@ -103,7 +103,7 @@ def rebin_1d(
     axis: int = 0,
     grouped: bool = False,
     assume_sorted: bool = False,
-) -> ArrayLike:
+) -> np.ndarray:
     """Transforms 1-D histogram defined as `data` on the limiting points.
 
     define like `bins` to equivalent (see the terms below) histogram defined
@@ -183,7 +183,7 @@ def rebin_1d(
 
 def rebin_nd(
     a: ndarray,
-    rebin_spec: Iterable[tuple[ndarray, ndarray, int, bool]],
+    rebin_spec: Iterable[tuple[ArrayLike, ArrayLike, int, bool]],
     assume_sorted: bool = False,
     external_process_threshold: int = __EXTERNAL_PROCESS_THRESHOLD,
 ) -> ndarray:
@@ -352,20 +352,21 @@ def shrink_1d(
     return new_bins, new_a
 
 
-def shrink_nd(a, trim_spec, assume_sorted=False) -> tuple[ArrayLike, ArrayLike]:
+def shrink_nd(
+    a: np.ndarray,
+    trim_spec,
+    assume_sorted=False,
+) -> tuple[list[np.ndarray] | None, np.ndarray]:
     """Perform multidimensional shrink.
 
     Args:
-        a: ndarray
-            The grid to shrink.
-        trim_spec: sequence of tuples
-            Iterates over tuples (bins, low, high, axis)
-        assume_sorted: bool, optional
-            If True skip assertion of bins sorting order,
-            by default False - asserts the input_file data
+        a: The grid to shrink.
+        trim_spec: sequence of tuples (bins, low, high, axis)
+        assume_sorted:  If True skip assertion of bins sorting order,
+                        by default False - asserts the input_file data
 
     Returns:
-            A sequence with  new bins,        The shrunk grid.
+            A sequence with  new bins, if any, the shrunk or initial grid.
     """
     if not isinstance(trim_spec, collections.abc.Iterator):
         trim_spec = iter(trim_spec)
