@@ -227,7 +227,7 @@ class FMesh:
             return self.totals_err[
                 -1
             ]  # TODO dvp: assumes max energy bin is most representative, check usage
-        return self.errors[0, 0, 0, 0]
+        return self.errors[0, 0, 0, 0].item()
 
     def check_attributes(self) -> None:
         """Check consistency of attributes."""
@@ -550,7 +550,7 @@ class FMesh:
             end="",
         )
         for f in np.nditer(self.ibins):
-            print("% g" % f, file=stream, end="")
+            print(f" {f}", file=stream, end="")
         print(file=stream)
         print(
             f"{('Z' if self.is_cylinder else 'Y')} direction:",
@@ -558,7 +558,7 @@ class FMesh:
             end="",
         )
         for f in np.nditer(self.jbins):
-            print(" %g" % f, file=stream, end="")
+            print(f" {f}", file=stream, end="")
         print(file=stream)
         print(
             "{} direction:".format("Theta" if self.is_cylinder else "Z"),
@@ -566,11 +566,11 @@ class FMesh:
             end="",
         )
         for f in np.nditer(self.kbins):
-            print(" %g" % f, file=stream, end="")
+            print(f" {f}", file=stream, end="")
         print(file=stream)
         print("Energy bin boundaries:", file=stream, end="")
         for f in np.nditer(self.e):
-            print(" %g" % f, file=stream, end="")
+            print(f" {f}", file=stream, end="")
         print("\n", file=stream)
         if self.is_cylinder:
             print(
@@ -589,14 +589,7 @@ class FMesh:
                     for iz in range(z.size):
                         value = self.data[ie, ix, iy, iz]
                         err = self.errors[ie, ix, iy, iz]
-                        row = " {:10.3e}{:10.3f}{:10.3f}{:10.3f} {:11.5e} {:11.5e}".format(
-                            e[ie],
-                            x[ix],
-                            y[iy],
-                            z[iz],
-                            value,
-                            err,
-                        )
+                        row = f" {e[ie]:10.3e}{x[ix]:10.3f}{y[iy]:10.3f}{z[iz]:10.3f} {value:11.5e} {err:11.5e}"
                         print(row, file=stream)
 
         for ix in range(x.size):
