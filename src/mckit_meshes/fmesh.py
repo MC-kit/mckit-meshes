@@ -948,9 +948,9 @@ def _iterate_bins(stream, _n, _with_ebins):
     Yields:
         pairs value - error
     """
-    value_start, value_end = (41, 53) if _with_ebins else (32, 44)
+    value_start, value_end = (39, 51) if _with_ebins else (30, 42)
     for _ in range(_n):
-        _line = next(stream)
+        _line = next(stream).lstrip()
         _value = float(_line[value_start:value_end])
         _error = float(_line[value_end:])
         if _value < 0.0:
