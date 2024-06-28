@@ -69,7 +69,6 @@ if there are more than 1 input file""",
 def mesh2npz(ctx: click.Context, prefix: str | Path, mesh_tallies: list[click.Path]) -> None:
     """Converts mesh files to npz files."""
     do_mesh2npz(prefix, mesh_tallies, ctx.obj["OVERRIDE"])
-    #
 
 
 @mckit_meshes.command()
