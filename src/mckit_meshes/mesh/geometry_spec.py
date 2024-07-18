@@ -509,11 +509,11 @@ def select_indexes(
 
         For non specified x, if input array represents just one bin,
         then return index 0 to squeeze results.
-        >>> select_indexes(np.array([10,20]), None)
+        >>> select_indexes(np.array([10, 20]), None)
         0
 
         For x = 1.5, we have 1 < 1.5 < 2, so the bin index is to be 1
-        >>> select_indexes(r, 1.5)
+        >>> select_indexes(r, 1.5).item()
         1
 
         For x = 0, it's the first bin, and index is to be 0
@@ -521,11 +521,11 @@ def select_indexes(
         0
 
         For coordinates below r[0] return -1.
-        >>> select_indexes(r, -1)
+        >>> select_indexes(r, -1).item()
         -1
 
         For coordinates above  r[-1] return a.size-1.
-        >>> select_indexes(r, 5)
+        >>> select_indexes(r, 5).item()
         4
 
         And for array of coordinates
@@ -544,7 +544,7 @@ def select_indexes(
     if x is None:
         return slice(0, a.size) if a.size > 2 else 0  # squeeze if there's only one bin
 
-    i: np.ndarray = a.searchsorted(x) - 1
+    i: np.ndarray = np.subtract(a.searchsorted(x), 1)
 
     if np.isscalar(i):
         if i < 0 and x == a[0]:
@@ -577,7 +577,7 @@ def compute_intervals_and_coarse_bins(
     >>> intervals
     [3]
     >>> coarse
-    [1.0, 4.0]
+    [np.float64(1.0), np.float64(4.0)]
 
     A bins with two interval values.
     >>> arr = np.array([1, 2, 3, 6, 8, 10], dtype=float)
@@ -585,7 +585,7 @@ def compute_intervals_and_coarse_bins(
     >>> intervals
     [2, 1, 2]
     >>> coarse
-    [1.0, 3.0, 6.0, 10.0]
+    [np.float64(1.0), np.float64(3.0), np.float64(6.0), np.float64(10.0)]
 
     On zero (or negative tolerance) just use 1 intervals and return original array.
     >>> intervals, coarse = compute_intervals_and_coarse_bins(arr, tolerance=0.0)

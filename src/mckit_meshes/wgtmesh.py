@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, NamedTuple, TextIO, Union
+from typing import TYPE_CHECKING, NamedTuple, TextIO
 
 import sys
 
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
     from numpy.typing import ArrayLike
 
-GeometrySpec = Union[gs.CartesianGeometrySpec, gs.CylinderGeometrySpec]
+GeometrySpec = gs.CartesianGeometrySpec | gs.CylinderGeometrySpec
 Point = np.ndarray
 
 
@@ -521,16 +521,15 @@ class WgtMesh:
         _gs = self._geometry_spec
         x, y, z = normalization_point
         ix, iy, iz = _gs.select_indexes(i_values=x, j_values=y, k_values=z)
-        new_weights = []
+
         value_at_normalisation_point = self.weights[0][energy_bin, ix, iy, iz]
         """The value at last energy bin about 20 MeV at neutron weights."""
 
         factor = normalized_value / value_at_normalisation_point
         """Scale all other weights by this value."""
 
-        for w in self.weights:
-            # TODO dvp: revise for multiple energy bins, may be add scaling values for each energy bin and particle
-            new_weights.append(w * factor)
+        new_weights = [w * factor for w in self.weights]
+        # TODO dvp: revise for multiple energy bins, may be add scaling values for each energy bin and particle
 
         return WgtMesh(_gs, self.energies, new_weights)
 

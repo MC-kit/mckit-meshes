@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Callable
+from typing import TYPE_CHECKING
 
 import io
 
@@ -18,6 +18,9 @@ import pytest
 from mckit_meshes import wgtmesh
 from mckit_meshes.utils.testing import a
 from mckit_meshes.wgtmesh import WgtMesh, make_geometry_spec, parse_coordinates
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 DEFAULT_ORIGIN = np.zeros((3,), dtype=float)
 

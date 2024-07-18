@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 
 from itertools import product
 
 import numpy as np
 
 if TYPE_CHECKING:
-    from collections.abc import Sized
+    from collections.abc import Callable, Sized
 
 
 def cartesian_product(

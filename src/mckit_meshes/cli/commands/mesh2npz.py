@@ -1,5 +1,6 @@
 # noinspection PyPep8
 """Convert MCNP meshtal file to a number of npz files, one for each meshtal."""
+
 from __future__ import annotations
 
 import typing as t
