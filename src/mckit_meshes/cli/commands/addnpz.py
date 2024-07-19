@@ -33,7 +33,8 @@ def add(
 
     Args:
         out: output file
-        comment: comment for a new fmesh npz file, if not provided, then the comment from the first mesh is used
+        comment: comment for a new fmesh npz file,
+                 if not provided, then the comment from the first mesh is used
         number: ... to assign to resulting mesh
         npz_files: files to process, optional
         override: define behaviour when output file, exists, default - rise FileExistsError.

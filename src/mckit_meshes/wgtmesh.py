@@ -425,26 +425,30 @@ class WgtMesh:
         r"""Combine weight meshes produced from different runs with weighting factor.
 
         Note:
-        Importance of a mesh voxel `i` is $1/w_i$ and is proportional to average portion $p_i$ of
-        passing particle weight W to a tally for which the weight mesh is computed.
-        To obtain combined weight on merging two meshes, we will combine the probabilities using weighting factors and
-        use reciprocal of a result as a resulting weight of mesh voxel.
-        The weighting factors are usually NPS (Number particles sampled) from a run on which a mesh was produced.
-        The combined probability in resulting voxel `i` is:
+            Importance of a mesh voxel `i` is $1/w_i$ and is proportional
+            to average portion $p_i$ of passing particle weight W to a tally,
+            for which the weight mesh is computed.
+            To obtain combined weight on merging two meshes,
+            we will combine the probabilities using weighting factors and
+            use reciprocal of a result as a resulting weight of mesh voxel.
+            The weighting factors are usually NPS (Number particles sampled)
+            from a run on which a mesh was produced.
 
-        .. math::
+            The combined probability in resulting voxel `i` is:
 
-            w_ij - weight in voxel i of mesh j
-            n_j -  nps - weighting factor on combining of mesh j
+            .. math::
 
-            p_ij = 1/w_ij - probability for voxel i of mesh j
+                w_ij - weight in voxel i of mesh j
+                n_j -  nps - weighting factor on combining of mesh j
 
-            p_i = \frac{ \sum_j{n_j*p_ij} { \sum_j{n_j} }
+                p_ij = 1/w_ij - probability for voxel i of mesh j
 
-        So, the resulting voxel `i` weight level is:
+                p_i = \frac{ \sum_j{n_j*p_ij} { \sum_j{n_j} }
 
-        .. math::
-            w_i = \frac{1} {p_i}
+            So, the resulting voxel `i` weight level is:
+
+            .. math::
+                w_i = \frac{1} {p_i}
 
 
         Args:
@@ -529,7 +533,8 @@ class WgtMesh:
         """Scale all other weights by this value."""
 
         new_weights = [w * factor for w in self.weights]
-        # TODO dvp: revise for multiple energy bins, may be add scaling values for each energy bin and particle
+        # TODO @dvp: revise for multiple energy bins,
+        #           may be add scaling values for each energy bin and particle
 
         return WgtMesh(_gs, self.energies, new_weights)
 
@@ -537,7 +542,8 @@ class WgtMesh:
         """Get reciprocal of self weights and normalize to 1 at given point.
 
         Important:
-            A caller specifies normalization_point in local coordinates. See :class:`GeometrySpec.local_coordinates`.
+            A caller specifies normalization_point in local coordinates.
+            See :class:`GeometrySpec.local_coordinates`.
 
         Args:
             normalization_point: Point at which output weights should be 1
@@ -581,7 +587,8 @@ def reciprocal(a: np.ndarray, zero_index: np.ndarray = None) -> np.ndarray:
     else:
         assert np.array_equal(zero_index, a == 0.0)
     result: np.ndarray = np.reciprocal(a, where=np.logical_not(zero_index))
-    #  fix bug in numpy reciprocal: it doesn't pass zero values, the bug doesn't show up on debugging
+    # this fixes bug in numpy reciprocal: it doesn't pass zero values
+    # note: the bug doesn't show up on debugging
     result[zero_index] = 0.0
     return result
 

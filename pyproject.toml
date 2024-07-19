@@ -473,7 +473,7 @@ ignore = [
   # "E203",   # E203: Whitespace before ‘:'
   # "E401",  # Multiple imports on one line
   "E402", # Module level import not at top of file
-  "E501", # Line too long (<LENGTH> > 100 characters)
+  # "E501", # Line too long (<LENGTH> > 100 characters)
   # "E701",  # Multiple statements on one line (colon)
   # "E702",  # Multiple statements on one line (semicolon)
   # "E703",  # Statement ends with an unnecessary semicolon

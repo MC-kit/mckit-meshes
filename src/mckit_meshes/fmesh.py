@@ -589,7 +589,10 @@ class FMesh:
                     for iz in range(z.size):
                         value = self.data[ie, ix, iy, iz]
                         err = self.errors[ie, ix, iy, iz]
-                        row = f" {e[ie]:10.3e}{x[ix]:10.3f}{y[iy]:10.3f}{z[iz]:10.3f} {value:11.5e} {err:11.5e}"
+                        row = (
+                            f" {e[ie]:10.3e}{x[ix]:10.3f}{y[iy]:10.3f}{z[iz]:10.3f}"
+                            f" {value:11.5e} {err:11.5e}"
+                        )
                         print(row, file=stream)
 
         if self._totals:
@@ -598,7 +601,10 @@ class FMesh:
                     for iz in range(z.size):
                         value = self._totals[ix, iy, iz]
                         err = self._totals_err[ix, iy, iz]
-                        row = f"   Total   {x[ix]:10.3f}{y[iy]:10.3f}{z[iz]:10.3f} {value:11.5e} {err:11.5e}"
+                        row = (
+                            f"   Total   {x[ix]:10.3f}{y[iy]:10.3f}{z[iz]:10.3f}"
+                            f" {value:11.5e} {err:11.5e}"
+                        )
                         print(row, file=stream)
 
     def total_by_energy(self, new_name: int = 0) -> FMesh:
