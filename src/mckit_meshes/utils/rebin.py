@@ -320,16 +320,18 @@ def shrink_1d(
         return bins, a
 
     if low < bins[0] or bins[-1] < low:
-        raise ValueError(
+        msg = (
             f"Low shrink edge is beyond the bins range: {low:g}"
             f" is not in [{bins[0]:g}..{bins[-1]:g}]",
         )
+        raise ValueError(msg)
 
     if high < bins[0] or bins[-1] < high:
-        raise ValueError(
+        msg = (
             f"High shrink edge is beyond the bins range: {high:g}"
-            f" is not in [{bins[1]:g}..{bins[-1]:g}]",
+            f" is not in [{bins[1]:g}..{bins[-1]:g}]"
         )
+        raise ValueError(msg)
 
     left_idx, right_idx = np.digitize([low, high], bins) - 1
 
