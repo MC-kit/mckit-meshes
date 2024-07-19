@@ -653,7 +653,7 @@ class FMesh:
         new_bins_list, new_data = rebin.shrink_nd(self.data, iter(trim_spec), assume_sorted=True)
         _, new_errors = rebin.shrink_nd(self.errors, iter(trim_spec), assume_sorted=True)
 
-        assert all(np.array_equal(a, b) for a, b in zip(new_bins_list, _))
+        assert all(np.array_equal(a, b) for a, b in zip(new_bins_list, _, strict=False))
 
         new_ebins, new_xbins, new_ybins, new_zbins = new_bins_list
         if self.totals is None:
@@ -1174,7 +1174,7 @@ def _find_words_after(f: TextIO, *keywords: str) -> list[str]:
     for line in f:
         words: list[str] = line.split()
         i = 0  # : ignore[SIM113]
-        for w, kw in zip(words, keywords):
+        for w, kw in zip(words, keywords, strict=False):
             if w != kw:
                 break
             i += 1

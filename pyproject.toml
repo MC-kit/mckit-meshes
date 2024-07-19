@@ -453,7 +453,7 @@ ignore = [
 
     # "ARG001", # Unused function argument: `expected`
 
-  "B905", # B905 `zip()` without an explicit `strict=` parameter - ignore while support 3.8, 3.9
+    # "B905", # B905 `zip()` without an explicit `strict=` parameter - ignore while support 3.9
 
   # "C812",   # C812 Missing trailing comma: black compatibility
   "C901", # too complex - ...

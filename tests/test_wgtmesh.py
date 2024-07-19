@@ -208,7 +208,7 @@ def test_add_bad_path():
 )
 def test_prepare_probabilities_and_nps(nps: int, weights: np.ndarray, expected: np.ndarray):
     actual = wgtmesh.prepare_probabilities_and_nps(nps, weights)
-    for _a, _b in zip(actual, expected):
+    for _a, _b in zip(actual, expected, strict=False):
         assert_array_equal(_a, _b)
 
 
@@ -231,7 +231,7 @@ def test_merge(weights_eijk) -> None:
 
 
 def my_assert_array_equal(actual, expected):
-    for i, (ai, ei) in enumerate(zip(actual, expected)):
+    for i, (ai, ei) in enumerate(zip(actual, expected, strict=False)):
         with suppress(ValueError):
             ai, ei = _a, _b = map(float, [ai, ei])  # noqa: PLW2901
         assert ai == ei, f"{i} - items are not equal: {ai} != {ei}"

@@ -100,7 +100,7 @@ class AbstractGeometrySpecData:
         if not isinstance(other, AbstractGeometrySpecData):
             return False
         a, b = self.bins, other.bins
-        return len(a) == len(b) and arrays_equal(zip(a, b))
+        return len(a) == len(b) and arrays_equal(zip(a, b, strict=False))
 
     @property
     def bins(self) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
@@ -272,7 +272,8 @@ class CartesianGeometrySpec(AbstractGeometrySpec):
             return bins_square[:-1] + bins_square[1:] + bins_mult
 
         x_square, y_square, z_square = (
-            calc_sum(x - px) for x, px in zip((self.ibins, self.jbins, self.kbins), point)
+            calc_sum(x - px)
+            for x, px in zip((self.ibins, self.jbins, self.kbins), point, strict=False)
         )
         w = np.zeros((ni, nj, nk), dtype=float)
         for i in range(ni):

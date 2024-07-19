@@ -263,7 +263,7 @@ def rebin_spec_composer(
         grouped_flags = itertools.repeat(grouped_flags)
     elif not grouped_flags:
         grouped_flags = itertools.repeat(False)
-    return zip(bins_seq, new_bins_seq, axes, grouped_flags)
+    return zip(bins_seq, new_bins_seq, axes, grouped_flags, strict=False)
 
 
 # @numba.jit
@@ -411,4 +411,4 @@ def trim_spec_composer(
         rights = itertools.repeat(None)
     if not axes:
         axes = itertools.count()
-    return zip(bins_seq, lefts, rights, axes)
+    return zip(bins_seq, lefts, rights, axes, strict=False)
