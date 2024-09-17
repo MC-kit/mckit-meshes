@@ -26,9 +26,8 @@ reset() {
     pyenv virtualenv-delete -f  "$env" && echo "Removed environment $env"
     pyenv virtualenv "$last_python" "$env" && echo "Created environment $env"
     pyenv local "$env"
-    eval "$(pyenv init -)"
-    pyenv rehash
-    pyenv shell "$env"
+    pyenv activate "$env"
+    python --version
     poetry config --local virtualenvs.create false
     poetry env info
     poetry lock --no-update
