@@ -8,7 +8,7 @@ from mckit_meshes.cli.runner import mckit_meshes
 from mckit_meshes.fmesh import FMesh
 
 
-@pytest.fixture()
+@pytest.fixture
 def source(data):
     return data / "1.m"
 

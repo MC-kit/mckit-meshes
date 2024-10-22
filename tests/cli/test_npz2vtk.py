@@ -11,7 +11,7 @@ import pytest
 from mckit_meshes.cli.runner import mckit_meshes
 
 
-@pytest.fixture()
+@pytest.fixture
 def source(data):
     return data / "1004.npz"
 

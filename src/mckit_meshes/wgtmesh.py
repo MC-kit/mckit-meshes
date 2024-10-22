@@ -23,7 +23,7 @@ GeometrySpec = gs.CartesianGeometrySpec | gs.CylinderGeometrySpec
 Point = np.ndarray
 
 
-def ensure_float_arrays(*arrays: ArrayLike) -> Generator[np.ndarray, None, None]:
+def ensure_float_arrays(*arrays: ArrayLike) -> Generator[np.ndarray]:
     yield from (np.asarray(x, dtype=float) for x in arrays)
 
 
@@ -318,13 +318,13 @@ class WgtMesh:
             self.index += items
             return self.data[i : self.index]
 
-        def get_floats(self, items: int) -> Generator[float, None, None]:
+        def get_floats(self, items: int) -> Generator[float]:
             return map(float, self.get(items))
 
-        def get_ints(self, items: int) -> Generator[int, None, None]:
+        def get_ints(self, items: int) -> Generator[int]:
             return map(int, self.get(items))
 
-        def get_ints_written_as_floats(self, items: int) -> Generator[int, None, None]:
+        def get_ints_written_as_floats(self, items: int) -> Generator[int]:
             return map(int, self.get_floats(items))
 
         def skip(self, items: int = 1) -> None:

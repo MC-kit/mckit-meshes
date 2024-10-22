@@ -970,7 +970,7 @@ def iter_meshtal(
     fid: TextIO,
     name_select: Callable[[int], bool] | None = None,
     tally_select: Callable[[FMesh], bool] | None = None,
-) -> Generator[FMesh, None, None]:
+) -> Generator[FMesh]:
     """Iterates fmesh tallies from fid.
 
     Args:

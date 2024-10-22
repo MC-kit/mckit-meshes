@@ -95,7 +95,7 @@ def weights_eijk() -> Callable[[float], WgtMesh]:
     return call
 
 
-@pytest.fixture()
+@pytest.fixture
 def wwinp(data) -> WgtMesh:
     filename = data / "wwinp"
     with filename.open() as stream:

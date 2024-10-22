@@ -15,7 +15,7 @@ from mckit_meshes.mesh.geometry_spec import CartesianGeometrySpec
 from mckit_meshes.utils.testing import a
 
 
-@pytest.fixture()
+@pytest.fixture
 def simple_bins():
     _xbins = a(0, 1)
     _ybins = a(2, 3)
@@ -237,7 +237,7 @@ def test_get_totals(simple_bins):
     assert_array_equal(actual_totals_err, desired_totals_err)
 
 
-@pytest.mark.skip()
+@pytest.mark.skip
 @pytest.mark.parametrize(
     "x,y,z,expected_total,expected_rel_error,msg",
     [
