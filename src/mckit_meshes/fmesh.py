@@ -234,12 +234,11 @@ class FMesh:
         assert self._e.size >= 2
         assert self.data.shape == self.errors.shape
         assert self.data.shape == (self.e.size - 1, *self._geometry_spec.bins_shape)
-        assert (
-            self._totals is None
-            or (isinstance(self._totals, np.ndarray)
+        assert self._totals is None or (
+            isinstance(self._totals, np.ndarray)
             and isinstance(self._totals_err, np.ndarray)
             and self._totals.shape == self._totals_err.shape
-            and self._totals.shape == self._geometry_spec.bins_shape)
+            and self._totals.shape == self._geometry_spec.bins_shape
         )
 
     def is_equal_by_geometry(self, other: FMesh) -> bool:
