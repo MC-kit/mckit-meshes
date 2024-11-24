@@ -236,10 +236,10 @@ class FMesh:
         assert self.data.shape == (self.e.size - 1, *self._geometry_spec.bins_shape)
         assert (
             self._totals is None
-            or isinstance(self._totals, np.ndarray)
+            or (isinstance(self._totals, np.ndarray)
             and isinstance(self._totals_err, np.ndarray)
             and self._totals.shape == self._totals_err.shape
-            and self._totals.shape == self._geometry_spec.bins_shape
+            and self._totals.shape == self._geometry_spec.bins_shape)
         )
 
     def is_equal_by_geometry(self, other: FMesh) -> bool:
@@ -487,7 +487,7 @@ class FMesh:
                     totals_err,
                     comment=comment,
                 )
-            raise FMesh.FMeshError("Invalid version for FMesh file %d" % version)
+            raise FMesh.FMeshError(f"Invalid version {version} for FMesh file")
 
     def save2vtk(self, filename: str | None = None, data_name: str | None = None) -> str:
         """Saves this fmesh data to vtk file.
@@ -505,7 +505,7 @@ class FMesh:
             Full path to saved VTK file.
         """
         assert not self.is_cylinder, "Not implemented for cylinder geometry"
-        # TODO dvp: implement for cylinder geometry (see iwwgvr project for example).
+        # TODO dvp: implement for cylinder geometry (see iwwgvr or F4Enix projects for example).
 
         if filename is None:
             filename = str(self.name)

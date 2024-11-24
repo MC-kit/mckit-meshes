@@ -145,10 +145,10 @@ def test_m_2_npz(tmp_path, simple_bins):
     prefix = tmp_path / "out"
     m_2_npz(tfn.open(), prefix=prefix)
     npz_index = {prefix / "14.npz": m1, prefix / "2.npz": m2}
-    for npz in npz_index:
+    for npz, expected in npz_index.items():
         assert npz.exists()
         actual = FMesh.load_npz(npz)
-        assert actual == npz_index[npz]
+        assert actual == expected
         npz.unlink()
 
 
@@ -186,10 +186,10 @@ def test_m_2_npz_with_comment(tmp_path, simple_bins):
     prefix = tmp_path / "out/"
     m_2_npz(tfn.open(), prefix=prefix)
     npz_index = {prefix / "14.npz": m1, prefix / "2.npz": m2}
-    for npz in npz_index:
+    for npz, expected in npz_index.items():
         assert npz.exists()
         actual = FMesh.load_npz(npz)
-        assert actual == npz_index[npz]
+        assert actual == expected
         npz.unlink()
 
 
