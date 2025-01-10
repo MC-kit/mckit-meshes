@@ -133,15 +133,15 @@ def rebin_1d(
     Returns:
         rebinned data
     """
-    assert (
-        bins[0] <= new_bins[0]
-    ), "Rebinning doesn't provide extrapolation lower of the original bins"
-    assert (
-        new_bins[-1] <= bins[-1]
-    ), "Rebinning doesn't provide extrapolation upper of the original bins"
-    assert (
-        bins.size == a.shape[axis] + 1
-    ), "The `a` array shape doesn't match the given bins and axis"
+    assert bins[0] <= new_bins[0], (
+        "Rebinning doesn't provide extrapolation lower of the original bins"
+    )
+    assert new_bins[-1] <= bins[-1], (
+        "Rebinning doesn't provide extrapolation upper of the original bins"
+    )
+    assert bins.size == a.shape[axis] + 1, (
+        "The `a` array shape doesn't match the given bins and axis"
+    )
     assert assume_sorted or is_monotonically_increasing(bins)
     assert assume_sorted or is_monotonically_increasing(new_bins)
 

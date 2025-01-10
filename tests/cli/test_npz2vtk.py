@@ -48,9 +48,7 @@ def test_multiple_files(tmp_path, runner, data):
     )
     assert result.exit_code == 0
     for i in [1004, 2004]:
-        assert (
-            prefix / f"{i}.vtr"
-        ).exists(), (
+        assert (prefix / f"{i}.vtr").exists(), (
             "When multiple npz files are specified the vtr file should be created for every one."
         )
 
