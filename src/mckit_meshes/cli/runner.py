@@ -13,7 +13,7 @@ import click
 import mckit_meshes.version as meta
 
 from mckit_meshes.cli.commands import do_add, do_mesh2npz, do_npz2vtk
-from mckit_meshes.cli.logging import init_logger, logger
+from mckit_meshes.cli import init_logger, logger
 
 if TYPE_CHECKING:
     from pathlib import Path

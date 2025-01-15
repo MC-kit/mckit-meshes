@@ -6,14 +6,17 @@ from numpy.testing import assert_array_equal
 
 import pytest
 
-from mckit_meshes.utils.cartesian_product import cartesian_product
+from mckit_meshes.utils import cartesian_product
 from mckit_meshes.utils.testing import a
 
 
 @pytest.mark.parametrize(
     "arrays,expected",
     [
-        (([1, 2], [3, 4]), [[[1, 3], [1, 4]], [[2, 3], [2, 4]]]),
+        (
+            ([1, 2], [3, 4]),
+            [[[1, 3], [1, 4]], [[2, 3], [2, 4]]],
+        ),
         (
             ([1, 2], [3, 4], [5, 6]),
             [

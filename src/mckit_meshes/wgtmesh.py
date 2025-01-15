@@ -12,10 +12,10 @@ from enum import IntEnum
 import numpy as np
 
 import mckit_meshes.mesh.geometry_spec as gs
-import mckit_meshes.utils.io
+from mckit_meshes.utils import print_n
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
+    from collections.abc import Generator, Iterable
 
     from numpy.typing import ArrayLike
 
@@ -58,7 +58,7 @@ class WgtMesh:
         self._geometry_spec.print_specification(io, columns=columns)
         print("wwge:n", end=" ", file=io)
         second_indent = " " * 15
-        mckit_meshes.utils.io.print_n(
+        print_n(
             gs.format_floats(self.energies[0][1:]),
             io=io,
             indent=second_indent,
@@ -66,7 +66,7 @@ class WgtMesh:
         )
         if len(self.energies) > 1:
             print("wwge:p", end=" ", file=io)
-            mckit_meshes.utils.io.print_n(
+            print_n(
                 gs.format_floats(self.energies[1][1:]),
                 io=io,
                 indent=second_indent,
@@ -88,7 +88,7 @@ class WgtMesh:
         indent = " " * 8
         print(indent, "emesh=", sep="", end="", file=io)
         second_indent = indent + " " * 6
-        mckit_meshes.utils.io.print_n(
+        print_n(
             gs.format_floats(self.energies[0][1:]),
             io=io,
             indent=second_indent,
@@ -100,7 +100,7 @@ class WgtMesh:
             self._geometry_spec.print_specification(io, columns=columns)
             print(indent, "emesh=", sep="", end="", file=io)
             # TODO dvp: try to use do_print_bins here
-            mckit_meshes.utils.io.print_n(
+            print_n(
                 gs.format_floats(self.energies[1][1:]),
                 io=io,
                 indent=second_indent,
@@ -318,13 +318,13 @@ class WgtMesh:
             self.index += items
             return self.data[i : self.index]
 
-        def get_floats(self, items: int) -> Generator[float]:
+        def get_floats(self, items: int) -> Iterable[float]:
             return map(float, self.get(items))
 
-        def get_ints(self, items: int) -> Generator[int]:
+        def get_ints(self, items: int) -> Iterable[int]:
             return map(int, self.get(items))
 
-        def get_ints_written_as_floats(self, items: int) -> Generator[int]:
+        def get_ints_written_as_floats(self, items: int) -> Iterable[int]:
             return map(int, self.get_floats(items))
 
         def skip(self, items: int = 1) -> None:

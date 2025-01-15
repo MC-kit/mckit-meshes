@@ -18,8 +18,7 @@ import mckit_meshes.mesh.geometry_spec as gc
 import mckit_meshes.utils.no_daemon_process as ndp
 
 from mckit_meshes.particle_kind import ParticleKind as Kind
-from mckit_meshes.utils import rebin
-from mckit_meshes.utils.io import raise_error_when_file_exists_strategy
+from mckit_meshes.utils import rebin, raise_error_when_file_exists_strategy
 from pyevtk.hl import gridToVTK
 from toolz.itertoolz import concatv
 

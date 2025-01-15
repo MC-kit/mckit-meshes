@@ -39,12 +39,11 @@ import numpy as np
 
 from numpy import linalg
 
-import mckit_meshes.utils.io
-
+from mckit_meshes.utils import print_n
 from mckit_meshes.utils.cartesian_product import cartesian_product
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Sequence
+    from collections.abc import Generator, Iterable, Sequence
 
 _2PI: Final[float] = 2.0 * np.pi
 _1_TO_2PI: Final[float] = 1 / _2PI
@@ -316,7 +315,7 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
 
     @property
     def bins(self):
-        return (*super().bins, self.axs, self.vec)
+        return *super().bins, self.axs, self.vec
 
     @property
     def cylinder(self) -> bool:
@@ -480,14 +479,14 @@ def _print_bins(indent, prefix, _ibins, io, columns: int = 6) -> None:
     coarse_mesh = coarse_mesh[1:]  # drop the first value - it's presented with origin
     print(indent, f"{prefix}mesh=", sep="", end="", file=io)
     second_indent = indent + " " * 5
-    mckit_meshes.utils.io.print_n(
+    print_n(
         (f"{x:.6g}" for x in coarse_mesh),
         io=io,
         indent=second_indent,
         max_columns=columns,
     )
     print(indent, f"{prefix}ints=", sep="", end="", file=io)
-    mckit_meshes.utils.io.print_n(intervals, io=io, indent=second_indent, max_columns=columns)
+    print_n(intervals, io=io, indent=second_indent, max_columns=columns)
 
 
 def select_indexes(
@@ -559,8 +558,11 @@ def select_indexes(
     return i
 
 
-def format_floats(floats: Iterable[float], _format="{:.6g}") -> Iterable[str]:
-    yield from map(_format.format, floats)
+def format_floats(floats: Iterable[float], _format: str = "{:.6g}") -> Generator[str]:
+    def _fmt(item: float) -> str:
+        return _format.format(item)
+
+    yield from map(_fmt, floats)
 
 
 def compute_intervals_and_coarse_bins(
@@ -571,28 +573,28 @@ def compute_intervals_and_coarse_bins(
 
     Examples:
     Find equidistant bins and report as intervals
-    >>> arr = np.array([1, 2, 3, 4], dtype=float)
-    >>> arr
+    >>> arry = np.array([1, 2, 3, 4], dtype=float)
+    >>> arry
     array([1., 2., 3., 4.])
-    >>> intervals, coarse = compute_intervals_and_coarse_bins(arr)
+    >>> intervals, coarse = compute_intervals_and_coarse_bins(arry)
     >>> intervals
     [3]
     >>> coarse
     [np.float64(1.0), np.float64(4.0)]
 
     A bins with two interval values.
-    >>> arr = np.array([1, 2, 3, 6, 8, 10], dtype=float)
-    >>> intervals, coarse = compute_intervals_and_coarse_bins(arr)
+    >>> arry = np.array([1, 2, 3, 6, 8, 10], dtype=float)
+    >>> intervals, coarse = compute_intervals_and_coarse_bins(arry)
     >>> intervals
     [2, 1, 2]
     >>> coarse
     [np.float64(1.0), np.float64(3.0), np.float64(6.0), np.float64(10.0)]
 
-    On zero (or negative tolerance) just use 1 intervals and return original array.
-    >>> intervals, coarse = compute_intervals_and_coarse_bins(arr, tolerance=0.0)
+    On zero (or negative tolerance) just use intervals filled with ones and return original array.
+    >>> intervals, coarse = compute_intervals_and_coarse_bins(arry, tolerance=0.0)
     >>> intervals
     [1, 1, 1, 1, 1]
-    >>> coarse is arr
+    >>> coarse is arry
     True
 
     Args:

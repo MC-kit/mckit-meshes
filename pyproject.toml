@@ -332,7 +332,7 @@ select = [
     # "CPY", # flake8-copyright
     "D", # pydocstyle
     "DJ", # flake8-django
-    "DOC", # pydoclint
+    # "DOC", # pydoclint
     "DTZ", # flake8-datetimez
     "E", # pycodestyle
     "EM", # flake8-errmsg

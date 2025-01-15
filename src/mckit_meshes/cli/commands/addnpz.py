@@ -11,7 +11,7 @@ from pathlib import Path
 import numpy as np
 
 from mckit_meshes import fmesh
-from mckit_meshes.utils.io import check_if_path_exists
+from mckit_meshes.utils import check_if_path_exists
 
 __LOG = logging.getLogger(__name__)
 
