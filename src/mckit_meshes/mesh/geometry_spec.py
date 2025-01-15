@@ -111,6 +111,7 @@ class AbstractGeometrySpecData:
         return self.origin, self.ibins, self.jbins, self.kbins
 
 
+# noinspection PyTypeChecker
 class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
     """Common base for rectilinear and cylinder mesh specifications."""
 
@@ -354,6 +355,7 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
 
     # TODO dvp: add opposite method global_coordinates
 
+    # noinspection PyTypeChecker
     def print_geom(self, io: TextIO, indent: str) -> None:
         print(indent, "geom=cyl", sep="", file=io)
         print(
