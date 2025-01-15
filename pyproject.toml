@@ -1,52 +1,63 @@
-[tool.poetry]
+[project]
 name = "mckit-meshes"
-version = "0.1.6a0"
+dynamic = [ "version", "classifiers", "requires-python" ]
 description = "Python tools to work with MCNP meshtallies and weight meshes."
-authors = ["dvp2015 <dmitri_portnov@yahoo.com>"]
-license = "MIT"
+license = { text = "MIT" }
+readme = "README.rst"
+authors = [
+  {name="dvp2015", email="dmitri_portnov@yahoo.com"}
+]
+keywords = ["MCNP", "mesh", "weights", "variance reduction"]
+dependencies = [
+  "click (>=8.0.1)",
+  "loguru (>=0.6.0)",
+  "numpy (>=2.1.3)",
+  "openpyxl (>=3.0.9)",
+  "pandas (>=2.0.0)",
+  "pyevtk (>=1.4.1)",
+  "toolz (>=0.11.2)"
+]
+
+[project.urls]
 homepage = "https://github.com/MC-kit/mckit-meshes"
 repository = "https://github.com/MC-kit/mckit-meshes"
 # documentation = "https://mckit-meshes.readthedocs.io
-keywords = ["mesh", "weights", "variance reduction"]
-readme = "README.rst"
+Changelog = "https://github.com/MC-kit/mckit-meshes/releases"
+
+[project.scripts]
+mckit-meshes = "mckit_meshes.cli.runner:mckit_meshes"
+
+[tool.poetry]
+version = "0.1.6a0"
 packages = [{ include = "mckit_meshes", from = "src" }]
-# Select from PyPI classifiers: https://pypi.org/classifiers/
+include = [
+   { path = "noxfile.py", format = "sdist" },
+   { path = "tests", format = "sdist" },
+   { path = "docs", format = "sdist"}
+]
+exclude = [
+  { path = "docs/build"}
+]
+
+# Select from PyPI trove classifiers: https://pypi.org/classifiers/
+# about dynamic classifiers in poetry: https://python-poetry.org/docs/pyproject/#classifiers-1
 classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Environment :: Console",
-    "Intended Audience :: Developers",
-    "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
-    "Topic :: Scientific/Engineering :: Physics",
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "Operating System :: OS Independent",
+  "Topic :: Scientific/Engineering :: Physics",
 ]
 
 [build-system]
-requires = ["poetry-core >= 1.8.3"]
+requires = ["poetry-core >= 2.0.0, <3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.poetry.scripts]
-mckit-meshes = "mckit_meshes.cli.runner:mckit_meshes"
-
-[tool.poetry.urls]
-# documentation = "https://mckit-meshes.readthedocs.io"
-Chnagelog = "https://github.com/MC-kit/mckit-meshes/releases"
 
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.14"
-click = ">=8.0.1"
-loguru = ">=0.6.0"
-numpy = ">=2.1.3"
-openpyxl = ">=3.0.9"
-pandas = ">=2.0.0"
-pyevtk = ">=1.4.1"
-toolz = ">=0.11.2"
 
 [tool.poetry.group.dev.dependencies]
 Pygments = ">=2.10.0"
@@ -284,11 +295,23 @@ src = ["src", "tests"]
 
 exclude = [
     "*.egg-info",
+    ".direnv",
     ".cache",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".mypy_cache",
+    ".nox",
+    ".ruff_cache",
+    ".venv",
     "__pycache__",
+    "_build",
     "adhoc",
+    "build",
+    "dist",
     "docs/source/conf.py",
     "notebooks",
+    "venv",
     "wrk",
 ]
 
@@ -297,8 +320,8 @@ exclude = [
 #or run 'ruff linter' to see a brief list
 select = [
     "A", # flake8-builtins
-    "ANN", # flake8-annotations
     "AIR", # Airflow https://airflow.apache.org/docs/apache-airflow/stable/index.html
+    "ANN", # flake8-annotations
     "ARG", # flake8-unused-arguments
     "ASYNC", # flake8-async
     "B", # flake8-bugbear
@@ -306,8 +329,10 @@ select = [
     "C4", # flake8-comprehensions
     "C90", # mccabe
     "COM", # flake8-commas
+    # "CPY", # flake8-copyright
     "D", # pydocstyle
     "DJ", # flake8-django
+    "DOC", # pydoclint
     "DTZ", # flake8-datetimez
     "E", # pycodestyle
     "EM", # flake8-errmsg
@@ -315,6 +340,7 @@ select = [
     "EXE", # flake8-executable
     "F", # Pyflakes
     "FA", # flake8-future-annotations
+    # "FAST", # FastAPI
     "FBT", # flake8-boolean-trap  https://adamj.eu/tech/2021/07/10/python-type-hints-how-to-avoid-the-boolean-trap
     "FIX", # flake8-fixme
     "FLY", # flynt
