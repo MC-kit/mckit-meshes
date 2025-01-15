@@ -95,7 +95,7 @@ class AbstractGeometrySpecData:
     def __hash__(self) -> int:
         return hash(self.bins)
 
-    def __eq__(self, other: AbstractGeometrySpecData) -> bool:
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, AbstractGeometrySpecData):
             return False
         a, b = self.bins, other.bins
@@ -507,7 +507,7 @@ def select_indexes(
         >>> select_indexes(r, None)
         slice(0, 5, None)
 
-        For non specified x, if input array represents just one bin,
+        For none specified x, if input array represents just one bin,
         then return index 0 to squeeze results.
         >>> select_indexes(np.array([10, 20]), None)
         0
@@ -537,7 +537,7 @@ def select_indexes(
         x: one or more coordinates along `a`-boundaries
 
     Returns:
-        out: index or indices for each given coordinate
+        index or indices for each given coordinate
     """
     assert a.size > 1, "Parameter a doesn't represent binning"
 
