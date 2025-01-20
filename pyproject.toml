@@ -1,3 +1,7 @@
+[build-system]
+requires = ["poetry-core >= 2.0.0, <3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
 [project]
 name = "mckit-meshes"
 dynamic = [ "version", "classifiers", "requires-python" ]
@@ -12,8 +16,6 @@ dependencies = [
   "click (>=8.0.1)",
   "loguru (>=0.6.0)",
   "numpy (>=2.1.3)",
-  "openpyxl (>=3.0.9)",
-  "pandas (>=2.0.0)",
   "pyevtk (>=1.4.1)",
   "toolz (>=0.11.2)"
 ]
@@ -38,7 +40,6 @@ include = [
 exclude = [
   { path = "docs/build"}
 ]
-
 # Select from PyPI trove classifiers: https://pypi.org/classifiers/
 # about dynamic classifiers in poetry: https://python-poetry.org/docs/pyproject/#classifiers-1
 classifiers = [
@@ -49,12 +50,6 @@ classifiers = [
   "Operating System :: OS Independent",
   "Topic :: Scientific/Engineering :: Physics",
 ]
-
-[build-system]
-requires = ["poetry-core >= 2.0.0, <3.0.0"]
-build-backend = "poetry.core.masonry.api"
-
-
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.14"
