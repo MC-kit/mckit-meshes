@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Callable
+from typing import TYPE_CHECKING
 
 import io
 
@@ -18,6 +18,9 @@ import pytest
 from mckit_meshes import wgtmesh
 from mckit_meshes.utils.testing import a
 from mckit_meshes.wgtmesh import WgtMesh, make_geometry_spec, parse_coordinates
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 DEFAULT_ORIGIN = np.zeros((3,), dtype=float)
 
@@ -92,7 +95,7 @@ def weights_eijk() -> Callable[[float], WgtMesh]:
     return call
 
 
-@pytest.fixture()
+@pytest.fixture
 def wwinp(data) -> WgtMesh:
     filename = data / "wwinp"
     with filename.open() as stream:
@@ -205,7 +208,7 @@ def test_add_bad_path():
 )
 def test_prepare_probabilities_and_nps(nps: int, weights: np.ndarray, expected: np.ndarray):
     actual = wgtmesh.prepare_probabilities_and_nps(nps, weights)
-    for _a, _b in zip(actual, expected):
+    for _a, _b in zip(actual, expected, strict=False):
         assert_array_equal(_a, _b)
 
 
@@ -228,7 +231,7 @@ def test_merge(weights_eijk) -> None:
 
 
 def my_assert_array_equal(actual, expected):
-    for i, (ai, ei) in enumerate(zip(actual, expected)):
+    for i, (ai, ei) in enumerate(zip(actual, expected, strict=False)):
         with suppress(ValueError):
             ai, ei = _a, _b = map(float, [ai, ei])  # noqa: PLW2901
         assert ai == ei, f"{i} - items are not equal: {ai} != {ei}"

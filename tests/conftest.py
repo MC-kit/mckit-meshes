@@ -24,8 +24,8 @@ def data() -> Path:
     return _DATA
 
 
-@pytest.fixture()
-def cd_tmpdir(tmp_path) -> Generator[Path, None, None]:
+@pytest.fixture
+def cd_tmpdir(tmp_path) -> Generator[Path]:
     """Temporarily change to temp directory.
 
     Yields:

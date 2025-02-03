@@ -2,6 +2,7 @@
 
 The module applies :meth:`click` API to organize CLI interface for McKit-meshes package.
 """
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -12,7 +13,7 @@ import click
 import mckit_meshes.version as meta
 
 from mckit_meshes.cli.commands import do_add, do_mesh2npz, do_npz2vtk
-from mckit_meshes.cli.logging import init_logger, logger
+from mckit_meshes.cli import init_logger, logger
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -68,7 +69,6 @@ if there are more than 1 input file""",
 def mesh2npz(ctx: click.Context, prefix: str | Path, mesh_tallies: list[click.Path]) -> None:
     """Converts mesh files to npz files."""
     do_mesh2npz(prefix, mesh_tallies, ctx.obj["OVERRIDE"])
-    #
 
 
 @mckit_meshes.command()

@@ -1,4 +1,5 @@
 """Utilities fof testing."""
+
 from __future__ import annotations
 
 from typing import cast
@@ -25,7 +26,7 @@ def a(*args, dtype=float) -> np.ndarray:
     array([1., 2., 3.])
     >>> a(1, 2, 3, dtype=np.int32)
     array([1, 2, 3], dtype=int32)
-    >>> a(0, 1, 2, 3).reshape(2,2)
+    >>> a(0, 1, 2, 3).reshape(2, 2)
     array([[0., 1.],
            [2., 3.]])
     """

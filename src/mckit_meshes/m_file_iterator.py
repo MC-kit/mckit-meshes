@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from collections.abc import Generator
 
 
-def m_file_iterator(stream: TextIO) -> Generator[list[str], None, None]:
+def m_file_iterator(stream: TextIO) -> Generator[list[str]]:
     header: list[str] = []
     for _line in stream:
         if len(header) < 3:

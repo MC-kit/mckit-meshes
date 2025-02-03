@@ -231,7 +231,7 @@ def test_shrink_1d(msg, array, bins, left, right, axis, expected_bins, expected_
 def test_shrink_nd(msg, array, trim_spec, expected_bins, expected_data):
     actual_bins, actual_data = shrink_nd(array, trim_spec)
     assert len(expected_bins) == len(actual_bins), msg
-    for eb, ab in zip(expected_bins, actual_bins):
+    for eb, ab in zip(expected_bins, actual_bins, strict=False):
         assert_array_equal(eb, ab)
     assert_array_equal(expected_data, actual_data)
 

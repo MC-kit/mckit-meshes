@@ -15,7 +15,7 @@ from mckit_meshes.mesh.geometry_spec import CartesianGeometrySpec
 from mckit_meshes.utils.testing import a
 
 
-@pytest.fixture()
+@pytest.fixture
 def simple_bins():
     _xbins = a(0, 1)
     _ybins = a(2, 3)
@@ -145,10 +145,10 @@ def test_m_2_npz(tmp_path, simple_bins):
     prefix = tmp_path / "out"
     m_2_npz(tfn.open(), prefix=prefix)
     npz_index = {prefix / "14.npz": m1, prefix / "2.npz": m2}
-    for npz in npz_index:
+    for npz, expected in npz_index.items():
         assert npz.exists()
         actual = FMesh.load_npz(npz)
-        assert actual == npz_index[npz]
+        assert actual == expected
         npz.unlink()
 
 
@@ -186,10 +186,10 @@ def test_m_2_npz_with_comment(tmp_path, simple_bins):
     prefix = tmp_path / "out/"
     m_2_npz(tfn.open(), prefix=prefix)
     npz_index = {prefix / "14.npz": m1, prefix / "2.npz": m2}
-    for npz in npz_index:
+    for npz, expected in npz_index.items():
         assert npz.exists()
         actual = FMesh.load_npz(npz)
-        assert actual == npz_index[npz]
+        assert actual == expected
         npz.unlink()
 
 
@@ -237,7 +237,7 @@ def test_get_totals(simple_bins):
     assert_array_equal(actual_totals_err, desired_totals_err)
 
 
-@pytest.mark.skip()
+@pytest.mark.skip
 @pytest.mark.parametrize(
     "x,y,z,expected_total,expected_rel_error,msg",
     [

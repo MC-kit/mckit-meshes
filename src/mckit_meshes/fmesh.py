@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable, TextIO
+from typing import TYPE_CHECKING, TextIO
 
 import logging
 
@@ -18,13 +18,12 @@ import mckit_meshes.mesh.geometry_spec as gc
 import mckit_meshes.utils.no_daemon_process as ndp
 
 from mckit_meshes.particle_kind import ParticleKind as Kind
-from mckit_meshes.utils import rebin
-from mckit_meshes.utils.io import raise_error_when_file_exists_strategy
+from mckit_meshes.utils import rebin, raise_error_when_file_exists_strategy
 from pyevtk.hl import gridToVTK
 from toolz.itertoolz import concatv
 
 if TYPE_CHECKING:
-    from collections.abc import Generator, Iterable
+    from collections.abc import Callable, Generator, Iterable
 
     from numpy.typing import ArrayLike
 
@@ -66,11 +65,11 @@ class FMesh:
         name: int,
         kind: int | Kind,
         geometry_spec: gc.AbstractGeometrySpec,
-        ebins: np.ndarray,
-        data: np.ndarray,
-        errors: np.ndarray,
-        totals: np.ndarray | None = None,
-        totals_err: np.ndarray | None = None,
+        ebins: ArrayLike,
+        data: ArrayLike,
+        errors: ArrayLike,
+        totals: ArrayLike | None = None,
+        totals_err: ArrayLike | None = None,
         comment: str | None = None,
     ) -> None:
         """Construct FMesh instance object.
@@ -96,9 +95,9 @@ class FMesh:
         self.name = int(name)
         self.kind = Kind(kind)  # may be not a particle kind, when this is a sum of heating
 
-        self._geometry_spec: gc.CartesianGeometrySpec | gc.CylinderGeometrySpec | gc.AbstractGeometrySpec = (
-            geometry_spec
-        )
+        self._geometry_spec: (
+            gc.CartesianGeometrySpec | gc.CylinderGeometrySpec | gc.AbstractGeometrySpec
+        ) = geometry_spec
         self.bins = {}
         self.bins["X"] = self._x = geometry_spec.ibins
         self.bins["Y"] = self._y = geometry_spec.jbins
@@ -227,16 +226,15 @@ class FMesh:
             return self.totals_err[
                 -1
             ]  # TODO dvp: assumes max energy bin is most representative, check usage
-        return self.errors[0, 0, 0, 0]
+        return self.errors[0, 0, 0, 0].item()
 
     def check_attributes(self) -> None:
         """Check consistency of attributes."""
         assert self._e.size >= 2
         assert self.data.shape == self.errors.shape
         assert self.data.shape == (self.e.size - 1, *self._geometry_spec.bins_shape)
-        assert (
-            self._totals is None
-            or isinstance(self._totals, np.ndarray)
+        assert self._totals is None or (
+            isinstance(self._totals, np.ndarray)
             and isinstance(self._totals_err, np.ndarray)
             and self._totals.shape == self._totals_err.shape
             and self._totals.shape == self._geometry_spec.bins_shape
@@ -487,7 +485,7 @@ class FMesh:
                     totals_err,
                     comment=comment,
                 )
-            raise FMesh.FMeshError("Invalid version for FMesh file %d" % version)
+            raise FMesh.FMeshError(f"Invalid version {version} for FMesh file")
 
     def save2vtk(self, filename: str | None = None, data_name: str | None = None) -> str:
         """Saves this fmesh data to vtk file.
@@ -505,7 +503,7 @@ class FMesh:
             Full path to saved VTK file.
         """
         assert not self.is_cylinder, "Not implemented for cylinder geometry"
-        # TODO dvp: implement for cylinder geometry (see iwwgvr project for example).
+        # TODO dvp: implement for cylinder geometry (see iwwgvr or F4Enix projects for example).
 
         if filename is None:
             filename = str(self.name)
@@ -550,7 +548,7 @@ class FMesh:
             end="",
         )
         for f in np.nditer(self.ibins):
-            print("% g" % f, file=stream, end="")
+            print(f" {f}", file=stream, end="")
         print(file=stream)
         print(
             f"{('Z' if self.is_cylinder else 'Y')} direction:",
@@ -558,7 +556,7 @@ class FMesh:
             end="",
         )
         for f in np.nditer(self.jbins):
-            print(" %g" % f, file=stream, end="")
+            print(f" {f}", file=stream, end="")
         print(file=stream)
         print(
             "{} direction:".format("Theta" if self.is_cylinder else "Z"),
@@ -566,11 +564,11 @@ class FMesh:
             end="",
         )
         for f in np.nditer(self.kbins):
-            print(" %g" % f, file=stream, end="")
+            print(f" {f}", file=stream, end="")
         print(file=stream)
         print("Energy bin boundaries:", file=stream, end="")
         for f in np.nditer(self.e):
-            print(" %g" % f, file=stream, end="")
+            print(f" {f}", file=stream, end="")
         print("\n", file=stream)
         if self.is_cylinder:
             print(
@@ -589,38 +587,23 @@ class FMesh:
                     for iz in range(z.size):
                         value = self.data[ie, ix, iy, iz]
                         err = self.errors[ie, ix, iy, iz]
-                        row = " {:10.3e}{:10.3f}{:10.3f}{:10.3f} {:11.5e} {:11.5e}".format(
-                            e[ie],
-                            x[ix],
-                            y[iy],
-                            z[iz],
-                            value,
-                            err,
+                        row = (
+                            f" {e[ie]:10.3e}{x[ix]:10.3f}{y[iy]:10.3f}{z[iz]:10.3f}"
+                            f" {value:11.5e} {err:11.5e}"
                         )
                         print(row, file=stream)
 
-        for ix in range(x.size):
-            for iy in range(y.size):
-                for iz in range(z.size):
-                    if self._totals:
+        if self._totals:
+            for ix in range(x.size):
+                for iy in range(y.size):
+                    for iz in range(z.size):
                         value = self._totals[ix, iy, iz]
                         err = self._totals_err[ix, iy, iz]
-                    else:
-                        portion = self.data[:, ix, iy, iz]
-                        value = np.sum(portion)
-                        err = portion * self.errors[:, ix, iy, iz]
-                        err = np.sqrt(np.sum(err * err)) / value
-                    row = "%11s%10.3f%10.3f%10.3f %11.5e %11.5e" % (
-                        "   Total   ",
-                        x[ix],
-                        y[iy],
-                        z[iz],
-                        value,
-                        err,
-                    )
-                    print(row, file=stream, end="")
-
-            print("\n", file=stream)
+                        row = (
+                            f"   Total   {x[ix]:10.3f}{y[iy]:10.3f}{z[iz]:10.3f}"
+                            f" {value:11.5e} {err:11.5e}"
+                        )
+                        print(row, file=stream)
 
     def total_by_energy(self, new_name: int = 0) -> FMesh:
         """Integrate over energy bins.
@@ -674,7 +657,7 @@ class FMesh:
         new_bins_list, new_data = rebin.shrink_nd(self.data, iter(trim_spec), assume_sorted=True)
         _, new_errors = rebin.shrink_nd(self.errors, iter(trim_spec), assume_sorted=True)
 
-        assert all(np.array_equal(a, b) for a, b in zip(new_bins_list, _))
+        assert all(np.array_equal(a, b) for a, b in zip(new_bins_list, _, strict=False))
 
         new_ebins, new_xbins, new_ybins, new_zbins = new_bins_list
         if self.totals is None:
@@ -969,9 +952,9 @@ def _iterate_bins(stream, _n, _with_ebins):
     Yields:
         pairs value - error
     """
-    value_start, value_end = (41, 53) if _with_ebins else (32, 44)
+    value_start, value_end = (39, 51) if _with_ebins else (30, 42)
     for _ in range(_n):
-        _line = next(stream)
+        _line = next(stream).lstrip()
         _value = float(_line[value_start:value_end])
         _error = float(_line[value_end:])
         if _value < 0.0:
@@ -985,7 +968,7 @@ def iter_meshtal(
     fid: TextIO,
     name_select: Callable[[int], bool] | None = None,
     tally_select: Callable[[FMesh], bool] | None = None,
-) -> Generator[FMesh, None, None]:
+) -> Generator[FMesh]:
     """Iterates fmesh tallies from fid.
 
     Args:
@@ -1195,7 +1178,7 @@ def _find_words_after(f: TextIO, *keywords: str) -> list[str]:
     for line in f:
         words: list[str] = line.split()
         i = 0  # : ignore[SIM113]
-        for w, kw in zip(words, keywords):
+        for w, kw in zip(words, keywords, strict=False):
             if w != kw:
                 break
             i += 1

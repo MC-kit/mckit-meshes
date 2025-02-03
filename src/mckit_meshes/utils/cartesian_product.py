@@ -1,21 +1,23 @@
 """Apply function to cartesian product of arrays."""
+
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 
 from itertools import product
 
 import numpy as np
 
 if TYPE_CHECKING:
-    from collections.abc import Sized
+    from collections.abc import Callable
+    from numpy.typing import NDArray
 
 
 def cartesian_product(
-    *arrays: Sized,
-    aggregator: Callable[[Any, dict], Any],
+    *arrays: NDArray,
+    aggregator: Callable = lambda x: np.array(x),
     **kw: dict[Any, Any],
-) -> np.ndarray:
+) -> NDArray:
     """Computes transformations of cartesian product of all the elements in arrays.
 
     Args:

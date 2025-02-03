@@ -11,7 +11,7 @@ from pathlib import Path
 import numpy as np
 
 from mckit_meshes import fmesh
-from mckit_meshes.utils.io import check_if_path_exists
+from mckit_meshes.utils import check_if_path_exists
 
 __LOG = logging.getLogger(__name__)
 
@@ -33,7 +33,8 @@ def add(
 
     Args:
         out: output file
-        comment: comment for a new fmesh npz file, if not provided, then the comment from the first mesh is used
+        comment: comment for a new fmesh npz file,
+                 if not provided, then the comment from the first mesh is used
         number: ... to assign to resulting mesh
         npz_files: files to process, optional
         override: define behaviour when output file, exists, default - rise FileExistsError.

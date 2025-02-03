@@ -1,4 +1,5 @@
 """Particle kinds enumeration and methods."""
+
 from __future__ import annotations
 
 from enum import IntEnum

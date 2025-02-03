@@ -1,7 +1,7 @@
 """Functions for rebinning histogram-like distributions."""
 
-# TODO: DVP: implement propagation in result the indexes computed on shrink
-# for reuse in FMesh.shrink for equivalent grids or alike
+# TODO @dvp: implement propagation in result the indexes computed on shrink
+#            for reuse in FMesh.shrink for equivalent grids or alike
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -23,8 +23,6 @@ if platform.system() == "Linux":
     from mckit_meshes.utils.no_daemon_process import Pool
 else:
     Pool = None
-
-# TODO
 
 __all__ = [
     "interpolate",
@@ -74,13 +72,13 @@ def interpolate(x_new: ArrayLike, x: ArrayLike, y: ArrayLike, axis: int | None =
         axis = 0
 
     x_new_indices = np.digitize(x_new, x)
-    x_new_indices = x_new_indices.clip(1, len(x) - 1).astype(int)
+    x_new_indices = x_new_indices.clip(1, len(x) - 1).astype(int)  # TODO @dvp: why astype?
     lo = x_new_indices - 1
     hi = x_new_indices
     x_lo = x[lo]
     deltas = x[hi] - x_lo
     nd = y.ndim
-    slice1 = [slice(None)] * nd
+    slice1 = [slice(None)] * nd  # TODO @dvp: suspicious usage of slice duplicates
     slice2 = [slice(None)] * nd
     slice1[axis] = lo
     slice2[axis] = hi
@@ -103,7 +101,7 @@ def rebin_1d(
     axis: int = 0,
     grouped: bool = False,
     assume_sorted: bool = False,
-) -> ArrayLike:
+) -> np.ndarray:
     """Transforms 1-D histogram defined as `data` on the limiting points.
 
     define like `bins` to equivalent (see the terms below) histogram defined
@@ -135,15 +133,15 @@ def rebin_1d(
     Returns:
         rebinned data
     """
-    assert (
-        bins[0] <= new_bins[0]
-    ), "Rebinning doesn't provide extrapolation lower of the original bins"
-    assert (
-        new_bins[-1] <= bins[-1]
-    ), "Rebinning doesn't provide extrapolation upper of the original bins"
-    assert (
-        bins.size == a.shape[axis] + 1
-    ), "The `a` array shape doesn't match the given bins and axis"
+    assert bins[0] <= new_bins[0], (
+        "Rebinning doesn't provide extrapolation lower of the original bins"
+    )
+    assert new_bins[-1] <= bins[-1], (
+        "Rebinning doesn't provide extrapolation upper of the original bins"
+    )
+    assert bins.size == a.shape[axis] + 1, (
+        "The `a` array shape doesn't match the given bins and axis"
+    )
     assert assume_sorted or is_monotonically_increasing(bins)
     assert assume_sorted or is_monotonically_increasing(new_bins)
 
@@ -183,7 +181,7 @@ def rebin_1d(
 
 def rebin_nd(
     a: ndarray,
-    rebin_spec: Iterable[tuple[ndarray, ndarray, int, bool]],
+    rebin_spec: Iterable[tuple[ArrayLike, ArrayLike, int, bool]],
     assume_sorted: bool = False,
     external_process_threshold: int = __EXTERNAL_PROCESS_THRESHOLD,
 ) -> ndarray:
@@ -199,8 +197,8 @@ def rebin_nd(
             If True skip assertion of bins sorting order,
             by default False - asserts the input_file data
         external_process_threshold: int
-            If size of `a` is greater than that, then the computation is executed in external process,
-            to achieve immediate memory cleanup.
+            If size of `a` is greater than that, then the computation
+            is executed in external process, to achieve immediate memory cleanup.
 
     Returns:
         Rebinned data.
@@ -263,7 +261,7 @@ def rebin_spec_composer(
         grouped_flags = itertools.repeat(grouped_flags)
     elif not grouped_flags:
         grouped_flags = itertools.repeat(False)
-    return zip(bins_seq, new_bins_seq, axes, grouped_flags)
+    return zip(bins_seq, new_bins_seq, axes, grouped_flags, strict=False)
 
 
 # @numba.jit
@@ -322,14 +320,18 @@ def shrink_1d(
         return bins, a
 
     if low < bins[0] or bins[-1] < low:
-        raise ValueError(
-            f"Low shrink edge is beyond the bins range: {low:g} is not in [{bins[0]:g}..{bins[-1]:g}]",
+        msg = (
+            f"Low shrink edge is beyond the bins range: {low:g}"
+            f" is not in [{bins[0]:g}..{bins[-1]:g}]",
         )
+        raise ValueError(msg)
 
     if high < bins[0] or bins[-1] < high:
-        raise ValueError(
-            f"High shrink edge is beyond the bins range: {high:g} is not in [{bins[1]:g}..{bins[-1]:g}]",
+        msg = (
+            f"High shrink edge is beyond the bins range: {high:g}"
+            f" is not in [{bins[1]:g}..{bins[-1]:g}]"
         )
+        raise ValueError(msg)
 
     left_idx, right_idx = np.digitize([low, high], bins) - 1
 
@@ -352,20 +354,21 @@ def shrink_1d(
     return new_bins, new_a
 
 
-def shrink_nd(a, trim_spec, assume_sorted=False) -> tuple[ArrayLike, ArrayLike]:
+def shrink_nd(
+    a: np.ndarray,
+    trim_spec,
+    assume_sorted=False,
+) -> tuple[list[np.ndarray] | None, np.ndarray]:
     """Perform multidimensional shrink.
 
     Args:
-        a: ndarray
-            The grid to shrink.
-        trim_spec: sequence of tuples
-            Iterates over tuples (bins, low, high, axis)
-        assume_sorted: bool, optional
-            If True skip assertion of bins sorting order,
-            by default False - asserts the input_file data
+        a: The grid to shrink.
+        trim_spec: sequence of tuples (bins, low, high, axis)
+        assume_sorted:  If True skip assertion of bins sorting order,
+                        by default False - asserts the input_file data
 
     Returns:
-            A sequence with  new bins,        The shrunk grid.
+            A sequence with  new bins, if any, the shrunk or initial grid.
     """
     if not isinstance(trim_spec, collections.abc.Iterator):
         trim_spec = iter(trim_spec)
@@ -410,4 +413,4 @@ def trim_spec_composer(
         rights = itertools.repeat(None)
     if not axes:
         axes = itertools.count()
-    return zip(bins_seq, lefts, rights, axes)
+    return zip(bins_seq, lefts, rights, axes, strict=False)

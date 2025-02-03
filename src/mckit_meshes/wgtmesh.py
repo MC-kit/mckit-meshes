@@ -1,7 +1,8 @@
 """Weight mesh class and functions."""
+
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, NamedTuple, TextIO, Union
+from typing import TYPE_CHECKING, NamedTuple, TextIO
 
 import sys
 
@@ -11,18 +12,18 @@ from enum import IntEnum
 import numpy as np
 
 import mckit_meshes.mesh.geometry_spec as gs
-import mckit_meshes.utils.io
+from mckit_meshes.utils import print_n
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
+    from collections.abc import Generator, Iterable
 
     from numpy.typing import ArrayLike
 
-GeometrySpec = Union[gs.CartesianGeometrySpec, gs.CylinderGeometrySpec]
+GeometrySpec = gs.CartesianGeometrySpec | gs.CylinderGeometrySpec
 Point = np.ndarray
 
 
-def ensure_float_arrays(*arrays: ArrayLike) -> Generator[np.ndarray, None, None]:
+def ensure_float_arrays(*arrays: ArrayLike) -> Generator[np.ndarray]:
     yield from (np.asarray(x, dtype=float) for x in arrays)
 
 
@@ -57,7 +58,7 @@ class WgtMesh:
         self._geometry_spec.print_specification(io, columns=columns)
         print("wwge:n", end=" ", file=io)
         second_indent = " " * 15
-        mckit_meshes.utils.io.print_n(
+        print_n(
             gs.format_floats(self.energies[0][1:]),
             io=io,
             indent=second_indent,
@@ -65,7 +66,7 @@ class WgtMesh:
         )
         if len(self.energies) > 1:
             print("wwge:p", end=" ", file=io)
-            mckit_meshes.utils.io.print_n(
+            print_n(
                 gs.format_floats(self.energies[1][1:]),
                 io=io,
                 indent=second_indent,
@@ -87,7 +88,7 @@ class WgtMesh:
         indent = " " * 8
         print(indent, "emesh=", sep="", end="", file=io)
         second_indent = indent + " " * 6
-        mckit_meshes.utils.io.print_n(
+        print_n(
             gs.format_floats(self.energies[0][1:]),
             io=io,
             indent=second_indent,
@@ -99,7 +100,7 @@ class WgtMesh:
             self._geometry_spec.print_specification(io, columns=columns)
             print(indent, "emesh=", sep="", end="", file=io)
             # TODO dvp: try to use do_print_bins here
-            mckit_meshes.utils.io.print_n(
+            print_n(
                 gs.format_floats(self.energies[1][1:]),
                 io=io,
                 indent=second_indent,
@@ -213,7 +214,7 @@ class WgtMesh:
 
     def __add__(self, other) -> WgtMesh:
         assert self.bins_are_equal(other)
-        weights = [a + b for a, b in zip(self.weights, other.weights)]
+        weights = [a + b for a, b in zip(self.weights, other.weights, strict=False)]
         return WgtMesh(
             self._geometry_spec,
             self.energies,
@@ -222,7 +223,7 @@ class WgtMesh:
 
     def __sub__(self, other) -> WgtMesh:
         assert self.bins_are_equal(other)
-        weights = [a - b for a, b in zip(self.weights, other.weights)]
+        weights = [a - b for a, b in zip(self.weights, other.weights, strict=False)]
         return WgtMesh(
             self._geometry_spec,
             self.energies,
@@ -317,13 +318,13 @@ class WgtMesh:
             self.index += items
             return self.data[i : self.index]
 
-        def get_floats(self, items: int) -> Generator[float, None, None]:
+        def get_floats(self, items: int) -> Iterable[float]:
             return map(float, self.get(items))
 
-        def get_ints(self, items: int) -> Generator[int, None, None]:
+        def get_ints(self, items: int) -> Iterable[int]:
             return map(int, self.get(items))
 
-        def get_ints_written_as_floats(self, items: int) -> Generator[int, None, None]:
+        def get_ints_written_as_floats(self, items: int) -> Iterable[int]:
             return map(int, self.get_floats(items))
 
         def skip(self, items: int = 1) -> None:
@@ -424,26 +425,30 @@ class WgtMesh:
         r"""Combine weight meshes produced from different runs with weighting factor.
 
         Note:
-        Importance of a mesh voxel `i` is $1/w_i$ and is proportional to average portion $p_i$ of
-        passing particle weight W to a tally for which the weight mesh is computed.
-        To obtain combined weight on merging two meshes, we will combine the probabilities using weighting factors and
-        use reciprocal of a result as a resulting weight of mesh voxel.
-        The weighting factors are usually NPS (Number particles sampled) from a run on which a mesh was produced.
-        The combined probability in resulting voxel `i` is:
+            Importance of a mesh voxel `i` is $1/w_i$ and is proportional
+            to average portion $p_i$ of passing particle weight W to a tally,
+            for which the weight mesh is computed.
+            To obtain combined weight on merging two meshes,
+            we will combine the probabilities using weighting factors and
+            use reciprocal of a result as a resulting weight of mesh voxel.
+            The weighting factors are usually NPS (Number particles sampled)
+            from a run on which a mesh was produced.
 
-        .. math::
+            The combined probability in resulting voxel `i` is:
 
-            w_ij - weight in voxel i of mesh j
-            n_j -  nps - weighting factor on combining of mesh j
+            .. math::
 
-            p_ij = 1/w_ij - probability for voxel i of mesh j
+                w_ij - weight in voxel i of mesh j
+                n_j -  nps - weighting factor on combining of mesh j
 
-            p_i = \frac{ \sum_j{n_j*p_ij} { \sum_j{n_j} }
+                p_ij = 1/w_ij - probability for voxel i of mesh j
 
-        So, the resulting voxel `i` weight level is:
+                p_i = \frac{ \sum_j{n_j*p_ij} { \sum_j{n_j} }
 
-        .. math::
-            w_i = \frac{1} {p_i}
+            So, the resulting voxel `i` weight level is:
+
+            .. math::
+                w_i = \frac{1} {p_i}
 
 
         Args:
@@ -520,16 +525,16 @@ class WgtMesh:
         _gs = self._geometry_spec
         x, y, z = normalization_point
         ix, iy, iz = _gs.select_indexes(i_values=x, j_values=y, k_values=z)
-        new_weights = []
+
         value_at_normalisation_point = self.weights[0][energy_bin, ix, iy, iz]
         """The value at last energy bin about 20 MeV at neutron weights."""
 
         factor = normalized_value / value_at_normalisation_point
         """Scale all other weights by this value."""
 
-        for w in self.weights:
-            # TODO dvp: revise for multiple energy bins, may be add scaling values for each energy bin and particle
-            new_weights.append(w * factor)
+        new_weights = [w * factor for w in self.weights]
+        # TODO @dvp: revise for multiple energy bins,
+        #           may be add scaling values for each energy bin and particle
 
         return WgtMesh(_gs, self.energies, new_weights)
 
@@ -537,7 +542,8 @@ class WgtMesh:
         """Get reciprocal of self weights and normalize to 1 at given point.
 
         Important:
-            A caller specifies normalization_point in local coordinates. See :class:`GeometrySpec.local_coordinates`.
+            A caller specifies normalization_point in local coordinates.
+            See :class:`GeometrySpec.local_coordinates`.
 
         Args:
             normalization_point: Point at which output weights should be 1
@@ -581,7 +587,8 @@ def reciprocal(a: np.ndarray, zero_index: np.ndarray = None) -> np.ndarray:
     else:
         assert np.array_equal(zero_index, a == 0.0)
     result: np.ndarray = np.reciprocal(a, where=np.logical_not(zero_index))
-    #  fix bug in numpy reciprocal: it doesn't pass zero values, the bug doesn't show up on debugging
+    # this fixes bug in numpy reciprocal: it doesn't pass zero values
+    # note: the bug doesn't show up on debugging
     result[zero_index] = 0.0
     return result
 

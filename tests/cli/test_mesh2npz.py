@@ -10,7 +10,7 @@ from mckit_meshes.cli.runner import mckit_meshes
 from mckit_meshes.fmesh import FMesh
 
 
-@pytest.fixture()
+@pytest.fixture
 def source(data):
     return data / "1.m"
 
@@ -76,9 +76,9 @@ def test_existing_mesh_tally_file_and_not_specified_mesh_tally(
     assert not output_path.exists()
     result = runner.invoke(mckit_meshes, args=["mesh2npz"], catch_exceptions=False)
     assert result.exit_code == 0
-    assert (
-        output_path.exists()
-    ), "Failed to process meshtal file in current directory with empty command line"
+    assert output_path.exists(), (
+        "Failed to process meshtal file in current directory with empty command line"
+    )
 
 
 def test_no_mesh_tally_file_and_not_specified_mesh_tally(cd_tmpdir, runner):  # noqa: ARG001
@@ -131,6 +131,6 @@ def test_long_mesh_number(cd_tmpdir, runner, data):  # noqa: ARG001
     npz_path = prefix / "2035224.npz"
     assert npz_path.exists(), f"should create {npz_path}"
     mesh = FMesh.load_npz(npz_path)
-    assert (
-        mesh.name == 2035224
-    ), "Should correctly save and load the 2035224 mesh id, which requires 32 bit"
+    assert mesh.name == 2035224, (
+        "Should correctly save and load the 2035224 mesh id, which requires 32 bit"
+    )

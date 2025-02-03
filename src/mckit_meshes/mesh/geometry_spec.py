@@ -26,6 +26,7 @@
     For the old callers we will use ZERO_ORIGIN for Geometry Specification being
     used in FMesh.
 """
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Final, TextIO, cast
@@ -38,12 +39,11 @@ import numpy as np
 
 from numpy import linalg
 
-import mckit_meshes.utils.io
-
+from mckit_meshes.utils import print_n
 from mckit_meshes.utils.cartesian_product import cartesian_product
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Sequence
+    from collections.abc import Generator, Iterable, Sequence
 
 _2PI: Final[float] = 2.0 * np.pi
 _1_TO_2PI: Final[float] = 1 / _2PI
@@ -95,11 +95,11 @@ class AbstractGeometrySpecData:
     def __hash__(self) -> int:
         return hash(self.bins)
 
-    def __eq__(self, other: AbstractGeometrySpecData) -> bool:
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, AbstractGeometrySpecData):
             return False
         a, b = self.bins, other.bins
-        return len(a) == len(b) and arrays_equal(zip(a, b))
+        return len(a) == len(b) and arrays_equal(zip(a, b, strict=False))
 
     @property
     def bins(self) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
@@ -111,6 +111,7 @@ class AbstractGeometrySpecData:
         return self.origin, self.ibins, self.jbins, self.kbins
 
 
+# noinspection PyTypeChecker
 class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
     """Common base for rectilinear and cylinder mesh specifications."""
 
@@ -271,7 +272,8 @@ class CartesianGeometrySpec(AbstractGeometrySpec):
             return bins_square[:-1] + bins_square[1:] + bins_mult
 
         x_square, y_square, z_square = (
-            calc_sum(x - px) for x, px in zip((self.ibins, self.jbins, self.kbins), point)
+            calc_sum(x - px)
+            for x, px in zip((self.ibins, self.jbins, self.kbins), point, strict=False)
         )
         w = np.zeros((ni, nj, nk), dtype=float)
         for i in range(ni):
@@ -314,7 +316,7 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
 
     @property
     def bins(self):
-        return (*super().bins, self.axs, self.vec)
+        return *super().bins, self.axs, self.vec
 
     @property
     def cylinder(self) -> bool:
@@ -353,6 +355,7 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
 
     # TODO dvp: add opposite method global_coordinates
 
+    # noinspection PyTypeChecker
     def print_geom(self, io: TextIO, indent: str) -> None:
         print(indent, "geom=cyl", sep="", file=io)
         print(
@@ -478,14 +481,14 @@ def _print_bins(indent, prefix, _ibins, io, columns: int = 6) -> None:
     coarse_mesh = coarse_mesh[1:]  # drop the first value - it's presented with origin
     print(indent, f"{prefix}mesh=", sep="", end="", file=io)
     second_indent = indent + " " * 5
-    mckit_meshes.utils.io.print_n(
+    print_n(
         (f"{x:.6g}" for x in coarse_mesh),
         io=io,
         indent=second_indent,
         max_columns=columns,
     )
     print(indent, f"{prefix}ints=", sep="", end="", file=io)
-    mckit_meshes.utils.io.print_n(intervals, io=io, indent=second_indent, max_columns=columns)
+    print_n(intervals, io=io, indent=second_indent, max_columns=columns)
 
 
 def select_indexes(
@@ -506,13 +509,13 @@ def select_indexes(
         >>> select_indexes(r, None)
         slice(0, 5, None)
 
-        For non specified x, if input array represents just one bin,
+        For none specified x, if input array represents just one bin,
         then return index 0 to squeeze results.
-        >>> select_indexes(np.array([10,20]), None)
+        >>> select_indexes(np.array([10, 20]), None)
         0
 
         For x = 1.5, we have 1 < 1.5 < 2, so the bin index is to be 1
-        >>> select_indexes(r, 1.5)
+        >>> select_indexes(r, 1.5).item()
         1
 
         For x = 0, it's the first bin, and index is to be 0
@@ -520,11 +523,11 @@ def select_indexes(
         0
 
         For coordinates below r[0] return -1.
-        >>> select_indexes(r, -1)
+        >>> select_indexes(r, -1).item()
         -1
 
         For coordinates above  r[-1] return a.size-1.
-        >>> select_indexes(r, 5)
+        >>> select_indexes(r, 5).item()
         4
 
         And for array of coordinates
@@ -536,14 +539,14 @@ def select_indexes(
         x: one or more coordinates along `a`-boundaries
 
     Returns:
-        out: index or indices for each given coordinate
+        index or indices for each given coordinate
     """
     assert a.size > 1, "Parameter a doesn't represent binning"
 
     if x is None:
         return slice(0, a.size) if a.size > 2 else 0  # squeeze if there's only one bin
 
-    i: np.ndarray = a.searchsorted(x) - 1
+    i: np.ndarray = np.subtract(a.searchsorted(x), 1)
 
     if np.isscalar(i):
         if i < 0 and x == a[0]:
@@ -557,8 +560,11 @@ def select_indexes(
     return i
 
 
-def format_floats(floats: Iterable[float], _format="{:.6g}") -> Iterable[str]:
-    yield from map(_format.format, floats)
+def format_floats(floats: Iterable[float], _format: str = "{:.6g}") -> Generator[str]:
+    def _fmt(item: float) -> str:
+        return _format.format(item)
+
+    yield from map(_fmt, floats)
 
 
 def compute_intervals_and_coarse_bins(
@@ -569,28 +575,28 @@ def compute_intervals_and_coarse_bins(
 
     Examples:
     Find equidistant bins and report as intervals
-    >>> arr = np.array([1, 2, 3, 4], dtype=float)
-    >>> arr
+    >>> arry = np.array([1, 2, 3, 4], dtype=float)
+    >>> arry
     array([1., 2., 3., 4.])
-    >>> intervals, coarse = compute_intervals_and_coarse_bins(arr)
+    >>> intervals, coarse = compute_intervals_and_coarse_bins(arry)
     >>> intervals
     [3]
     >>> coarse
-    [1.0, 4.0]
+    [np.float64(1.0), np.float64(4.0)]
 
     A bins with two interval values.
-    >>> arr = np.array([1, 2, 3, 6, 8, 10], dtype=float)
-    >>> intervals, coarse = compute_intervals_and_coarse_bins(arr)
+    >>> arry = np.array([1, 2, 3, 6, 8, 10], dtype=float)
+    >>> intervals, coarse = compute_intervals_and_coarse_bins(arry)
     >>> intervals
     [2, 1, 2]
     >>> coarse
-    [1.0, 3.0, 6.0, 10.0]
+    [np.float64(1.0), np.float64(3.0), np.float64(6.0), np.float64(10.0)]
 
-    On zero (or negative tolerance) just use 1 intervals and return original array.
-    >>> intervals, coarse = compute_intervals_and_coarse_bins(arr, tolerance=0.0)
+    On zero (or negative tolerance) just use intervals filled with ones and return original array.
+    >>> intervals, coarse = compute_intervals_and_coarse_bins(arry, tolerance=0.0)
     >>> intervals
     [1, 1, 1, 1, 1]
-    >>> coarse is arr
+    >>> coarse is arry
     True
 
     Args:
