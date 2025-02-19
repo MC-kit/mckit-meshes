@@ -681,11 +681,13 @@ def make_geometry_spec(origin, ibins, jbins, kbins, axs=None, vec=None) -> Geome
     Returns:
         spec - new geometry specification
     """
-    origin, ibins, jbins, kbins = map(gs.as_float_array, [origin, ibins, jbins, kbins])
+    origin, ibins, jbins, kbins = map(
+        lambda x: np.asarray(x, dtype=np.float64), [origin, ibins, jbins, kbins]
+    )
     if axs is None:
         geometry_spec = gs.CartesianGeometrySpec(ibins, jbins, kbins, origin=origin)
     else:
-        axs, vec = map(gs.as_float_array, [axs, vec])
+        axs, vec = map(np.asarray, [axs, vec])
         geometry_spec = gs.CylinderGeometrySpec(
             ibins,
             jbins,

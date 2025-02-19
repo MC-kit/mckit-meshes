@@ -102,9 +102,9 @@ class FMesh:
         self.bins["X"] = self._x = geometry_spec.ibins
         self.bins["Y"] = self._y = geometry_spec.jbins
         self.bins["Z"] = self._z = geometry_spec.kbins
-        self.bins["E"] = self._e = gc.as_float_array(ebins)
-        self.data = gc.as_float_array(data)
-        self.errors = gc.as_float_array(errors)
+        self.bins["E"] = self._e = np.asarray(ebins)
+        self.data = np.asarray(data)
+        self.errors = np.asarray(errors)
         if self._e.size > 2:
             if totals is None:
                 if totals_err is not None:

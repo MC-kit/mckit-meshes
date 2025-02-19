@@ -1,10 +1,11 @@
-"""Common mesh geometry specification classes and functions.
+"""Common for weight and tally meshes geometry specification classes and functions.
 
 ## Relative or absolute coordinates
 
     There are variations when coordinates are presented as relative to origin
-    or absolute. This depends on is output for specification, or input/output
-    to Weight of Meshtal files and is it cartesian or cylinder mesh.
+    or absolute. This depends on:
+    1) is the output is for MCNP specification or input/output to Weight of Meshtal files
+    2) is it cartesian or cylinder mesh.
 
     Cartesian:
 
@@ -39,35 +40,23 @@ import numpy as np
 
 from numpy import linalg
 
-from mckit_meshes.utils import print_n
-from mckit_meshes.utils.cartesian_product import cartesian_product
+from mckit_meshes.utils import print_n, cartesian_product
 
 if TYPE_CHECKING:
     from collections.abc import Generator, Iterable, Sequence
 
+
 _2PI: Final[float] = 2.0 * np.pi
 _1_TO_2PI: Final[float] = 1 / _2PI
 __DEG_2_RAD: Final[float] = np.pi / 180.0
-CARTESIAN_BASIS: Final[np.ndarray] = np.eye(3, dtype=np.double)
+CARTESIAN_BASIS: Final[np.ndarray] = np.eye(3, dtype=float)
 (NX, NY, NZ) = CARTESIAN_BASIS
 
 DEFAULT_AXIS: Final[np.ndarray] = NZ
 DEFAULT_VEC: Final[np.ndarray] = NX
 
 
-ZERO_ORIGIN: Final[np.ndarray] = np.zeros((3,), dtype=np.double)
-
-
-def as_float_array(array) -> np.ndarray:
-    """Convert any sequence of numbers to numpy array of floats.
-
-    Args:
-        array: Anything that can be converted to numpy ndarray.
-
-    Returns:
-        np.ndarray:  either original or conversion.
-    """
-    return np.asarray(array, dtype=float)
+ZERO_ORIGIN: Final[np.ndarray] = np.zeros((3,), dtype=float)
 
 
 @dataclass(eq=False)
@@ -131,7 +120,7 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
         ...
 
     @abc.abstractmethod
-    def get_mean_square_distance_weights(self, point) -> float:
+    def get_mean_square_distance_weights(self, point: np.ndarray) -> np.ndarray:
         """Estimate weights as a voxel mean square distance from the point.
 
         Args:
@@ -440,14 +429,6 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
 
         return cell_centers
 
-    # def __hash__(self):
-    #
-    # def __eq__(self, other):
-    #     if not isinstance(other, CylinderGeometrySpec):
-    #     return (
-    #         and np.array_equal(self.axs, other.axs)
-    #         and np.array_equal(self.vec, other.vec)
-
     def adjust_axs_vec_for_mcnp(self) -> CylinderGeometrySpec:
         """Set `axs` and `vec` attributes to the values, which MCNP considers orthogonal.
 
@@ -546,7 +527,7 @@ def select_indexes(
     if x is None:
         return slice(0, a.size) if a.size > 2 else 0  # squeeze if there's only one bin
 
-    i: np.ndarray = np.subtract(a.searchsorted(x), 1)
+    i = a.searchsorted(x) - 1
 
     if np.isscalar(i):
         if i < 0 and x == a[0]:

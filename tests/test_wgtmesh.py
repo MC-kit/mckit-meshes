@@ -153,7 +153,7 @@ def test_constructor_from_lists():
         wgm.photon_weights,
     ]:
         assert isinstance(b, np.ndarray), f"{b} is not np.ndarray"
-        assert b.dtype == float, f"{b} is not an array of floats"
+        assert b.dtype == np.float64, f"{b} is not an array of floats"
     for b in [
         wgm.energies,
         wgm.weights,
