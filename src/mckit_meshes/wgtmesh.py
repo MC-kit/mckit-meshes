@@ -579,7 +579,7 @@ class WgtMesh:
         return WgtMesh(self._geometry_spec, new_energies, new_weights)
 
 
-def reciprocal(a: np.ndarray, zero_index: np.ndarray = None) -> np.ndarray:
+def reciprocal(a: np.ndarray, zero_index: np.ndarray | None = None) -> np.ndarray:
     if a.dtype != float:
         a = np.array(a, dtype=float)
     if zero_index is None:
@@ -681,8 +681,8 @@ def make_geometry_spec(origin, ibins, jbins, kbins, axs=None, vec=None) -> Geome
     Returns:
         spec - new geometry specification
     """
-    origin, ibins, jbins, kbins = map(
-        lambda x: np.asarray(x, dtype=np.float64), [origin, ibins, jbins, kbins]
+    origin, ibins, jbins, kbins = (
+        np.asarray(x, dtype=float) for x in (origin, ibins, jbins, kbins)
     )
     if axs is None:
         geometry_spec = gs.CartesianGeometrySpec(ibins, jbins, kbins, origin=origin)
