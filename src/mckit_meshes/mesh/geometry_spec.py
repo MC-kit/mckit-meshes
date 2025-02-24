@@ -30,6 +30,7 @@
 
 from __future__ import annotations
 
+import numbers
 from typing import TYPE_CHECKING, Final, TextIO, cast
 
 import abc
@@ -45,6 +46,8 @@ from mckit_meshes.utils import print_n, cartesian_product
 if TYPE_CHECKING:
     from collections.abc import Generator, Iterable, Sequence
 
+    import numpy.typing as npt
+
 
 _2PI: Final[float] = 2.0 * np.pi
 _1_TO_2PI: Final[float] = 1 / _2PI
@@ -57,6 +60,21 @@ DEFAULT_VEC: Final[np.ndarray] = NX
 
 
 ZERO_ORIGIN: Final[np.ndarray] = np.zeros((3,), dtype=float)
+
+
+def as_float_array(array: npt.ArrayLike) -> np.ndarray:
+    """Convert any sequence of numbers to numpy array of floats.
+
+    Note:
+        We rely on unified representation all the 'floats' with Python float.
+
+    Args:
+        array: Anything that can be converted to numpy ndarray.
+
+    Returns:
+        np.ndarray:  either original or conversion.
+    """
+    return np.asarray(array, dtype=float)
 
 
 @dataclass(eq=False)
@@ -179,13 +197,13 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
         """Bins (boundaries) shape."""
         return self.ibins.size, self.jbins.size, self.kbins.size
 
-    def surrounds_point(self, x: float, y: float, z: float, local: bool = True) -> bool:
+    def surrounds_point(self, x: float, y: float, z: float, *, local: bool = True) -> bool:
         """Check if the point (x,y,z) is within the volume of mesh.
 
         By default, assumes that the point is given in local coordinates.
         """
         if not local:
-            x, y, z = self.local_coordinates(np.array([x, y, z], dtype=float))
+            x, y, z = self.local_coordinates(as_float_array([x, y, z]))
         (xmin, xmax), (ymin, ymax), (zmin, zmax) = self.boundaries
         return cast(bool, (xmin < x < xmax) and (ymin < y < ymax) and (zmin < z < zmax))
 
@@ -391,7 +409,7 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
         z_sum = (1.0 / 3.0) * (
             z_minus_pz_square[1:] + z_minus_pz_square[:-1] + z_minus_pz[1:] * z_minus_pz[:-1]
         )
-        w = np.zeros((ni, nj, nk), dtype=float)
+        w: np.ndarray = np.zeros((ni, nj, nk), dtype=float)
 
         for i in range(ni):
             for j in range(nj):
@@ -401,7 +419,7 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
                     d = z_sum[j]
                     w[i, j, k] = a + b + d
         w = w + l1_square
-        return w * (1024.0 / np.max(w))
+        return cast(np.ndarray, w * (1024.0 / np.max(w)))
 
     def calc_cell_centers(self) -> np.ndarray:
         _x0, _y0, _z0 = self.origin
@@ -527,16 +545,18 @@ def select_indexes(
     if x is None:
         return slice(0, a.size) if a.size > 2 else 0  # squeeze if there's only one bin
 
-    i = a.searchsorted(x) - 1
+    i: npt.ArrayLike | int = a.searchsorted(x) - 1
 
-    if np.isscalar(i):
+    if isinstance(i, numbers.Integral):
         if i < 0 and x == a[0]:
             return 0
-    else:
+    elif isinstance(i, np.ndarray):
         neg = i < 0
         if np.any(neg):
             eq_to_min = a[0] == x
             i[np.logical_and(neg, eq_to_min)] = 0
+    else:
+        raise TypeError(i)
 
     return i
 

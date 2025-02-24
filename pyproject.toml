@@ -395,7 +395,7 @@ ignore = [
     "E402", # Module level import not at top of file
     "EM101", # Exception must not use a string literal, assign to variable first
     "EM102", # Exception must not use an f-string literal, assign to variable first
-    "FBT001", # Boolean positional arg in function definition (TODO!)
+    # "FBT001", # Boolean positional arg in function definition (TODO!)
     "FBT002", # Boolean default value in function definition (TODO!)
     "FBT003", # Boolean positional value in function call
     "FIX", # Remove TODOs
