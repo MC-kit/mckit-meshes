@@ -30,7 +30,6 @@
 
 from __future__ import annotations
 
-import numbers
 from typing import TYPE_CHECKING, Final, TextIO, cast
 
 import abc
@@ -547,7 +546,7 @@ def select_indexes(
 
     i: npt.ArrayLike | int = a.searchsorted(x) - 1
 
-    if isinstance(i, numbers.Integral):
+    if isinstance(i, int):
         if i < 0 and x == a[0]:
             return 0
     elif isinstance(i, np.ndarray):
