@@ -204,7 +204,7 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
         if not local:
             x, y, z = self.local_coordinates(as_float_array([x, y, z]))
         (xmin, xmax), (ymin, ymax), (zmin, zmax) = self.boundaries
-        return cast(bool, (xmin < x < xmax) and (ymin < y < ymax) and (zmin < z < zmax))
+        return cast("bool", (xmin < x < xmax) and (ymin < y < ymax) and (zmin < z < zmax))
 
     def select_indexes(
         self,
@@ -261,7 +261,7 @@ class CartesianGeometrySpec(AbstractGeometrySpec):
         assert points.shape[-1] == 3, "Expected cartesian point array or single point"
         if self.origin is not ZERO_ORIGIN:
             return cast(
-                np.ndarray,
+                "np.ndarray",
                 points - ZERO_ORIGIN,
             )  # TODO dvp: recall what is this subtraction for?
         return points
@@ -418,7 +418,7 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
                     d = z_sum[j]
                     w[i, j, k] = a + b + d
         w = w + l1_square
-        return cast(np.ndarray, w * (1024.0 / np.max(w)))
+        return cast("np.ndarray", w * (1024.0 / np.max(w)))
 
     def calc_cell_centers(self) -> np.ndarray:
         _x0, _y0, _z0 = self.origin
@@ -546,7 +546,7 @@ def select_indexes(
 
     i: npt.ArrayLike | int = a.searchsorted(x) - 1
 
-    if isinstance(i, int):
+    if np.isscalar(i):
         if i < 0 and x == a[0]:
             return 0
     elif isinstance(i, np.ndarray):

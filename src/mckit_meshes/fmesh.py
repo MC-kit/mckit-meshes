@@ -5,17 +5,17 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TextIO
+from typing import TYPE_CHECKING, TextIO, Literal
 
 import logging
 
+from multiprocessing import Pool
 from pathlib import Path
 from textwrap import dedent
 
 import numpy as np
 
 import mckit_meshes.mesh.geometry_spec as gc
-import mckit_meshes.utils.no_daemon_process as ndp
 
 from mckit_meshes.particle_kind import ParticleKind as Kind
 from mckit_meshes.utils import rebin, raise_error_when_file_exists_strategy
@@ -278,7 +278,7 @@ class FMesh:
         assert self.is_equal_by_mesh(other), "Incompatible meshes for precision comparison."
         return self.total_precision < other.total_precision
 
-    def surrounds_point(self, x: float, y: float, z: float, local: bool = True) -> bool:
+    def surrounds_point(self, x: float, y: float, z: float, *, local: bool = True) -> bool:
         """Check if a point x,y,z is within the mesh spatial grid.
 
         Args:
@@ -310,7 +310,7 @@ class FMesh:
             ebins, data, err
                 Energy bin boundaries, group energy spectrum and relative errors.
         """
-        key_index = {0: "X", 1: "Y", 2: "Z"}
+        key_index: dict[int, Literal["X", "Y", "Z"]] = {0: "X", 1: "Y", 2: "Z"}
         values = [x, y, z]
         result_data = self.data
         result_error = self.errors
@@ -519,7 +519,7 @@ class FMesh:
             cell_data[name] = np.sum(self.data, axis=0)
         return gridToVTK(filename, self.ibins, self.jbins, self.kbins, cellData=cell_data)
 
-    # noinspection PyUnresolvedReferences
+    # noinspection PyUnresolvedReferences,PyTypeChecker
     def save_2_mcnp_mesh(self, stream: TextIO) -> None:
         """Saves the mesh in a file in a format similar to mcnp mesh tally textual representation.
 
@@ -715,7 +715,7 @@ class FMesh:
             return self.rebin_single(new_x, new_y, new_z, new_name)
 
         # To avoid huge memory allocations, iterate over energy with external processes
-        pool = ndp.Pool(processes=4)
+        pool = Pool(processes=4)
         data_rebin_spec = list(
             rebin.rebin_spec_composer(
                 [self.ibins, self.jbins, self.kbins],

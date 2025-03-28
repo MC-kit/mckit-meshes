@@ -7,11 +7,10 @@ from typing import TYPE_CHECKING, Any, cast
 from itertools import product
 
 import numpy as np
-from numpy.typing import NDArray
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-    from numpy.typing import ArrayLike
+    from numpy.typing import ArrayLike, NDArray
 
 
 # noinspection PyUnresolvedReferences
@@ -56,4 +55,4 @@ def cartesian_product(
     shape = tuple(map(len, arrays))
     if len(res.shape) > 1:  # the aggregation result is vector
         shape = shape + res.shape[1:]
-    return cast(NDArray, res.reshape(shape))
+    return cast("NDArray", res.reshape(shape))

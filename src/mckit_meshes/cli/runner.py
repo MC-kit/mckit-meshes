@@ -36,10 +36,10 @@ VERSION = meta.__version__
 @click.version_option(VERSION, prog_name=NAME)
 def mckit_meshes(
     ctx: click.Context,
-    verbose: bool,
-    quiet: bool,
+    verbose: bool,  # noqa: FBT001
+    quiet: bool,  # noqa: FBT001
     logfile: str,
-    override: bool,
+    override: bool,  # noqa: FBT001
 ) -> None:
     """McKit-meshes command line interface."""
     init_logger(logfile, quiet, verbose)
@@ -68,7 +68,7 @@ if there are more than 1 input file""",
 )
 def mesh2npz(ctx: click.Context, prefix: str | Path, mesh_tallies: list[click.Path]) -> None:
     """Converts mesh files to npz files."""
-    do_mesh2npz(prefix, mesh_tallies, ctx.obj["OVERRIDE"])
+    do_mesh2npz(prefix, mesh_tallies, override=ctx.obj["OVERRIDE"])
 
 
 @mckit_meshes.command()
@@ -90,7 +90,7 @@ if there are more than 1 input file""",
 )
 def npz2vtk(ctx: click.Context, prefix: str | Path, npz_files: list[click.Path]) -> None:
     """Converts npz files to VTK files."""
-    do_npz2vtk(prefix, npz_files, ctx.obj["OVERRIDE"])
+    do_npz2vtk(prefix, npz_files, override=ctx.obj["OVERRIDE"])
     # Don't remove these comments: this makes flake8 happy on absent arguments in the docstring.
     #
 
@@ -131,7 +131,7 @@ def add(
     npz_files: list[click.Path],
 ) -> None:
     """Add meshes from npz files."""
-    do_add(out, comment, number, npz_files, ctx.obj["OVERRIDE"])
+    do_add(out, comment, number, npz_files, override=ctx.obj["OVERRIDE"])
     # Don't remove these comments: this makes flake8 happy on absent arguments in the docstring.
     #
 

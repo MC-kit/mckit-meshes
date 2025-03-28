@@ -21,6 +21,7 @@ def add(
     comment: str,
     number: int,
     npz_files: t.Iterable[str | Path],
+    *,
     override: bool = False,
 ) -> None:
     """Convert MCNP meshtal file to a number of npz files, one for each mesh tally.
@@ -48,7 +49,7 @@ def add(
     out = Path(out) if out else Path("+".join(x.stem for x in npz_files) + ".npz")
 
     out.parent.mkdir(parents=True, exist_ok=True)
-    file_exists_strategy = check_if_path_exists(override)
+    file_exists_strategy = check_if_path_exists(override=override)
 
     _sum: fmesh.FMesh | None = None
     data = None

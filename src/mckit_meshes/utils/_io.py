@@ -35,7 +35,7 @@ Please remove the file or specify --override option"""
         raise FileExistsError(errmsg)
 
 
-def check_if_path_exists(override: bool) -> t.Callable[[str | Path], None]:
+def check_if_path_exists(*, override: bool) -> t.Callable[[str | Path], None]:
     """Select strategy to handle existing files, depending on option `override`.
 
     Args:
