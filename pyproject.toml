@@ -66,7 +66,7 @@ pyupgrade = ">=3.15.2"
 [tool.poetry.group.test.dependencies]
 pytest = ">=7.1"
 pytest-cov = ">=4.0"
-# pytest-mock = ">=3.9"
+pytest-mock = ">=3.14.0"
 # pytest-randomly = ">=3.12"
 coverage = { version = ">=6.1.2", extras = ["toml"] }
 xdoctest = { extras = ["colors"], version = ">=0.15.10" }
