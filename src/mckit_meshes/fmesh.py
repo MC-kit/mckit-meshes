@@ -290,14 +290,14 @@ class FMesh:
         Returns:
             True if point is within the mesh's grid.
         """
-        return self._geometry_spec.surrounds_point(x, y, z, local)
+        return self._geometry_spec.surrounds_point(x, y, z, local=local)
 
     def get_spectrum(
         self,
-        x: ArrayLike,
-        y: ArrayLike,
-        z: ArrayLike,
-    ) -> tuple[ArrayLike, ArrayLike, ArrayLike]:
+        x: float,
+        y: float,
+        z: float,
+    ) -> tuple[ArrayLike, ArrayLike, ArrayLike] | None:
         """Gets energy spectrum at the specified point.
 
         Args:
@@ -307,7 +307,7 @@ class FMesh:
             z: ...
 
         Returns:
-            ebins, data, err
+            ebins, data, err or None
                 Energy bin boundaries, group energy spectrum and relative errors.
         """
         key_index: dict[int, Literal["X", "Y", "Z"]] = {0: "X", 1: "Y", 2: "Z"}
@@ -318,9 +318,7 @@ class FMesh:
             key = key_index[i]
             index = np.searchsorted(self.bins[key], value) - 1
             if index < 0 or index >= self.bins[key].size - 1:
-                result_data *= 0
-                result_error *= 0
-                index = 0
+                return None
             result_data = result_data.take(index, axis=i + 1)
             result_error = result_error.take(index, axis=i + 1)
         return self.e, result_data, result_error
@@ -987,16 +985,19 @@ def iter_meshtal(
             # noinspection PyUnresolvedReferences
             name = int(_find_words_after(fid, "Mesh", "Tally", "Number")[0])
             if not name_select or name_select(name):
-                comment = fid.readline().strip()
-                if comment.startswith("This is a"):
-                    kind = comment.split()[3]
+                line: str = fid.readline().strip()
+                if line.startswith("This is a"):
                     comment = None
+                    kind_str = line.split()[3]
                 else:
+                    comment = line
                     # noinspection PyUnresolvedReferences
-                    kind = _find_words_after(fid, "This", "is", "a")[0]
+                    kind_str = _find_words_after(fid, "This", "is", "a")[0]
+
                 if comment:
                     comment = fix_mesh_comment(name, comment)
-                kind = Kind[kind]
+
+                kind = Kind[kind_str]
 
                 # TODO dvp read "dose function modified" here
 
@@ -1222,10 +1223,22 @@ def m_2_npz(
     next(stream)  # TODO dvp check if we need to store problem title
     line = next(stream)
     nps = int(float(line.strip().split("=")[1]))
+    __LOG.info("NPS: %d", nps)
     if mesh_file_info is not None:
         mesh_file_info.nps = nps
     total = 0  # : ignore[SIM113]
     for t in iter_meshtal(stream, name_select=name_select, tally_select=tally_select):
+        if t.comment:
+            __LOG.info("Comment: %s", t.comment)
+        __LOG.info(
+            "Bounds: [%.5g..%.5g], [%.5g..%.5g], [%.5g..%.5g]",
+            t.ibins[0],
+            t.ibins[-1],
+            t.jbins[0],
+            t.jbins[-1],
+            t.kbins[0],
+            t.kbins[-1],
+        )
         t.save_2_npz(prefix / (str(t.name) + suffix), check_existing_file_strategy)
         total += 1
 
