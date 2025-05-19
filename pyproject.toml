@@ -30,7 +30,7 @@ Changelog = "https://github.com/MC-kit/mckit-meshes/releases"
 mckit-meshes = "mckit_meshes.cli.runner:mckit_meshes"
 
 [tool.poetry]
-version = "0.1.6"
+version = "0.1.7a0"
 packages = [{ include = "mckit_meshes", from = "src" }]
 include = [
     { path = "noxfile.py", format = "sdist" },
