@@ -14,13 +14,6 @@ from os import environ
 
 from loguru import logger
 
-# class PropagateHandler(logging.Handler):
-#     """Send events from loguru to standard logging"""
-#     def emit(self, record):
-#
-#
-
-
 class InterceptHandler(logging.Handler):
     """Send events from standard logging to loguru."""
 

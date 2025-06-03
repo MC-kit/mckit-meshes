@@ -15,6 +15,7 @@ import mckit_meshes.mesh.geometry_spec as gs
 from mckit_meshes.utils import print_n
 
 if TYPE_CHECKING:
+    # noinspection PyCompatibility
     from collections.abc import Generator, Iterable
 
     from numpy.typing import ArrayLike
@@ -624,7 +625,7 @@ def produce_strings(stream, format_spec) -> list[str]:
 
 
 def parse_coordinates(inp: list[str]) -> np.ndarray:
-    def iter_over_coarse_mesh():
+    def iter_over_coarse_mesh() -> Generator[tuple[float, int], None, None]:
         is_first = True
         i = 0
         length = len(inp)
@@ -643,13 +644,17 @@ def parse_coordinates(inp: list[str]) -> np.ndarray:
                 i += 1
             yield coordinate, fine_bins
 
-    def iter_over_fine_mesh(_iter_over_coarse_mesh):
-        prev_coordinate = None
-        prev_fine_bins = None
+    def iter_over_fine_mesh(_iter_over_coarse_mesh) -> Generator[float, None, None]:
+        prev_coordinate: float | None = None
+        prev_fine_bins: int | None = None
         for coordinate, fine_bins in _iter_over_coarse_mesh:
             if prev_fine_bins == 1:
+                if prev_coordinate is None:
+                    raise ValueError("Invalid mesh spec")
                 yield prev_coordinate
             elif prev_coordinate is not None:
+                if prev_fine_bins is None:
+                    raise ValueError("Invalid mesh spec")
                 res = np.linspace(
                     prev_coordinate,
                     coordinate,
