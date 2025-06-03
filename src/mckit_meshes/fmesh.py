@@ -1201,12 +1201,12 @@ def m_2_npz(
     """Splits the tallies from the mesh file into separate npz files.
 
     Args:
-        stream: File with MCNP mesh tallies
+        stream: File with MCNP mesh tallies to read
         prefix: Prefix for separate mesh files names
         name_select:
-            Filter fmesh by names (Default value = lambda _: True)
+            Filter fmesh by names (default: no filter)
         tally_select: function(FMesh)->bool
-            Filter fmesh by content. (Default value = lambda _: True)
+            Filter fmesh by content. (default: no filter)
         suffix:
             Prefix for separate mesh files names
         mesh_file_info: structure to store meshtal file header info: nps.
