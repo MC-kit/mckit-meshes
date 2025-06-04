@@ -79,3 +79,14 @@ def test_not_existing_input_file(runner):
     )
     assert result.exit_code > 0
     assert "does not exist" in result.output
+
+
+def test_absent_npz_files(runner, caplog, tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    result = runner.invoke(
+        mckit_meshes,
+        args=["npz2vtk"],
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0
+    assert "nothing to do" in caplog.text

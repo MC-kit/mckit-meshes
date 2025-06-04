@@ -69,6 +69,7 @@ pytest-mock = ">=3.14.0"
 # pytest-randomly = ">=3.12"
 coverage = { version = ">=6.1.2", extras = ["toml"] }
 xdoctest = { extras = ["colors"], version = ">=0.15.10" }
+pytest-durations = "^1.5.2"
 
 [tool.poetry.group.coverage.dependencies]
 coverage = { version = ">=6.1.2", extras = ["toml"] }
