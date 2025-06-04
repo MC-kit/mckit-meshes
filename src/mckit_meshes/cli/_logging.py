@@ -14,6 +14,7 @@ from os import environ
 
 from loguru import logger
 
+
 class InterceptHandler(logging.Handler):
     """Send events from standard logging to loguru."""
 
