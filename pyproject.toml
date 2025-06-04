@@ -122,6 +122,8 @@ addopts = '''
 --ignore setup.py
 --failed-first
 --xdoctest
+--pytest-durations-min=1
+--pytest-resultlog="pytest-result.log"
 '''
 doctest_optionflags = "ELLIPSIS NORMALIZE_WHITESPACE IGNORE_EXCEPTION_DETAIL ALLOW_UNICODE ALLOW_BYTES NUMBER"
 testpaths = ["tests", "src"]
@@ -235,33 +237,6 @@ ignore = [
     "tools/*",
     "*.yaml",
     "noxfile.py",
-]
-
-[tool.ipdb]
-# For debugging in jupyterlab and ipython
-# see https://github.com/gotcha/ipdb
-context = 5
-
-[tool.tryceratops]
-include = ["src"]
-experimental = true
-
-[tool.pydocstringformatter]
-write = true
-style = "pep257"
-exclude = ["tools/**", "src/**/*_parser.py", "src/**/*_tab.py"]
-strip-whitespaces = true
-max-line-length = 100
-summary-quotes-same-line = true
-
-
-[tool.pylint]
-good-names-rgxs = ["."]  # a single character variable is okay
-logging-format-style = "new"   # use {} in logging messages
-deprecated-modules = ["six"]
-extension-pkg-allow-list = ["duckdb"]
-disable = [
-    "wrong-import-order"  # this is `ruff format` responsibility
 ]
 
 [tool.ruff]
@@ -386,7 +361,6 @@ ignore = [
     "E402", # Module level import not at top of file
     "EM101", # Exception must not use a string literal, assign to variable first
     "EM102", # Exception must not use an f-string literal, assign to variable first
-    # "FBT001", # Boolean positional arg in function definition (TODO!)
     "FBT002", # Boolean default value in function definition (TODO!)
     "FBT003", # Boolean positional value in function call
     "FIX", # Remove TODOs
@@ -399,7 +373,7 @@ ignore = [
     "PLR0912", # Too many branches (15 > 12)
     "PLR0913", # Too many arguments to function call (6 > 5)
     "PLR0915", # Too many statements (65 > 50)
-    "PLR2004", # magic number - don't want declare 0.0 as constant
+    "PLR2004", # magic number - don't want to declare 0.0 as constant
     "PT019", # Fixture `_bin` without value is injected as parameter (false positive?)
     "S101", # Use of `assert` detected
     "SLF001", # Private member accessed: `_geometry_spec`
