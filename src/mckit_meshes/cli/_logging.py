@@ -51,7 +51,7 @@ def init_logger(logfile, quiet, verbose, *, stderr_format: str = MCKIT_CONSOLE_L
         stderr_level = "WARNING"
     elif verbose:
         stderr_level = "TRACE"
-    logger.remove(0)
+    # logger.remove(0)
     if stderr_format:
         logger.add(
             sys.stderr,

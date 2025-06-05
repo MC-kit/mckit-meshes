@@ -10,11 +10,13 @@ from click.testing import CliRunner
 from loguru import logger
 
 if TYPE_CHECKING:
+    # noinspection PyCompatibility
+    from collections.abc import Generator
     from _pytest.logging import LogCaptureFixture
 
 
 @pytest.fixture
-def caplog(caplog: LogCaptureFixture) -> LogCaptureFixture:
+def caplog(caplog: LogCaptureFixture) -> Generator[LogCaptureFixture, None, None]:
     """Fixture to capture loguru logging.
 
     Emitting logs from loguru's logger.log means that they will not show up in
@@ -34,8 +36,9 @@ def caplog(caplog: LogCaptureFixture) -> LogCaptureFixture:
     def filter_(record):
         return record["level"].no >= caplog.handler.level
 
-    logger.add(caplog.handler, level=0, format="{message}", filter=filter_)
-    return caplog
+    handler_id = logger.add(caplog.handler, level=0, format="{message}", filter=filter_)
+    yield caplog
+    logger.remove(handler_id)
     # TODO (dvp): the handler added above is to be removed here,
     #             but it's removed on init_logger()
     #             there's quite complicated logic of logging initialization

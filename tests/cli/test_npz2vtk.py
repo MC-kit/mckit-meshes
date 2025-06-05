@@ -81,6 +81,24 @@ def test_not_existing_input_file(runner):
     assert "does not exist" in result.output
 
 
+def test_glob_inputs(tmp_path, runner, data, monkeypatch):
+    for i in [1004, 2004]:
+        original = data / f"{i}.npz"
+        shutil.copy(original, tmp_path)
+    prefix = tmp_path / "some_vtk"
+    monkeypatch.chdir(tmp_path)
+    result = runner.invoke(
+        mckit_meshes,
+        args=["npz2vtk", "-p", str(prefix)],
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0
+    for i in [1004, 2004]:
+        assert (prefix / f"{i}.vtr").exists(), (
+            "When multiple npz files are specified the vtr file should be created for every one."
+        )
+
+
 def test_absent_npz_files(runner, caplog, tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     result = runner.invoke(
