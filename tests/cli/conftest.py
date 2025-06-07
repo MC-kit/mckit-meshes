@@ -28,20 +28,14 @@ def caplog(caplog: LogCaptureFixture) -> Generator[LogCaptureFixture, None, None
 
     See Also:
         https://github.com/mcarans/pytest-loguru/blob/main/src/pytest_loguru/plugin.py
+        https://florian-dahlitz.de/articles/logging-made-easy-with-loguru
 
     Yields:
         LogCaptureFixture
     """
-
-    def filter_(record):
-        return record["level"].no >= caplog.handler.level
-
-    handler_id = logger.add(caplog.handler, level=0, format="{message}", filter=filter_)
+    handler_id = logger.add(caplog.handler, format="{message} {extra}")
     yield caplog
     logger.remove(handler_id)
-    # TODO (dvp): the handler added above is to be removed here,
-    #             but it's removed on init_logger()
-    #             there's quite complicated logic of logging initialization
 
 
 @pytest.fixture
