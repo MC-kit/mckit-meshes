@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 
 if TYPE_CHECKING:
+    # noinspection PyCompatibility
     from collections.abc import Callable, Iterable
     from _typeshed import SupportsWrite
 

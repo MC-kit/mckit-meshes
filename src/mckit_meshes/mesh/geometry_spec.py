@@ -43,6 +43,7 @@ from numpy import linalg
 from mckit_meshes.utils import print_n, cartesian_product
 
 if TYPE_CHECKING:
+    # noinspection PyCompatibility
     from collections.abc import Generator, Iterable, Sequence
 
     import numpy.typing as npt
@@ -554,7 +555,7 @@ def select_indexes(
         if np.any(neg):
             eq_to_min = a[0] == x
             i[np.logical_and(neg, eq_to_min)] = 0
-    else:
+    else:  #pragma: no cover
         raise TypeError(i)
 
     return i
