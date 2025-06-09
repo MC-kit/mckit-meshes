@@ -241,7 +241,6 @@ def test_get_totals(simple_bins):
     assert_array_equal(actual_totals_err, desired_totals_err)
 
 
-@pytest.mark.skip
 @pytest.mark.parametrize(
     "x,y,z,expected_total,expected_rel_error,msg",
     [
