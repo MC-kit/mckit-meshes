@@ -96,11 +96,8 @@ class AbstractGeometrySpecData:
             TypeError: if any of the fields is not a numpy array.
         """
         for b in self.bins:
-            if not isinstance(b, np.ndarray):
+            if not isinstance(b, np.ndarray):  # pragma: no cover
                 raise TypeError(f"Expected numpy array, actual {b[0]}...{b[-1]}")
-
-    def __hash__(self) -> int:
-        return hash(self.bins)
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, AbstractGeometrySpecData):
@@ -126,7 +123,6 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
     @abc.abstractmethod
     def cylinder(self) -> bool:
         """Is this an instance of a cylinder mesh specification?"""
-        ...
 
     @abc.abstractmethod
     def local_coordinates(self, points: np.ndarray) -> np.ndarray:
@@ -135,7 +131,6 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
         Args:
             points: ... with global coordinates
         """
-        ...
 
     @abc.abstractmethod
     def get_mean_square_distance_weights(self, point: np.ndarray) -> np.ndarray:
@@ -144,12 +139,10 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
         Args:
             point: ... from where to compute distance
         """
-        ...
 
     @abc.abstractmethod
     def calc_cell_centers(self) -> np.ndarray:
         """Calculate cell (voxel) centers."""
-        ...
 
     @abc.abstractmethod
     def print_geom(self, io: TextIO, indent: str) -> None:
@@ -159,7 +152,6 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
             io: stream to print to
             indent: indent to insert before lines
         """
-        ...
 
     # Generic methods
 
@@ -555,7 +547,7 @@ def select_indexes(
         if np.any(neg):
             eq_to_min = a[0] == x
             i[np.logical_and(neg, eq_to_min)] = 0
-    else:  #pragma: no cover
+    else:  # pragma: no cover
         raise TypeError(i)
 
     return i

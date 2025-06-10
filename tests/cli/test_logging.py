@@ -18,7 +18,7 @@ def test_std_logging(tmp_path, monkeypatch) -> None:
     assert "test non-standard level" in log_text
 
 
-def test_quiet(tmp_path, caplog) -> None:
+def test_quiet() -> None:
     logger = loguru.logger
     init_logger(None, quiet=True, verbose=False)
     logger.info("xxx")
@@ -28,3 +28,14 @@ def test_quiet(tmp_path, caplog) -> None:
     # Anyway, the scheme with verbosity is too primitive.
     # Use external configuration instead.
 
+
+def test_logging_without_stderr():
+    logger = loguru.logger
+    logger.remove()
+    init_logger(None, quiet=True, verbose=False, stderr_format=None)
+    logger.info("xxx")
+    logger.warning("yyy")
+    # caplog create handler, which is not controlled in init_logger
+    # so, it logs everything regardless quiet or verbose settings
+    # Anyway, the scheme with verbosity is too primitive.
+    # Use external configuration instead.

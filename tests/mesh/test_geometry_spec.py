@@ -11,9 +11,17 @@ from mckit_meshes.mesh.geometry_spec import (
     DEFAULT_VEC,
     CartesianGeometrySpec,
     CylinderGeometrySpec,
+    as_float_array,
     select_indexes,
 )
 from mckit_meshes.utils.testing import a
+
+
+def test_as_float_array() -> None:
+    expected = np.array([1, 2, 3], dtype=float)
+    actual = as_float_array([1, 2, 3])
+    assert actual.dtype == np.dtype(float)
+    assert_array_equal(actual, expected)
 
 
 def test_cartesian_constructor():
@@ -73,6 +81,14 @@ def test_cylinder_local_coordinates(points, origin, expected):
     assert_array_almost_equal(expected, actual)
 
 
+def test_boundaries_shape():
+    gc = CartesianGeometrySpec(a(1, 2, 3), a(4, 5), a(7, 8))
+    i, j, k = gc.boundaries_shape
+    assert i == 3
+    assert j == 2
+    assert k == 2
+
+
 def test_boundaries():
     gc = CartesianGeometrySpec(a(1, 2, 3), a(4, 5, 6), a(7, 8, 9))
     (xmin, xmax), (ymin, ymax), (zmin, zmax) = gc.boundaries
@@ -124,6 +140,11 @@ def test_eq():
     gc3 = CartesianGeometrySpec(a(1, 2, 3), a(4, 5, 6), a(7, 8, 2))
     assert gc1 == gc2
     assert gc1 != gc3
+
+
+def test_ne_obj() -> None:
+    cartesian = CartesianGeometrySpec(ibins=a(1, 2, 3), jbins=a(4, 5, 6), kbins=a(7, 8, 9))
+    assert cartesian != object()
 
 
 def test_cylinder_mesh_trivial_constructor():
