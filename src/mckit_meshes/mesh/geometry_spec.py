@@ -37,6 +37,7 @@ import abc
 from dataclasses import dataclass, field
 
 import numpy as np
+import numpy.typing as npt
 
 from numpy import linalg
 
@@ -48,21 +49,25 @@ if TYPE_CHECKING:
 
     import numpy.typing as npt
 
+    Bins = npt.NDArray[np.floating]
+
 
 _2PI: Final[float] = 2.0 * np.pi
 _1_TO_2PI: Final[float] = 1 / _2PI
 __DEG_2_RAD: Final[float] = np.pi / 180.0
-CARTESIAN_BASIS: Final[np.ndarray] = np.eye(3, dtype=float)
+
+CARTESIAN_BASIS: Final[Bins] = np.eye(3, dtype=float)
 (NX, NY, NZ) = CARTESIAN_BASIS
 
-DEFAULT_AXIS: Final[np.ndarray] = NZ
-DEFAULT_VEC: Final[np.ndarray] = NX
+
+DEFAULT_AXIS: Final[Bins] = NZ
+DEFAULT_VEC: Final[Bins] = NX
 
 
-ZERO_ORIGIN: Final[np.ndarray] = np.zeros((3,), dtype=float)
+ZERO_ORIGIN: Final[Bins] = np.zeros((3,), dtype=float)
 
 
-def as_float_array(array: npt.ArrayLike) -> np.ndarray:
+def as_float_array(array: npt.ArrayLike) -> Bins:
     """Convert any sequence of numbers to numpy array of floats.
 
     Note:
@@ -82,12 +87,23 @@ class AbstractGeometrySpecData:
     """Data mixin for :py:class:`AbstractGeometrySpec`.
 
     Provides reusable data fields.
+
+    Notes:
+        The meaning of `origin` is different for cartesian and cylindrical meshes
+
+        In cartesian mesh `origin` means most negative coordinates, all the coordinates
+        (ibins, jbins, kbins) are absolute
+        (or in coordinate system given with transformation).
+
+        In cylindrical mesh `origin` is a center of a cylinder bottom,
+        the coordinates are relative to the coordinate system given
+        with `origin`, `axs` and `vec`.
+        Plus, if specified, in coordinate system given with transformation.
     """
 
-    ibins: np.ndarray
-    jbins: np.ndarray
-    kbins: np.ndarray
-    origin: np.ndarray = field(default_factory=lambda: ZERO_ORIGIN.copy())
+    ibins: Bins
+    jbins: Bins
+    kbins: Bins
 
     def __post_init__(self) -> None:
         """Force a caller provided data as numpy arrays.
@@ -106,13 +122,13 @@ class AbstractGeometrySpecData:
         return len(a) == len(b) and arrays_equal(zip(a, b, strict=False))
 
     @property
-    def bins(self) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    def bins(self) -> tuple[Bins, ...]:
         """Pack the fields to tuple.
 
         Returns:
-            tuple of origin and bins.
+            tuple of bins.
         """
-        return self.origin, self.ibins, self.jbins, self.kbins
+        return self.ibins, self.jbins, self.kbins
 
 
 # noinspection PyTypeChecker
@@ -125,7 +141,11 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
         """Is this an instance of a cylinder mesh specification?"""
 
     @abc.abstractmethod
-    def local_coordinates(self, points: np.ndarray) -> np.ndarray:
+    def get_origin(self) -> Bins:
+        """Get origin coordinates."""
+
+    @abc.abstractmethod
+    def local_coordinates(self, points: Bins) -> Bins:
         """Convert points coordinates to local system.
 
         Args:
@@ -133,7 +153,7 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
         """
 
     @abc.abstractmethod
-    def get_mean_square_distance_weights(self, point: np.ndarray) -> np.ndarray:
+    def get_mean_square_distance_weights(self, point: Bins) -> Bins:
         """Estimate weights as a voxel mean square distance from the point.
 
         Args:
@@ -141,7 +161,7 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
         """
 
     @abc.abstractmethod
-    def calc_cell_centers(self) -> np.ndarray:
+    def calc_cell_centers(self) -> Bins:
         """Calculate cell (voxel) centers."""
 
     @abc.abstractmethod
@@ -196,8 +216,9 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
         """
         if not local:
             x, y, z = self.local_coordinates(as_float_array([x, y, z]))
+
         (xmin, xmax), (ymin, ymax), (zmin, zmax) = self.boundaries
-        return cast("bool", (xmin < x < xmax) and (ymin < y < ymax) and (zmin < z < zmax))
+        return cast("bool", (xmin <= x <= xmax) and (ymin <= y <= ymax) and (zmin <= z <= zmax))
 
     def select_indexes(
         self,
@@ -205,7 +226,7 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
         i_values=None,
         j_values=None,
         k_values=None,
-    ) -> tuple[int | slice | np.ndarray, int | slice | np.ndarray, int | slice | np.ndarray]:
+    ) -> tuple[int | slice | npt.NDArray, int | slice | npt.NDArray, int | slice | npt.NDArray]:
         """Select indices for data corresponding to given spatial values.
 
         Args:
@@ -225,7 +246,7 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
     def print_specification(self, io: TextIO, columns: int = 6) -> None:
         indent = " " * 8
         self.print_geom(io, indent)
-        print(indent, "origin=", " ".join(format_floats(self.origin)), sep="", file=io)
+        print(indent, "origin=", " ".join(format_floats(self.get_origin())), sep="", file=io)
         _print_bins(indent, "i", self.ibins, io, columns=columns)
         _print_bins(indent, "j", self.jbins, io, columns=columns)
         _print_bins(indent, "k", self.kbins, io, columns=columns)
@@ -239,25 +260,28 @@ class CartesianGeometrySpec(AbstractGeometrySpec):
         return False
 
     @property
-    def x(self) -> np.ndarray:
+    def origin(self) -> Bins:
+        """Get origin coordinates."""
+        return as_float_array([self.x[0], self.y[0], self.z[0]])
+
+    def get_origin(self) -> Bins:
+        return self.origin
+
+    @property
+    def x(self) -> Bins:
         return self.ibins
 
     @property
-    def y(self) -> np.ndarray:
+    def y(self) -> Bins:
         return self.jbins
 
     @property
-    def z(self) -> np.ndarray:
+    def z(self) -> Bins:
         return self.kbins
 
-    def local_coordinates(self, points: np.ndarray) -> np.ndarray:
+    def local_coordinates(self, points: Bins) -> Bins:
         assert points.shape[-1] == 3, "Expected cartesian point array or single point"
-        if self.origin is not ZERO_ORIGIN:
-            return cast(
-                "np.ndarray",
-                points - ZERO_ORIGIN,
-            )  # TODO dvp: recall what is this subtraction for?
-        return points
+        return points  # do nothing until mesh Transformation is implemented
 
     def print_geom(self, io: TextIO, indent: str) -> None:
         pass  # Defaults will do for cartesian mesh
@@ -298,6 +322,7 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
         vec: vector to measure angle (theta) from
     """
 
+    origin: Bins
     axs: np.ndarray = field(default_factory=lambda: DEFAULT_AXIS.copy())
     vec: np.ndarray = field(default_factory=lambda: DEFAULT_VEC.copy())
 
@@ -313,9 +338,18 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
         if not (self.theta[0] == 0.0 and self.theta[-1] == 1.0):
             raise ValueError("Theta is expected in rotations only")
 
+        if not self.r[0] == 0.0:
+            raise ValueError("First R bin of CYL mesh is to be zero")
+
+        if not self.z[0] == 0.0:
+            raise ValueError("First Z bin of CYL mesh is to be zero")
+
     @property
-    def bins(self):
-        return *super().bins, self.axs, self.vec
+    def bins(self) -> tuple[Bins, ...]:
+        return *super().bins, self.origin, self.axs, self.vec
+
+    def get_origin(self) -> Bins:
+        return self.origin
 
     @property
     def cylinder(self) -> bool:
@@ -484,8 +518,8 @@ def _print_bins(indent, prefix, _ibins, io, columns: int = 6) -> None:
 
 def select_indexes(
     a: np.ndarray,
-    x: float | list[float] | np.ndarray | None,
-) -> int | slice | np.ndarray:
+    x: float | list[float] | npt.NDArray[np.floating] | None,
+) -> int | slice | npt.NDArray[np.integer]:
     """Find indexes for a mesh bin, corresponding given coordinates.
 
     Assumes that `a` is sorted.
@@ -506,7 +540,7 @@ def select_indexes(
         0
 
         For x = 1.5, we have 1 < 1.5 < 2, so the bin index is to be 1
-        >>> select_indexes(r, 1.5).item()
+        >>> select_indexes(r, 1.5)
         1
 
         For x = 0, it's the first bin, and index is to be 0
@@ -514,11 +548,11 @@ def select_indexes(
         0
 
         For coordinates below r[0] return -1.
-        >>> select_indexes(r, -1).item()
+        >>> select_indexes(r, -1)
         -1
 
         For coordinates above  r[-1] return a.size-1.
-        >>> select_indexes(r, 5).item()
+        >>> select_indexes(r, 5)
         4
 
         And for array of coordinates
@@ -537,19 +571,20 @@ def select_indexes(
     if x is None:
         return slice(0, a.size) if a.size > 2 else 0  # squeeze if there's only one bin
 
-    i: npt.ArrayLike | int = a.searchsorted(x) - 1
+    i: np.int64 | npt.NDArray[np.integer] = a.searchsorted(x) - 1
 
-    if np.isscalar(i):
+    if np.isscalar(i) and isinstance(i, np.integer):
         if i < 0 and x == a[0]:
             return 0
-    elif isinstance(i, np.ndarray):
-        neg = i < 0
-        if np.any(neg):
-            eq_to_min = a[0] == x
-            i[np.logical_and(neg, eq_to_min)] = 0
-    else:  # pragma: no cover
+        return int(i)
+
+    if not isinstance(i, np.ndarray):  # pragma: no cover
         raise TypeError(i)
 
+    neg = i < 0
+    if np.any(neg):
+        eq_to_min = a[0] == x
+        i[np.logical_and(neg, eq_to_min)] = 0
     return i
 
 
