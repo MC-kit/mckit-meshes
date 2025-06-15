@@ -38,7 +38,8 @@ Contributing
 .. image:: https://github.com/MC-kit/mckit-meshes/workflows/Tests/badge.svg
    :target: https://github.com/MC-kit/mckit-meshes/actions?workflow=Tests
    :alt: Tests
-.. image:: https://codecov.io/gh/MC-kit/mckit-meshes/branch/master/graph/badge.svg?token=wlqoa368k8
+..  TODO check why the codecov site is not accessible
+   .. image:: https://codecov.io/gh/MC-kit/mckit-meshes/branch/master/graph/badge.svg?token=wlqoa368k8
    :target: https://codecov.io/gh/MC-kit/mckit-meshes
 .. image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v0.json
    :target: https://github.com/astral-sh/ruff
