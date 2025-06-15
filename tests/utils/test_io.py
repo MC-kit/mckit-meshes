@@ -39,11 +39,8 @@ def test_print_cols(
         ([], "", 2, "", "nothing to print"),
     ],
 )
-def test_print_n(
-    seq: Iterable[Any], indent: str, columns: int, expected: str, msg: str
-) -> None:
+def test_print_n(seq: Iterable[Any], indent: str, columns: int, expected: str, msg: str) -> None:
     buf = StringIO()
     print_n(seq, buf, indent, columns)
     actual = buf.getvalue()
     assert actual == expected, "Text: " + msg
-
