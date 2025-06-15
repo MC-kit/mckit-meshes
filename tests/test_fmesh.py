@@ -135,7 +135,8 @@ def test_m_2_npz(tmp_path, simple_bins):
         m1.save_2_mcnp_mesh(fid)
         m2.save_2_mcnp_mesh(fid)
     # now use already opened file
-    m_2_npz(tfn.open(), tmp_path, name_select=lambda name_: name_ == 14)
+    with tfn.open() as fid:
+        m_2_npz(fid, tmp_path, name_select=lambda name_: name_ == 14)
     npz = tmp_path / "14.npz"
     assert npz.exists()
     assert not (tmp_path / "2.npz").exists()
@@ -143,7 +144,8 @@ def test_m_2_npz(tmp_path, simple_bins):
     assert actual == m1
     npz.unlink()
     prefix = tmp_path / "out"
-    m_2_npz(tfn.open(), prefix=prefix)
+    with tfn.open() as fid:
+        m_2_npz(fid, prefix=prefix)
     npz_index = {prefix / "14.npz": m1, prefix / "2.npz": m2}
     for npz, expected in npz_index.items():
         assert npz.exists()
@@ -176,7 +178,8 @@ def test_m_2_npz_with_comment(tmp_path, simple_bins):
         m1.save_2_mcnp_mesh(fid)
         m2.save_2_mcnp_mesh(fid)
     # now use already opened file
-    m_2_npz(tfn.open(), tmp_path, name_select=lambda name_: name_ == 14)
+    with tfn.open() as fid:
+        m_2_npz(fid, tmp_path, name_select=lambda name_: name_ == 14)
     npz = tmp_path / "14.npz"
     assert npz.exists()
     assert not (tmp_path / "2.npz").exists()
@@ -184,7 +187,8 @@ def test_m_2_npz_with_comment(tmp_path, simple_bins):
     assert actual == m1
     npz.unlink()
     prefix = tmp_path / "out/"
-    m_2_npz(tfn.open(), prefix=prefix)
+    with tfn.open() as fid:
+        m_2_npz(fid, prefix=prefix)
     npz_index = {prefix / "14.npz": m1, prefix / "2.npz": m2}
     for npz, expected in npz_index.items():
         assert npz.exists()
@@ -237,7 +241,6 @@ def test_get_totals(simple_bins):
     assert_array_equal(actual_totals_err, desired_totals_err)
 
 
-@pytest.mark.skip
 @pytest.mark.parametrize(
     "x,y,z,expected_total,expected_rel_error,msg",
     [
@@ -458,7 +461,8 @@ Energy bin boundaries: 0 6 7 8
 """
     tf = tmp_path / "gts.m"
     tf.write_text(text)
-    meshes = read_meshtal(tf.open())
+    with tf.open() as fid:
+        meshes = read_meshtal(fid)
     assert meshes, msg
     assert len(meshes) == 1, msg
     m = meshes[0]

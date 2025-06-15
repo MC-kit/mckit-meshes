@@ -15,6 +15,7 @@ import mckit_meshes.mesh.geometry_spec as gs
 from mckit_meshes.utils import print_n
 
 if TYPE_CHECKING:
+    # noinspection PyCompatibility
     from collections.abc import Generator, Iterable
 
     from numpy.typing import ArrayLike
@@ -399,7 +400,7 @@ class WgtMesh:
                 assert np.all(
                     np.transpose(_wp_data.reshape((nep, _nfz, _nfy, _nfx)), (0, 3, 2, 1)) == _wp,
                 )
-        geometry_spec = make_geometry_spec([_x0, _y0, _z0], _x, _y, _z, axs=axs, vec=vec)
+        geometry_spec = make_geometry_spec(_x, _y, _z, [_x0, _y0, _z0], axs=axs, vec=vec)
         return cls(geometry_spec, _e, _w)
 
     def get_mean_square_distance_weights(self, point) -> WgtMesh:
@@ -579,7 +580,7 @@ class WgtMesh:
         return WgtMesh(self._geometry_spec, new_energies, new_weights)
 
 
-def reciprocal(a: np.ndarray, zero_index: np.ndarray = None) -> np.ndarray:
+def reciprocal(a: np.ndarray, zero_index: np.ndarray | None = None) -> np.ndarray:
     if a.dtype != float:
         a = np.array(a, dtype=float)
     if zero_index is None:
@@ -624,7 +625,7 @@ def produce_strings(stream, format_spec) -> list[str]:
 
 
 def parse_coordinates(inp: list[str]) -> np.ndarray:
-    def iter_over_coarse_mesh():
+    def iter_over_coarse_mesh() -> Generator[tuple[float, int], None, None]:
         is_first = True
         i = 0
         length = len(inp)
@@ -643,13 +644,17 @@ def parse_coordinates(inp: list[str]) -> np.ndarray:
                 i += 1
             yield coordinate, fine_bins
 
-    def iter_over_fine_mesh(_iter_over_coarse_mesh):
-        prev_coordinate = None
-        prev_fine_bins = None
+    def iter_over_fine_mesh(_iter_over_coarse_mesh) -> Generator[float, None, None]:
+        prev_coordinate: float | None = None
+        prev_fine_bins: int | None = None
         for coordinate, fine_bins in _iter_over_coarse_mesh:
             if prev_fine_bins == 1:
+                if prev_coordinate is None:
+                    raise ValueError("Invalid mesh spec")
                 yield prev_coordinate
             elif prev_coordinate is not None:
+                if prev_fine_bins is None:
+                    raise ValueError("Invalid mesh spec")
                 res = np.linspace(
                     prev_coordinate,
                     coordinate,
@@ -665,27 +670,32 @@ def parse_coordinates(inp: list[str]) -> np.ndarray:
     return np.fromiter(iter_over_fine_mesh(iter_over_coarse_mesh()), dtype=float)
 
 
-def make_geometry_spec(origin, ibins, jbins, kbins, axs=None, vec=None) -> GeometrySpec:
+def make_geometry_spec(ibins, jbins, kbins, origin=None, axs=None, vec=None) -> GeometrySpec:
     """Make Cartesian or Cylinder geometry specification from with given parameters.
 
     The parameters are converted to numpy arrays.
 
     Args:
-        origin: origin point
         ibins:  X or R bins
         jbins:  Y or Z bins
         kbins:  Z or Theta bins
+        origin: origin point
         axs:    Cylinder mesh axis
         vec:    Cylinder mesh angle reference vector
 
     Returns:
         spec - new geometry specification
     """
-    origin, ibins, jbins, kbins = map(gs.as_float_array, [origin, ibins, jbins, kbins])
+    origin, ibins, jbins, kbins = (
+        np.asarray(x, dtype=float) for x in (origin, ibins, jbins, kbins)
+    )
     if axs is None:
-        geometry_spec = gs.CartesianGeometrySpec(ibins, jbins, kbins, origin=origin)
+        geometry_spec = gs.CartesianGeometrySpec(ibins, jbins, kbins)
+        if origin is not None and not np.array_equal(origin, geometry_spec.origin):
+            msg = "Incompatible cartesian bins and origin"
+            raise ValueError(msg)
     else:
-        axs, vec = map(gs.as_float_array, [axs, vec])
+        axs, vec = map(np.asarray, [axs, vec])
         geometry_spec = gs.CylinderGeometrySpec(
             ibins,
             jbins,

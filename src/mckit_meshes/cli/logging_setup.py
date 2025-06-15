@@ -1,6 +1,8 @@
 """Intercept log messages from the used libraries and pass them to `loguru`.
 
-See https://github.com/Delgan/loguru
+See:
+    https://github.com/Delgan/loguru
+    https://github.com/Delgan/loguru/issues/474
 """
 
 from __future__ import annotations
@@ -13,12 +15,6 @@ import sys
 from os import environ
 
 from loguru import logger
-
-# class PropagateHandler(logging.Handler):
-#     """Send events from loguru to standard logging"""
-#     def emit(self, record):
-#
-#
 
 
 class InterceptHandler(logging.Handler):
@@ -33,7 +29,7 @@ class InterceptHandler(logging.Handler):
 
         # Find caller from where originated the logged message
         frame, depth = logging.currentframe(), 2
-        while frame.f_code.co_filename == logging.__file__:
+        while frame.f_code.co_filename == logging.__file__:  # pragma: no cover
             frame = frame.f_back
             depth += 1
 
@@ -57,7 +53,6 @@ def init_logger(logfile, quiet, verbose, *, stderr_format: str = MCKIT_CONSOLE_L
         stderr_level = "WARNING"
     elif verbose:
         stderr_level = "TRACE"
-    logger.remove()
     if stderr_format:
         logger.add(
             sys.stderr,

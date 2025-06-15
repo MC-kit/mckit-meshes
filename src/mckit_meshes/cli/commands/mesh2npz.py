@@ -30,6 +30,7 @@ def revise_mesh_tallies(mesh_tallies) -> list[Path]:
 def mesh2npz(
     prefix: str | Path,
     mesh_tallies: t.Iterable[str | Path],
+    *,
     override: bool = False,
 ) -> None:
     """Convert MCNP meshtal file to a number of npz files, one for each mesh tally."""
@@ -46,5 +47,5 @@ def mesh2npz(
             fmesh.m_2_npz(
                 stream,
                 prefix=p,
-                check_existing_file_strategy=check_if_path_exists(override),
+                check_existing_file_strategy=check_if_path_exists(override=override),
             )

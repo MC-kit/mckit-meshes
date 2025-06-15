@@ -4,25 +4,22 @@
 #            for reuse in FMesh.shrink for equivalent grids or alike
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import collections.abc
 import gc
 import itertools
-import platform
+from multiprocessing import Pool
 
 import numpy as np
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
 
-    from numpy import ndarray
-    from numpy.typing import ArrayLike
+    from numpy.typing import ArrayLike, NDArray
 
-if platform.system() == "Linux":
-    from mckit_meshes.utils.no_daemon_process import Pool
-else:
-    Pool = None
+    ArrayFloat = NDArray[Any, float]
+
 
 __all__ = [
     "interpolate",
@@ -42,7 +39,7 @@ __EXTERNAL_PROCESS_THRESHOLD = 1000000
 
 
 # noinspection PyTypeChecker
-def is_monotonically_increasing(a: ArrayLike) -> bool:
+def is_monotonically_increasing(a: NDArray) -> bool:
     # noinspection PyUnresolvedReferences
     if not a.size:
         return False
@@ -63,8 +60,10 @@ def set_axis(indices: ArrayLike, axis: int, a_shape: Sequence[int]) -> ArrayLike
     return indices.reshape(tuple(shape))
 
 
-# noinspection PyUnresolvedReferences
-def interpolate(x_new: ArrayLike, x: ArrayLike, y: ArrayLike, axis: int | None = None) -> ArrayLike:
+# noinspection PyUnresolvedReferences,PyTypeChecker
+def interpolate(
+    x_new: ArrayFloat, x: ArrayFloat, y: ArrayFloat, axis: int | None = None
+) -> ArrayFloat:
     if y.ndim == 1:
         return np.interp(x_new, x, y)
 
@@ -95,10 +94,11 @@ def interpolate(x_new: ArrayLike, x: ArrayLike, y: ArrayLike, axis: int | None =
 
 # noinspection PyUnresolvedReferences
 def rebin_1d(
-    a: ArrayLike,
-    bins: ArrayLike,
-    new_bins: ArrayLike,
+    a: np.ndarray,
+    bins: np.ndarray,
+    new_bins: np.ndarray,
     axis: int = 0,
+    *,
     grouped: bool = False,
     assume_sorted: bool = False,
 ) -> np.ndarray:
@@ -180,11 +180,12 @@ def rebin_1d(
 
 
 def rebin_nd(
-    a: ndarray,
-    rebin_spec: Iterable[tuple[ArrayLike, ArrayLike, int, bool]],
+    a: NDArray[float],
+    rebin_spec: Iterable[tuple[NDArray[float], NDArray[float], int, bool]],
+    *,
     assume_sorted: bool = False,
     external_process_threshold: int = __EXTERNAL_PROCESS_THRESHOLD,
-) -> ndarray:
+) -> NDArray[float]:
     """Rebin an array `a` over multidimensional grid.
 
     Args:
@@ -210,12 +211,17 @@ def rebin_nd(
     except StopIteration:
         return a
 
-    if Pool is not None and a.size > external_process_threshold:
-        recursion_res = Pool(processes=1).apply(rebin_nd, args=(a, rebin_spec, assume_sorted))
+    if a.size > external_process_threshold:
+        with Pool(processes=1) as pool:
+            recursion_res = pool.apply(
+                rebin_nd, args=(a, rebin_spec), kwds={"assume_sorted": assume_sorted}
+            )
     else:
-        recursion_res = rebin_nd(a, rebin_spec, assume_sorted)
+        recursion_res = rebin_nd(a, rebin_spec, assume_sorted=assume_sorted)
 
-    res = rebin_1d(recursion_res, bins, new_bins, axis, grouped, assume_sorted)
+    res = rebin_1d(
+        recursion_res, bins, new_bins, axis, grouped=grouped, assume_sorted=assume_sorted
+    )
 
     del recursion_res
     if a.size > external_process_threshold:
@@ -231,7 +237,7 @@ def rebin_spec_composer(
     new_bins_seq,
     axes=None,
     grouped_flags=None,
-) -> tuple[ArrayLike, ArrayLike, ArrayLike, ArrayLike]:
+) -> Iterable[tuple[NDArray[float], NDArray[float], NDArray[float], NDArray[float]]]:
     """Compose rebin_spec parameter.
 
     See also :py:func:`mckit_meshes.utils.rebin.rebin_nd` with reasonable defaults
@@ -253,7 +259,7 @@ def rebin_spec_composer(
             all the axes this value is applied.
 
     Returns:
-        Iterator: ... over the sequence of tuples (bins, new_bins, axis, grouped)
+        Iterator over the sequence of tuples (bins, new_bins, axis, grouped)
     """
     if not axes:
         axes = itertools.count()
@@ -268,10 +274,11 @@ def rebin_spec_composer(
 def shrink_1d(
     a: np.ndarray,
     bins: np.ndarray,
-    low=None,
-    high=None,
-    axis=None,
-    assume_sorted=False,
+    low: float | None = None,
+    high: float | None = None,
+    axis: int | None = None,
+    *,
+    assume_sorted: bool = False,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Select sub-arrays of a `a` and corresponding `bins` for minimal span.
 
@@ -327,10 +334,7 @@ def shrink_1d(
         raise ValueError(msg)
 
     if high < bins[0] or bins[-1] < high:
-        msg = (
-            f"High shrink edge is beyond the bins range: {high:g}"
-            f" is not in [{bins[1]:g}..{bins[-1]:g}]"
-        )
+        msg = f"High shrink edge is beyond the bins range: {high} is not in [{bins[0]}..{bins[-1]}]"
         raise ValueError(msg)
 
     left_idx, right_idx = np.digitize([low, high], bins) - 1
@@ -356,8 +360,9 @@ def shrink_1d(
 
 def shrink_nd(
     a: np.ndarray,
-    trim_spec,
-    assume_sorted=False,
+    trim_spec: Iterable[tuple[np.ndarray, float, float, int]],
+    *,
+    assume_sorted: bool = False,
 ) -> tuple[list[np.ndarray] | None, np.ndarray]:
     """Perform multidimensional shrink.
 
@@ -376,8 +381,10 @@ def shrink_nd(
         bins, left, right, axis = next(trim_spec)
     except StopIteration:
         return None, a
-    new_bins_seq, recursed_data = shrink_nd(a, trim_spec, assume_sorted)
-    top_bins, top_data = shrink_1d(recursed_data, bins, left, right, axis, assume_sorted)
+    new_bins_seq, recursed_data = shrink_nd(a, trim_spec, assume_sorted=assume_sorted)
+    top_bins, top_data = shrink_1d(
+        recursed_data, bins, left, right, axis, assume_sorted=assume_sorted
+    )
     new_bins_seq = [top_bins, *new_bins_seq] if new_bins_seq else [top_bins]
     return new_bins_seq, top_data
 
@@ -387,7 +394,7 @@ def trim_spec_composer(
     lefts=None,
     rights=None,
     axes=None,
-) -> Iterable[tuple[ArrayLike, float, float, int]]:
+) -> Iterable[tuple[NDArray[float], float, float, int]]:
     """Helps to compose trim_spec parameter in.
 
     :func:`mckit_meshes.utils.rebin.trim_nd` with

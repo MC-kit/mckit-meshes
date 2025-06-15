@@ -53,7 +53,7 @@ def weights_ijk() -> Callable[[float], WgtMesh]:
 
     def call(start_value: float):
         return WgtMesh(
-            make_geometry_spec(origin=DEFAULT_ORIGIN, ibins=ibins, jbins=jbins, kbins=kbins),
+            make_geometry_spec(ibins=ibins, jbins=jbins, kbins=kbins, origin=DEFAULT_ORIGIN),
             [ebins],
             [build_weights(start_value)],
         )
@@ -87,7 +87,7 @@ def weights_eijk() -> Callable[[float], WgtMesh]:
 
     def call(start_value: float):
         return WgtMesh(
-            make_geometry_spec(origin=DEFAULT_ORIGIN, ibins=ibins, jbins=jbins, kbins=kbins),
+            make_geometry_spec(ibins=ibins, jbins=jbins, kbins=kbins, origin=DEFAULT_ORIGIN),
             [ebins],
             [build_weights(start_value)],
         )
@@ -107,9 +107,9 @@ def test_trivial_constructor():
     ebins = np.array([0.0, 15.0])
     x = np.array([0.0, 1.0])
     y = np.array([0.0, 1.0])
-    z = np.array([0.0, 1.0])
+    z = np.array([-17.0, 1.0])
     w = np.array([[[[0.5]]]])
-    m = WgtMesh(make_geometry_spec(origin, x, y, z), [ebins], [w])
+    m = WgtMesh(make_geometry_spec(x, y, z, origin), [ebins], [w])
     assert w == m._weights
 
 
@@ -140,7 +140,7 @@ def test_mesh_coordinate_parsing(text, expected):
 
 def test_constructor_from_lists():
     wgm = WgtMesh(
-        make_geometry_spec(DEFAULT_ORIGIN, [0, 10], [0, 20], [0, 30]),
+        make_geometry_spec([0, 10], [0, 20], [0, 30], DEFAULT_ORIGIN),
         [[0, 20], [0, 20]],
         [[[[[1]]]], [[[[10]]]]],
     )
@@ -153,7 +153,7 @@ def test_constructor_from_lists():
         wgm.photon_weights,
     ]:
         assert isinstance(b, np.ndarray), f"{b} is not np.ndarray"
-        assert b.dtype == float, f"{b} is not an array of floats"
+        assert b.dtype == np.float64, f"{b} is not an array of floats"
     for b in [
         wgm.energies,
         wgm.weights,
@@ -170,12 +170,12 @@ def test_constructor_from_lists():
 
 def test_add_happy_path():
     am = WgtMesh(
-        make_geometry_spec(DEFAULT_ORIGIN, [0, 10], [0, 20], [0, 30]),
+        make_geometry_spec([0, 10], [0, 20], [0, 30], DEFAULT_ORIGIN),
         [[0, 20], [0, 20]],
         [[[[[1]]]], [[[[10]]]]],
     )
     bm = WgtMesh(
-        make_geometry_spec(DEFAULT_ORIGIN, [0, 10], [0, 20], [0, 30]),
+        make_geometry_spec([0, 10], [0, 20], [0, 30], DEFAULT_ORIGIN),
         [[0, 20], [0, 20]],
         [[[[[2]]]], [[[[20]]]]],
     )
@@ -185,12 +185,12 @@ def test_add_happy_path():
 
 def test_add_bad_path():
     am = WgtMesh(
-        make_geometry_spec(DEFAULT_ORIGIN, [0, 10], [0, 20], [0, 30]),
+        make_geometry_spec([0, 10], [0, 20], [0, 30], DEFAULT_ORIGIN),
         [[0, 20], [0, 20]],
         [[[[[1]]]], [[[[10]]]]],
     )
     bm = WgtMesh(
-        make_geometry_spec(DEFAULT_ORIGIN, [0, 10], [0, 20], [0, 50]),  # <-- kbins differ
+        make_geometry_spec([0, 10], [0, 20], [0, 50], DEFAULT_ORIGIN),  # <-- kbins differ
         [[0, 20], [0, 20]],
         [[[[[2]]]], [[[[20]]]]],
     )

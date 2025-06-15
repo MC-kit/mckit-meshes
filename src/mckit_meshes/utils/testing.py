@@ -30,7 +30,7 @@ def a(*args, dtype=float) -> np.ndarray:
     array([[0., 1.],
            [2., 3.]])
     """
-    return cast(np.ndarray, np.fromiter(args, dtype=dtype))
+    return cast("np.ndarray", np.fromiter(args, dtype=dtype))
 
 
 if __name__ == "__main__":

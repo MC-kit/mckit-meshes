@@ -1,5 +1,5 @@
 [build-system]
-requires = ["poetry-core >= 2.0.0, <3.0.0"]
+requires = ["poetry-core >= 2.1.2, <3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [project]
@@ -30,12 +30,12 @@ Changelog = "https://github.com/MC-kit/mckit-meshes/releases"
 mckit-meshes = "mckit_meshes.cli.runner:mckit_meshes"
 
 [tool.poetry]
-version = "0.1.6"
+version = "0.2.0"
 packages = [{ include = "mckit_meshes", from = "src" }]
 include = [
     { path = "noxfile.py", format = "sdist" },
     { path = "tests", format = "sdist" },
-    { path = "docs", format = "sdist" }
+    { path = "docs", format = "sdist" },
 ]
 exclude = [
     { path = "docs/build" }
@@ -55,30 +55,21 @@ classifiers = [
 python = ">=3.10,<3.14"
 
 [tool.poetry.group.dev.dependencies]
-Pygments = ">=2.10.0"
 nox = ">=2022.1.7"
 tomli = { version = ">=2.0.1", python = "<3.11" }
-
-#[tool.poetry.group.profile]
-#optional = true
-
-#[tool.poetry.group.profile.dependencies]
-# TODO dvp: apply yappi: https://coderzcolumn.com/tutorials/python/yappi-yet-another-python-profiler
-#yappi = ">=1.3.2"
 
 [tool.poetry.group.pre_commit.dependencies]
 pre-commit = ">=2.15.0"
 pydocstringformatter = ">=0.7.3"
-pyupgrade = ">=3.15.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = ">=7.1"
-# pytest-cache = ">=1.0"
 pytest-cov = ">=4.0"
-# pytest-mock = ">=3.9"
+pytest-mock = ">=3.14.0"
 # pytest-randomly = ">=3.12"
 coverage = { version = ">=6.1.2", extras = ["toml"] }
 xdoctest = { extras = ["colors"], version = ">=0.15.10" }
+pytest-durations = "^1.5.2"
 
 [tool.poetry.group.coverage.dependencies]
 coverage = { version = ">=6.1.2", extras = ["toml"] }
@@ -93,7 +84,7 @@ typeguard = ">=4.1.5"
 mypy = ">=1.2.0"
 pep8-naming = ">=0.12.1"
 types-setuptools = ">=57.4.2"
-numpy = ">=1.26.2"
+numpy = ">=2.1.3"
 
 [tool.poetry.group.docs.dependencies]
 sphinx = ">=6.1.3"
@@ -132,6 +123,8 @@ addopts = '''
 --ignore setup.py
 --failed-first
 --xdoctest
+--pytest-durations-min=1
+--pytest-resultlog="pytest-result.log"
 '''
 doctest_optionflags = "ELLIPSIS NORMALIZE_WHITESPACE IGNORE_EXCEPTION_DETAIL ALLOW_UNICODE ALLOW_BYTES NUMBER"
 testpaths = ["tests", "src"]
@@ -247,33 +240,6 @@ ignore = [
     "noxfile.py",
 ]
 
-[tool.ipdb]
-# For debugging in jupyterlab and ipython
-# see https://github.com/gotcha/ipdb
-context = 5
-
-[tool.tryceratops]
-include = ["src"]
-experimental = true
-
-[tool.pydocstringformatter]
-write = true
-style = "pep257"
-exclude = ["tools/**", "src/**/*_parser.py", "src/**/*_tab.py"]
-strip-whitespaces = true
-max-line-length = 100
-summary-quotes-same-line = true
-
-
-[tool.pylint]
-good-names-rgxs = ["."]  # a single character variable is okay
-logging-format-style = "new"   # use {} in logging messages
-deprecated-modules = ["six"]
-extension-pkg-allow-list = ["duckdb"]
-disable = [
-    "wrong-import-order"  # this is `ruff format` responsibility
-]
-
 [tool.ruff]
 target-version = "py310"
 
@@ -375,8 +341,6 @@ select = [
     "YTT", # flake8-2020
 ]
 
-#warning: The isort option `isort.split-on-trailing-comma` is incompatible with the formatter `format.skip-magic-trailing-comma=true` option. To avoid unexpected behavior, we recommend either setting `isort.split-on-trailing-comma=false` or `format.skip-magic-trailing-comma=false`.
-
 # Ignore rules that currently fail on the codebase
 ignore = [
     "ANN001", # ANN001 Missing type annotation for function argument: doesn't allow to use functools dispatching
@@ -398,7 +362,6 @@ ignore = [
     "E402", # Module level import not at top of file
     "EM101", # Exception must not use a string literal, assign to variable first
     "EM102", # Exception must not use an f-string literal, assign to variable first
-    "FBT001", # Boolean positional arg in function definition (TODO!)
     "FBT002", # Boolean default value in function definition (TODO!)
     "FBT003", # Boolean positional value in function call
     "FIX", # Remove TODOs
@@ -411,7 +374,7 @@ ignore = [
     "PLR0912", # Too many branches (15 > 12)
     "PLR0913", # Too many arguments to function call (6 > 5)
     "PLR0915", # Too many statements (65 > 50)
-    "PLR2004", # magic number - don't want declare 0.0 as constant
+    "PLR2004", # magic number - don't want to declare 0.0 as constant
     "PT019", # Fixture `_bin` without value is injected as parameter (false positive?)
     "S101", # Use of `assert` detected
     "SLF001", # Private member accessed: `_geometry_spec`
@@ -420,9 +383,7 @@ ignore = [
 
 
 [tool.ruff.lint.per-file-ignores]
-"**/__init__.py" = ["E402"]
 "benchmarks/*" = ["S101"]
-"noxfile.py" = ["ANN"]
 "tests/*" = ["ANN", "D100", "D101", "D102", "D103", "D104", "PLR2004", "S101"]
 "tools/*" = ["T201", "INP001", "S603", "S607"]
 
@@ -438,6 +399,11 @@ parametrize-names-type = "csv"
 
 [tool.ruff.lint.flake8-type-checking]
 strict = true
+
+# warning: The isort option `isort.split-on-trailing-comma` is incompatible
+# with the formatter `format.skip-magic-trailing-comma=true` option.
+# To avoid unexpected behavior, we recommend either setting `isort.split-on-trailing-comma=false`
+# or `format.skip-magic-trailing-comma=false`.
 
 [tool.ruff.lint.isort]
 known-first-party = ["src"]
@@ -470,3 +436,8 @@ docstring-code-format = true
 # https://jupytext.readthedocs.io/en/latest/config.html
 # Pair ipynb notebooks to py:percent text notebooks
 formats = "ipynb,md,py:percent"
+
+[tool.creosote]
+paths = ["src"]
+deps-file = "pyproject.toml"
+sections = ["project.dependencies"]

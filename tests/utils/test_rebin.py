@@ -301,7 +301,7 @@ def test_shrink_nd(msg, array, trim_spec, expected_bins, expected_data):
     ],
 )
 def test_rebin_1d(rebinned_data, data, bins, new_bins, axis, grouped):
-    actual_rebinned_data = rebin_1d(data, bins, new_bins, axis, grouped)
+    actual_rebinned_data = rebin_1d(data, bins, new_bins, axis, grouped=grouped)
     assert_array_equal(rebinned_data, actual_rebinned_data)
 
 

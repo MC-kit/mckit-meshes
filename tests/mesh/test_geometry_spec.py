@@ -11,9 +11,17 @@ from mckit_meshes.mesh.geometry_spec import (
     DEFAULT_VEC,
     CartesianGeometrySpec,
     CylinderGeometrySpec,
+    as_float_array,
     select_indexes,
 )
 from mckit_meshes.utils.testing import a
+
+
+def test_as_float_array() -> None:
+    expected = np.array([1, 2, 3], dtype=float)
+    actual = as_float_array([1, 2, 3])
+    assert actual.dtype == np.dtype(float)
+    assert_array_equal(actual, expected)
 
 
 def test_cartesian_constructor():
@@ -28,16 +36,16 @@ def test_cartesian_constructor():
 
 
 def test_cylinder_constructor():
-    cylinder = CylinderGeometrySpec(a(1, 2, 3), a(4, 5, 6), a(0, 0.5, 1), origin=a(1, 0, 0))
+    cylinder = CylinderGeometrySpec(a(0, 1, 2, 3), a(0, 4, 5, 6), a(0, 0.5, 1), origin=a(1, 0, 0))
     assert cylinder.cylinder
     assert isinstance(cylinder.r, np.ndarray)
-    assert np.array_equal(a(1, 2, 3), cylinder.r)
+    assert np.array_equal(a(0, 1, 2, 3), cylinder.r)
     assert isinstance(cylinder.origin, np.ndarray)
     assert np.array_equal(a(1, 0, 0), cylinder.origin)
     assert cylinder.axs.dtype == float
     assert not hasattr(cylinder, "x")
-    assert_array_equal(a(4, 5, 6), cylinder.z)
-    assert cylinder.bins_size == 8
+    assert_array_equal(a(0, 4, 5, 6), cylinder.z)
+    assert cylinder.bins_size == 18
 
 
 def test_cylinder_constructor_with_wrong_theta():
@@ -68,9 +76,17 @@ def test_cartesian_local_coordinates():
     ],
 )
 def test_cylinder_local_coordinates(points, origin, expected):
-    cylinder = CylinderGeometrySpec(a(1, 2, 3), a(4, 5, 6), a(0, 0.5, 1), origin=origin)
+    cylinder = CylinderGeometrySpec(a(0, 1, 2, 3), a(0, 4, 5, 6), a(0, 0.5, 1), origin=origin)
     actual = cylinder.local_coordinates(points)
     assert_array_almost_equal(expected, actual)
+
+
+def test_boundaries_shape():
+    gc = CartesianGeometrySpec(a(1, 2, 3), a(4, 5), a(7, 8))
+    i, j, k = gc.boundaries_shape
+    assert i == 3
+    assert j == 2
+    assert k == 2
 
 
 def test_boundaries():
@@ -83,39 +99,42 @@ def test_boundaries():
     assert zmin == 7.0
     assert zmax == 9.0
 
-    gc = CylinderGeometrySpec(a(1, 2, 3), a(4, 5, 6), a(0, 0.5, 1), origin=a(0, 0, 0))
+    gc = CylinderGeometrySpec(a(0, 1, 2, 3), a(0, 4, 5, 6), a(0, 0.5, 1), origin=a(0, 0, 0))
     (rmin, rmax), (zmin, zmax), (tmin, tmax) = gc.boundaries
-    assert rmin == 1.0
+    assert rmin == 0.0
     assert rmax == 3.0
-    assert zmin == 4.0
+    assert zmin == 0.0
     assert zmax == 6.0
     assert tmin == 0.0
     assert tmax == 1.0
 
 
 @pytest.mark.parametrize(
-    "point,expected",
+    "point,expected,local",
     [
-        (a(2, 5, 8), True),
-        (a(1, 5, 8), False),
+        (a(2, 5, 8), True, True),
+        (a(2, 5, 8), True, False),  # should not depend on local until Transformation is implemented
+        (a(1, 5, 8), True, True),
+        (a(0.5, 5, 8), False, True),
     ],
 )
-def test_surrounds_point_cartesian(point, expected):
+def test_surrounds_point_cartesian(point, expected, local) -> None:
     gc = CartesianGeometrySpec(a(1, 2, 3), a(4, 5, 6), a(7, 8, 9))
-    assert gc.surrounds_point(*point) == expected
+    assert gc.surrounds_point(*point, local=local) == expected
 
 
 @pytest.mark.parametrize(
-    "point,expected",
+    "point,expected,local",
     [
-        (a(2, 2, 0), True),
-        (a(2, 2, 2), False),
+        (a(2, 2, 0), True, True),
+        (a(2, 2, 2), False, True),
+        (a(0, 0, 2), False, False),
+        (a(0, 0, 0), True, False),
     ],
 )
-def test_surrounds_point_cylinder(point, expected):
-    gc = CylinderGeometrySpec(a(1, 2, 3), a(4, 5, 6), a(0, 0.5, 1), origin=a(0, 0, -5))
-    local_point = gc.local_coordinates(point)
-    assert gc.surrounds_point(*local_point) == expected
+def test_surrounds_point_cylinder(point, expected, local):
+    gc = CylinderGeometrySpec(a(0, 1, 2, 3), a(0, 4, 5, 6), a(0, 0.5, 1), origin=a(0, 0, -5))
+    assert gc.surrounds_point(*point, local=local) == expected
 
 
 def test_eq():
@@ -124,6 +143,11 @@ def test_eq():
     gc3 = CartesianGeometrySpec(a(1, 2, 3), a(4, 5, 6), a(7, 8, 2))
     assert gc1 == gc2
     assert gc1 != gc3
+
+
+def test_ne_obj() -> None:
+    cartesian = CartesianGeometrySpec(ibins=a(1, 2, 3), jbins=a(4, 5, 6), kbins=a(7, 8, 9))
+    assert cartesian != object()
 
 
 def test_cylinder_mesh_trivial_constructor():

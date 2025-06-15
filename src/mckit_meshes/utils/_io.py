@@ -2,16 +2,16 @@
 
 from __future__ import annotations
 
-import typing as t
-
-from typing import Any, TextIO
+from typing import TYPE_CHECKING, Any
 
 import sys
 
 from pathlib import Path
 
-if t.TYPE_CHECKING:
-    from collections.abc import Iterable
+if TYPE_CHECKING:
+    # noinspection PyCompatibility
+    from collections.abc import Callable, Iterable
+    from _typeshed import SupportsWrite
 
 
 def ignore_existing_file_strategy(_: str | Path) -> None:
@@ -35,7 +35,7 @@ Please remove the file or specify --override option"""
         raise FileExistsError(errmsg)
 
 
-def check_if_path_exists(override: bool) -> t.Callable[[str | Path], None]:
+def check_if_path_exists(*, override: bool) -> Callable[[str | Path], None]:
     """Select strategy to handle existing files, depending on option `override`.
 
     Args:
@@ -49,37 +49,37 @@ def check_if_path_exists(override: bool) -> t.Callable[[str | Path], None]:
 
 def print_cols(
     seq: Iterable[Any],
-    fid: TextIO = sys.stdout,
+    fid: SupportsWrite[str] = sys.stdout,
     max_columns: int = 6,
     fmt: str = "{}",
 ) -> int:
-    """Print sequence in max_columns.
+    """Print sequence in columns.
 
     Args:
         seq: sequence to print
         fid: output
-        max_columns: max max_columns in a line
+        max_columns: max columns in a line
         fmt: format string
 
     Returns:
         int: the number of the last column printed on the last row
     """
-    column = 0  # : ignore[SIM113]
+    i = 0
     for s in seq:
-        print(fmt.format(s), file=fid, end="")
-        column += 1
-        if column % max_columns == 0:
-            column = 0
-            print(file=fid)
-        else:
+        if i > 0:
             print(" ", file=fid, end="")
+        print(fmt.format(s), file=fid, end="")
+        i += 1
+        if i >= max_columns:
+            print(file=fid)
+            i = 0
 
-    return column
+    return i
 
 
 def print_n(
     words: Iterable,
-    io: TextIO = sys.stdout,
+    io: SupportsWrite[str] = sys.stdout,
     indent: str = "",
     max_columns: int = 5,
 ) -> None:
