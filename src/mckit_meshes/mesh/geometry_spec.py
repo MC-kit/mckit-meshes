@@ -33,8 +33,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Final, TextIO, cast
 
 import abc
+import operator
 
 from dataclasses import dataclass, field
+from functools import reduce
 
 import numpy as np
 import numpy.typing as npt
@@ -120,6 +122,9 @@ class AbstractGeometrySpecData:
             return False
         a, b = self.bins, other.bins
         return len(a) == len(b) and arrays_equal(zip(a, b, strict=False))
+
+    def __hash__(self) -> int:
+        return reduce(operator.xor, map(len, self.bins))
 
     @property
     def bins(self) -> tuple[Bins, ...]:
