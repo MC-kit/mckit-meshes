@@ -16,4 +16,3 @@ test-all *ARGS:
   pytest {{ARGS}}
 
 alias t := test-all
-
