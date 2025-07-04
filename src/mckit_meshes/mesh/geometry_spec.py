@@ -43,7 +43,7 @@ import numpy.typing as npt
 
 from numpy import linalg
 
-from mckit_meshes.utils import print_n, cartesian_product
+from mckit_meshes.utils import cartesian_product, print_n
 
 if TYPE_CHECKING:
     # noinspection PyCompatibility

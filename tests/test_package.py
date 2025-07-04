@@ -5,7 +5,7 @@ import sys
 
 from pathlib import Path
 
-if sys.version_info < (3, 11):
+if sys.version_info < (3, 11):  # noqa: UP036
     import tomli as tomllib
 else:
     import tomllib

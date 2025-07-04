@@ -10,6 +10,7 @@ import numpy as np
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+
     from numpy.typing import ArrayLike, NDArray
 
 

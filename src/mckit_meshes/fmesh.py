@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TextIO, Literal
+from typing import TYPE_CHECKING, Literal, TextIO
 
 import logging
 
@@ -15,12 +15,13 @@ from textwrap import dedent
 
 import numpy as np
 
+from pyevtk.hl import gridToVTK
+from toolz.itertoolz import concatv
+
 import mckit_meshes.mesh.geometry_spec as gc
 
 from mckit_meshes.particle_kind import ParticleKind as Kind
-from mckit_meshes.utils import rebin, raise_error_when_file_exists_strategy
-from pyevtk.hl import gridToVTK
-from toolz.itertoolz import concatv
+from mckit_meshes.utils import raise_error_when_file_exists_strategy, rebin
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Generator, Iterable

@@ -1,5 +1,6 @@
 from __future__ import annotations
-from .logging_setup import init_logger, logger, InterceptHandler
+
+from .logging_setup import InterceptHandler, init_logger, logger
 
 __all__ = [
     "InterceptHandler",

@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 
 from numpy.testing import assert_array_equal
-
-import pytest
 
 from mckit_meshes.utils import cartesian_product
 from mckit_meshes.utils.testing import a

@@ -3,10 +3,9 @@ from __future__ import annotations
 import sys
 
 import numpy as np
+import pytest
 
 from numpy.testing import assert_array_equal
-
-import pytest
 
 from mckit_meshes.utils.rebin import (
     interpolate,

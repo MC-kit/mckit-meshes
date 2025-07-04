@@ -2,16 +2,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-
 import pytest
 
 from click.testing import CliRunner
-
 from loguru import logger
 
 if TYPE_CHECKING:
     # noinspection PyCompatibility
     from collections.abc import Generator
+
     from _pytest.logging import LogCaptureFixture
 
 

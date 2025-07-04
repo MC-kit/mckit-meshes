@@ -12,6 +12,7 @@ from enum import IntEnum
 import numpy as np
 
 import mckit_meshes.mesh.geometry_spec as gs
+
 from mckit_meshes.utils import print_n
 
 if TYPE_CHECKING:

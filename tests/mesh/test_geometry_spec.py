@@ -3,11 +3,9 @@ from __future__ import annotations
 from io import StringIO
 
 import numpy as np
-
-from numpy.testing import assert_almost_equal, assert_array_almost_equal, assert_array_equal
-
 import pytest
 
+from numpy.testing import assert_almost_equal, assert_array_almost_equal, assert_array_equal
 
 from mckit_meshes.mesh.geometry_spec import (
     DEFAULT_AXIS,
