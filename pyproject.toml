@@ -1,5 +1,5 @@
 [build-system]
-requires = ["uv_build>=0.7.19,<0.8.0"]
+requires = ["uv_build>=0.7.19,<0.9.0"]
 build-backend = "uv_build"
 
 [project]
@@ -18,8 +18,6 @@ keywords = [
   "weights",
   "variance reduction"
 ]
-# Select from PyPI trove classifiers: https://pypi.org/classifiers/
-# about dynamic classifiers in poetry: https://python-poetry.org/docs/pyproject/#classifiers-1
 classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: Console",
