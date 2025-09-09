@@ -38,6 +38,7 @@ repos:
       - id: check-symlinks
       - id: check-toml
       - id: check-yaml
+        exclude: recipe/meta.yaml
       - id: debug-statements
         exclude: notebooks
       - id: destroyed-symlinks
@@ -56,17 +57,17 @@ repos:
 
 
   - repo: https://github.com/fredrikaverpil/creosote
-    rev: v4.0.3
+    rev: v4.1.0
     hooks:
       - id: creosote
 
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.8.9
+    rev: 0.8.15
     hooks:
       - id: uv-lock 
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.12.8
+    rev: v0.12.12
     hooks:
       # linter
       - id: ruff-check
