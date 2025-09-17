@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import numpy as np
-
 import pytest
 
 from mckit_meshes.cli.runner import mckit_meshes

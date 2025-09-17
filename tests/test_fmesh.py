@@ -5,10 +5,9 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 from numpy.testing import assert_almost_equal, assert_array_equal
-
-import pytest
 
 from mckit_meshes.fmesh import FMesh, iter_meshtal, m_2_npz, merge_tallies, read_meshtal
 from mckit_meshes.mesh.geometry_spec import CartesianGeometrySpec

@@ -18,7 +18,7 @@ reset() {
     local env="${1:-}"
     read -r -a pkgs <<< "$(ls -1 src)"
     local pkg=${pkgs[0]}
-    local last_python="3.13.4"
+    local last_python="3.13.5"
     [[ -z "$env" ]] && env="${pkg//_/-}"
     echo "Installing package $pkg to environment $env with python $last_python."
     eval "$(pyenv init -)"

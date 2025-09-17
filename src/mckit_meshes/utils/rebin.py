@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any
 import collections.abc
 import gc
 import itertools
+
 from multiprocessing import Pool
 
 import numpy as np

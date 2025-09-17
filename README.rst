@@ -9,28 +9,14 @@
 .. contents::
 
 
-Note:
-    This document is in progress.
-
 Description
 -----------
 
 The module implements methods to read and manipulate (merge, inverse, scale, etc.)
 MCNP mesh tallies and weight meshes.
 
-.. TODO dvp: apply FISPACT v.5 API and describe here.
+More details in documentation_.
 
-
-Installation
-------------
-
-.. TODO dvp: check and report all possible ways to install (pip, poetry)
-
-
-Examples
---------
-
-.. TODO
 
 Contributing
 ------------
@@ -38,20 +24,59 @@ Contributing
 .. image:: https://github.com/MC-kit/mckit-meshes/workflows/Tests/badge.svg
    :target: https://github.com/MC-kit/mckit-meshes/actions?workflow=Tests
    :alt: Tests
+
+..  check why the codecov site is not accessible
+
 .. image:: https://codecov.io/gh/MC-kit/mckit-meshes/branch/master/graph/badge.svg?token=wlqoa368k8
    :target: https://codecov.io/gh/MC-kit/mckit-meshes
-.. image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v0.json
-   :target: https://github.com/astral-sh/ruff
 .. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
    :target: https://github.com/pre-commit/pre-commit
    :alt: pre-commit
+.. image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json
+   :target: https://github.com/astral-sh/ruff
+.. image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json
+   :target: https://github.com/astral-sh/uv
 
 
+Some specific: in development environment we use uv_, just_, ruff_.
+
+To setup development environment, run:
+
+.. code-block:: shell
+
+  just install | reinstall
+
+To build documentation, run:
+
+.. code-block:: shell
+
+   just docs        # - for local online docs rendering, while editing 
+   just docs-build  # - to build documentation 
+
+To release, run:
+
+.. code-block:: shell
+
+  just bump [major|minor|patch]  # - in `devel` branch
+  
+Then merge devel to master (via Pull Request) and if all the checks are passed create Release. Manually.
+
+
+.. ... with /home/dvp/.julia/dev/Tools.jl/scripts/extract-half-lives.jl (nice script by the way).
 
 References
 ----------
 
-.. TODO dvp: add references to iww-gvr, mckit and used libraries:  poetry, xarray etc
+.. todo::
+
+   dvp: add references to iww-gvr, mckit and used libraries:  poetry, xarray etc
+
+.. Links
+
+.. _documentation: https://mckit-meshes.readthedocs.io/en/latest
+.. _uv: https://github.com/astral-sh/uv
+.. _just: https://github.com/casey/just
+.. _ruff: https://github.com/astral-sh/ruff
 
 
 .. Substitutions

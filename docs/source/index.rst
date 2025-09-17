@@ -2,10 +2,12 @@
 Welcome to mckit-meshes documentation!
 ======================================
 
-.. todo::
+.. note::
 
-    The documentation is under development.
+   This documentation is currently under active development.
 
+Overview
+========
 
 The package provides methods to read, write and process MCNP tally and weight meshes.
 
@@ -24,22 +26,35 @@ That includes: ::
 Installation
 ============
 
-From PyPI (recommended):
+**From PyPI (Recommended):**
 
-.. code-block::
-
+.. code-block:: bash
+   
    pip install mckit-meshes
+   # or 
+   uv pip install mckit-meshes
 
-With package manager (as dependency):
+**With package manager (as a dependency):**
 
-.. code-block::
+.. code-block:: bash
+   
+   # uv
+   uv add mckit-nuclides
+   
+   # pixi
+   pixi add --pypi mckit-meshes
 
+   # poetry
    poetry add mckit-meshes
+
+   # ...
 
 From source:
 
-.. code-block::
+.. code-block:: bash
 
+   uv pip install https://github.com/MC-kit/mckit-meshes.git
+   # or
    pip install https://github.com/MC-kit/mckit-meshes.git
 
 Details

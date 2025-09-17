@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+from io import StringIO
+
 import numpy as np
+import pytest
 
 from numpy.testing import assert_almost_equal, assert_array_almost_equal, assert_array_equal
-
-import pytest
 
 from mckit_meshes.mesh.geometry_spec import (
     DEFAULT_AXIS,
@@ -17,6 +18,16 @@ from mckit_meshes.mesh.geometry_spec import (
 from mckit_meshes.utils.testing import a
 
 
+@pytest.fixture
+def cartesian() -> CartesianGeometrySpec:
+    return CartesianGeometrySpec(ibins=a(1, 2, 3), jbins=a(4, 5, 6), kbins=a(7, 8, 9))
+
+
+@pytest.fixture
+def cylinder() -> CylinderGeometrySpec:
+    return CylinderGeometrySpec(a(0, 1, 2, 3), a(0, 4, 5, 6), a(0, 0.5, 1), origin=a(1, 0, 0))
+
+
 def test_as_float_array() -> None:
     expected = np.array([1, 2, 3], dtype=float)
     actual = as_float_array([1, 2, 3])
@@ -24,8 +35,7 @@ def test_as_float_array() -> None:
     assert_array_equal(actual, expected)
 
 
-def test_cartesian_constructor():
-    cartesian = CartesianGeometrySpec(ibins=a(1, 2, 3), jbins=a(4, 5, 6), kbins=a(7, 8, 9))
+def test_cartesian_constructor(cartesian):
     assert not cartesian.cylinder
     assert isinstance(cartesian.x, np.ndarray)
     assert np.array_equal(a(1, 2, 3), cartesian.x)
@@ -35,8 +45,7 @@ def test_cartesian_constructor():
     assert cartesian.bins_size == 8
 
 
-def test_cylinder_constructor():
-    cylinder = CylinderGeometrySpec(a(0, 1, 2, 3), a(0, 4, 5, 6), a(0, 0.5, 1), origin=a(1, 0, 0))
+def test_cylinder_constructor(cylinder):
     assert cylinder.cylinder
     assert isinstance(cylinder.r, np.ndarray)
     assert np.array_equal(a(0, 1, 2, 3), cylinder.r)
@@ -209,3 +218,36 @@ def test_select_indices_with_arrays(inp, values, expected):
         expected,
         actual,
     ), f"for {inp} and {values}, we expect {expected}, actual {actual}"
+
+
+def test_print_specification(cartesian, cylinder):
+    buf = StringIO()
+    cartesian.print_specification(buf, columns=5)
+    actual = buf.getvalue()
+    expected = (
+        "        origin=1 4 7\n"
+        "        imesh=3\n"
+        "        iints=2\n"
+        "        jmesh=6\n"
+        "        jints=2\n"
+        "        kmesh=9\n"
+        "        kints=2\n"
+    )
+    assert actual == expected
+
+    buf = StringIO()
+    cylinder.print_specification(buf, columns=5)
+    actual = buf.getvalue()
+    expected = (
+        "        geom=cyl\n"
+        "        axs=0 0 1\n"
+        "        vec=1 0 0\n"
+        "        origin=1 0 0\n"
+        "        imesh=3\n"
+        "        iints=3\n"
+        "        jmesh=4 6\n"
+        "        jints=1 2\n"
+        "        kmesh=1\n"
+        "        kints=2\n"
+    )
+    assert actual == expected

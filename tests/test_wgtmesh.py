@@ -10,10 +10,9 @@ from itertools import product
 from operator import mul
 
 import numpy as np
+import pytest
 
 from numpy.testing import assert_almost_equal, assert_array_almost_equal, assert_array_equal
-
-import pytest
 
 from mckit_meshes import wgtmesh
 from mckit_meshes.utils.testing import a
