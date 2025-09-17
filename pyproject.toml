@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "mckit-meshes"
-version = "0.2.2"
+version = "0.2.3"
 requires-python = ">=3.11,<3.14" # connectorx==0.4.3 prevents <4
 description = "Python tools to work with MCNP meshtallies and weight meshes."
 authors = [
@@ -229,4 +229,4 @@ sections = ["project.dependencies"]
 
 [tool.rstcheck]
 report_level = "ERROR"
-ignore_messages = "(Unknown directive type \"(todo.*|automodule)\".$)"
+ignore_messages = '(Unknown directive type "(todo|todolist|automodule)"\.$)'
