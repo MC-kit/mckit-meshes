@@ -64,8 +64,8 @@ export JUST_LOG := log
 
 # Bump project version
 [group: 'dev']
-@bump *args="dev":
-  uv version --bump {{args}}
+@bump *args="--bump alpha":
+  uv version {{args}}
   git commit -m "bump: version $(uv version)" pyproject.toml uv.lock 
 
 # update tools
