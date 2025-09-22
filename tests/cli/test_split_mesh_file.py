@@ -21,35 +21,24 @@ def source():
     return res
 
 
-def test_version():
-    console = Console()
-    with console.capture() as capture:
-        result = app(["--version"], console=console)
-        assert result is None
-    out = capture.get()
+def test_version(cyclopts_runner):   
+    result, out, dir = cyclopts_runner(app, ["--version"])
+    assert result is None
     assert __version__ in out
 
 
-def test_help():
-    console = Console()
-    with console.capture() as capture:
-        result = app(["--help"], console=console)
-        assert result is None
-    out = capture.get()
+def test_help(cyclopts_runner):
+    result, out, dir = cyclopts_runner(app, ["--help"])
+    assert result is None
     assert "Usage: " in out
 
 
-def test_when_there_is_no_args(tmp_path, monkeypatch):
-    monkeypatch.chdir(tmp_path)
-    console = Console()
-    with console.capture() as capture:
-        result = app([], console=console)
-        assert result != 0
-    out = capture.get()
+def test_when_there_is_no_args(cyclopts_runner):
+    result, out, dir = cyclopts_runner(app, ["split"])
     assert "Usage: " in out
 
 
-def test_not_existing_mesh_tally_file(runner):
+def test_not_existing_mesh_tally_file(cyclopts_runner):
     result = app(["not-existing.m"])
     assert result.exit_code > 0
     assert "does not exist" in result.output

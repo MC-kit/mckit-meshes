@@ -11,16 +11,12 @@ from pathlib import Path
 
 import textwrap
 
-from cyclopts import App
+from cyclopts import App, types
 from eliot import to_file, start_action, start_task
 from rich.console import Console
 
 from mckit_meshes import __version__
 from mckit_meshes import m_file_iterator
-
-
-if TYPE_CHECKING:
-    from cyclopts import types
 
 
 console = Console()

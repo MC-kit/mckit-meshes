@@ -55,7 +55,7 @@ def cyclopts_runner(tmp_path, monkeypatch):
         console = Console()
         with console.capture() as capture:
             result = app(args, console=console, **kwargs)
-        return result, capture.get()
+        return result, capture.get(), tmp_path
 
     return _wrapper
 
