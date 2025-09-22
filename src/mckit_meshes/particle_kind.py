@@ -20,7 +20,7 @@ class ParticleKind(IntEnum):
         """One letter synonym for a long name.
 
         Returns:
-            the fires letter of the name
+            the first letter of the name
         """
         return self.name[0]
 

@@ -666,6 +666,10 @@ def parse_coordinates(inp: list[str]) -> np.ndarray:
                 yield from res[:-1]
             prev_coordinate = coordinate
             prev_fine_bins = fine_bins
+
+        if prev_coordinate is None:
+            raise ValueError("Invalid mesh spec")
+
         yield prev_coordinate
 
     return np.fromiter(iter_over_fine_mesh(iter_over_coarse_mesh()), dtype=float)
@@ -695,14 +699,13 @@ def make_geometry_spec(ibins, jbins, kbins, origin=None, axs=None, vec=None) -> 
         if origin is not None and not np.array_equal(origin, geometry_spec.origin):
             msg = "Incompatible cartesian bins and origin"
             raise ValueError(msg)
-    else:
-        axs, vec = map(np.asarray, [axs, vec])
-        geometry_spec = gs.CylinderGeometrySpec(
-            ibins,
-            jbins,
-            kbins,
-            origin=origin,
-            axs=axs,
-            vec=vec,
-        )
-    return geometry_spec
+        return geometry_spec
+    axs, vec = map(np.asarray, [axs, vec])
+    return gs.CylinderGeometrySpec(
+        ibins,
+        jbins,
+        kbins,
+        origin=origin,
+        axs=axs,
+        vec=vec,
+    )
