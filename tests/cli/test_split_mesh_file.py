@@ -8,6 +8,7 @@ from time import sleep
 
 import pytest
 
+from  cyclopts.exceptions import MissingArgumentError, ValidationError
 from rich.console import Console
 from mckit_meshes.cli.split_mesh_file import __version__, app
 from mckit_meshes import m_file_iterator
@@ -15,8 +16,7 @@ from mckit_meshes import m_file_iterator
 
 @pytest.fixture
 def source():
-    res = files("tests").joinpath("data/mcnp/2.m")
-    res = Path(res)
+    res = files("tests").joinpath("data/2.m")
     assert res.exists()
     return res
 
@@ -34,23 +34,20 @@ def test_help(cyclopts_runner):
 
 
 def test_when_there_is_no_args(cyclopts_runner):
-    result, out, dir = cyclopts_runner(app, ["split"])
-    assert "Usage: " in out
+    with pytest.raises(MissingArgumentError, match="meshtally-file"):
+        cyclopts_runner(app, ["split"], exit_on_error=False)
 
 
 def test_not_existing_mesh_tally_file(cyclopts_runner):
-    result = app(["not-existing.m"])
-    assert result.exit_code > 0
-    assert "does not exist" in result.output
+    with pytest.raises(ValidationError, match="does not exist"):
+        cyclopts_runner(app, ["split", "not-existing.m"], exit_on_error=False)
 
 
-def test_when_only_mesh_is_specified(source, tmp_path, monkeypatch):
-    monkeypatch.chdir(tmp_path)
-    prefix = "ttt"
-    result = app(["--prefix", prefix, str(source)])
-    assert result.exit_code == 0
+def test_when_only_mesh_is_specified(source, cyclopts_runner):
+    result, out, dir = cyclopts_runner(app, ["split", str(source)])
+    assert result == 0
     for i in [1004, 2004]:
-        output_path = Path(prefix) / f"{i}.m"
+        output_path = dir / f"{i}.m"
         assert output_path.exists()
         assert_content_is_correct(output_path, i)
 

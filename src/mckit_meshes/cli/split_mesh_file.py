@@ -52,7 +52,8 @@ def split(
                 * "update"   - override if older than input file
                 * "fail"     - raise error (default)
     """
-    to_file("mckit-meshes.split.log", "ab")
+    eliot_log = Path("mckit-meshes.split.log").open("ab")
+    to_file(eliot_log)
     with start_task(
         "split meshtally file",
         prefix=prefix,
