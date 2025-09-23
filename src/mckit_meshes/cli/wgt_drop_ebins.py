@@ -4,7 +4,7 @@ from pathlib import Path
 
 import click
 
-from triniti_ne.mcnp.wgtmesh import WgtMesh
+from mckit_meshes.wgtmesh import WgtMesh
 
 
 def load(path: Path) -> WgtMesh:

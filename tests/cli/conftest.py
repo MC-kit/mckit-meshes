@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from contextlib import contextmanager
+from contextlib import _GeneratorContextManager, contextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 from attr import dataclass
 import pytest
@@ -47,6 +47,43 @@ def runner():
     return CliRunner()
 
 
+class MemoryDestination(MemoryLogger):
+    """Eliot memory logger."""
+
+    def __call__(self, message):
+        self.write(message)
+
+
+@pytest.fixture
+def eliot_file_trace() -> Callable[[Path | str], _GeneratorContextManager[None]]:
+    """Eliot trace to file."""
+
+    @contextmanager
+    def _wrap(path: Path | str) -> Generator[None]:
+        if isinstance(path, str):
+            path = Path(path)
+        with path.open("w") as fid:
+            pth = FileDestination(fid)
+            add_destinations(pth)
+            try:
+                yield
+            finally:
+                remove_destination(pth)
+
+    return _wrap
+
+
+@pytest.fixture
+def eliot_mem_trace() -> Generator[MemoryDestination]:
+    """Eliot trace to memory logger."""
+    mem = MemoryDestination()
+    add_destinations(mem)
+    try:
+        yield mem
+    finally:
+        remove_destination(mem)
+
+
 @pytest.fixture
 def cyclopts_runner(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
@@ -58,37 +95,3 @@ def cyclopts_runner(tmp_path, monkeypatch):
         return result, capture.get(), tmp_path
 
     return _wrapper
-
-
-class MemoryDestination(MemoryLogger):
-    """Eliot memory logger."""
-
-    def __call__(self, message):
-        self.write(message)
-
-
-@pytest.fixture
-def eliot_trace():
-    # noinspection PyUnreachableCode
-    @contextmanager
-    def _wrap(
-        *, path: Path | None = None, use_memory_logger: bool = False
-    ) -> Generator[MemoryLogger, None, None]:
-        if path:
-            fid = path.open("w")
-            pth = FileDestination(fid)
-        else:
-            fid = None
-            pth = None
-        mem = MemoryDestination() if use_memory_logger else None
-        try:
-            add_destinations(*(i for i in (pth, mem) if i is not None))
-            yield mem
-        finally:
-            for i in (mem, pth):
-                if i is not None:
-                    remove_destination(i)
-            if fid:
-                fid.close()
-
-    return _wrap

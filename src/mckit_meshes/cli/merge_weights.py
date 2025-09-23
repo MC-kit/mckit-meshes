@@ -9,7 +9,7 @@ import click
 import click_log
 
 from triniti_ne import __version__
-from triniti_ne.mcnp.wgtmesh import WgtMesh
+from mckit_meshes.wgtmesh import WgtMesh
 
 __LOG = logging.getLogger(__name__)
 click_log.basic_config(__LOG)

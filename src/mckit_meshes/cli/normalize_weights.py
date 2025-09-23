@@ -7,7 +7,7 @@ from pathlib import Path
 import click
 import numpy as np
 
-from triniti_ne.mcnp.wgtmesh import Point, WgtMesh
+from mckit_meshes.wgtmesh import Point, WgtMesh
 
 
 def do_normalize_weights(

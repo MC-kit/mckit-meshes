@@ -7,17 +7,10 @@ name = "mckit-meshes"
 version = "0.2.4a2"
 requires-python = ">=3.11,<3.14" # connectorx==0.4.3 prevents <4
 description = "Python tools to work with MCNP meshtallies and weight meshes."
-authors = [
-    { name = "dvp2015", email = "dmitri_portnov@yahoo.com" }
-]
+authors = [{ name = "dvp2015", email = "dmitri_portnov@yahoo.com" }]
 readme = "README.rst"
 license = { text = "MIT" }
-keywords = [
-  "MCNP",
-  "mesh",
-  "weights",
-  "variance reduction"
-]
+keywords = ["MCNP", "mesh", "weights", "variance reduction"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: Console",
@@ -28,13 +21,13 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
-  "click (>=8.0.1)",
-  "cyclopts>=3.24.0",
-  "eliot>=1.17.5",
-  "loguru (>=0.6.0)",
-  "numpy (>=2.3.1)",
-  "pyevtk (>=1.4.1)",
-  "toolz (>=0.11.2)",
+    "click (>=8.0.1)",
+    "cyclopts>=3.24.0",
+    "eliot>=1.17.5",
+    "loguru (>=0.6.0)",
+    "numpy (>=2.3.1)",
+    "pyevtk (>=1.4.1)",
+    "toolz (>=0.11.2)",
 ]
 
 [project.urls]
@@ -47,7 +40,11 @@ Changelog = "https://github.com/MC-kit/mckit-meshes/releases"
 mckit-meshes = "mckit_meshes.cli.runner:mckit_meshes"
 
 [dependency-groups]
-dev = [{ include-group = "style" }, { include-group = "test" }]
+dev = [
+    { include-group = "style" },
+    { include-group = "test" },
+    "eliot-tree>=24.0.0",
+]
 style = [
     { include-group = "pre_commit" },
     { include-group = "ruff" },
@@ -148,7 +145,7 @@ omit = ["*_tab.py", "**/__init__.py", "tools/*.py"]
 [tool.coverage.report]
 show_missing = true
 skip_covered = true
-fail_under = 80     # TODO dvp: increase limit to 100 with code maturing
+fail_under = 80                                      # TODO dvp: increase limit to 100 with code maturing
 omit = ["*_tab.py", "**/__init__.py", "**/types.py"]
 # Regexes for lines to exclude from consideration
 exclude_lines = [
@@ -194,8 +191,11 @@ module = [
     "IPython.core.magic_arguments",
     "click",
     "click.testing",
+    "cyclopts",
     "dask.*",
     "duckdb",
+    "eliot",
+    "eliot.*",
     "loguru",
     "mckit_nuclides.*",
     "msgspec",
@@ -206,6 +206,8 @@ module = [
     "pandas",
     "polars",
     "pytest",
+    "rich",
+    "rich.*",
     "scipy.constants",
     "scipy.sparse",
     "tomli",
