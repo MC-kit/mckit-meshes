@@ -11,8 +11,7 @@ from typing import Any
 import pytest
 
 from cyclopts.exceptions import MissingArgumentError, ValidationError
-from rich.console import Console
-from mckit_meshes.cli.split_mesh_file import __version__, app
+from mckit_meshes.__main__ import app
 from mckit_meshes import m_file_iterator
 
 
@@ -21,8 +20,6 @@ def source():
     res = files("tests").joinpath("data/2.m")
     assert res.exists()
     return res
-
-
 
 
 def test_when_there_is_no_args(cyclopts_runner):
@@ -37,8 +34,7 @@ def test_not_existing_mesh_tally_file(cyclopts_runner):
 
 def test_when_only_mesh_is_specified(source, cyclopts_runner, eliot_file_trace, eliot_mem_trace):
     with eliot_file_trace("test.log"):
-        result, _, tmp = cyclopts_runner(app, ["split", str(source)])
-        assert result == 0
+        _, _, tmp = cyclopts_runner(app, ["split", str(source)])
         eliot_mem_trace.validate()
     for i in [1004, 2004]:
         output_path = tmp / f"{i}.m"
@@ -61,8 +57,7 @@ def assert_content_is_correct(output_path, mesh_no):
 def test_with_prefix(source, cyclopts_runner, eliot_file_trace, eliot_mem_trace):
     with eliot_file_trace("test.log"):
         prefix = "out"
-        result, _, _ = cyclopts_runner(app, ["split", "--prefix", prefix, str(source)])
-        assert result == 0
+        cyclopts_runner(app, ["split", "--prefix", prefix, str(source)])
         eliot_mem_trace.validate()
     for i in [1004, 2004]:
         output_path = Path(prefix, f"{i}.m")
@@ -75,7 +70,7 @@ def test_when_output_file_exist_and_override_is_not_specified(
     with eliot_file_trace("test.log"):
         output_path = Path("1004.m")
         output_path.touch()
-        with pytest.raises(FileExistsError, match="--when-exists"):
+        with pytest.raises(FileExistsError, match="--override"):
             cyclopts_runner(app, ["split", str(source)])
         eliot_mem_trace.validate()
 
@@ -89,51 +84,9 @@ def test_when_output_file_exist_and_override_is_specified(
         output_path.touch()
         prev_out_time = output_path.stat().st_mtime_ns
         sleep(0.01)
-        result, _, _ = cyclopts_runner(app, ["split", "--when-exists", "override", str(source)])
-        assert result == 0, (
-            "Overrides existing file if '--when-exists override' option is specified"
-        )
+        cyclopts_runner(app, ["split", "--override", str(source)])
         out_time = output_path.stat().st_mtime_ns
         assert prev_out_time < out_time, (
-            "Overrides existing file if '--when-exists override' option is specified"
+            "Overrides existing file if '--override' option is specified"
         )
 
-
-def check_message(messages: list[dict[str, Any]], key: str, msg: str) -> bool:
-    """Check message in memory log."""
-    return any(key in m and msg in m[key] for m in messages)
-
-
-def test_when_output_file_is_newer_and_update_option_is_set(
-    source, cyclopts_runner, eliot_file_trace, eliot_mem_trace
-):
-    with eliot_file_trace("test.log"):
-        tmp_src = Path("t.m")
-        shutil.copy(source, tmp_src)
-        sleep(0.01)
-        output_path = Path("1004.m")
-        output_path.touch()
-        prev_out_time = output_path.stat().st_ctime_ns
-        result, _, _ = cyclopts_runner(app, ["split", "--when-exists", "update", str(source)])
-        eliot_mem_trace.validate()
-        check_message(eliot_mem_trace.messages, "message_type", "is newer and is not updated")
-        assert result == 0, "Do nothing if the output file is newer"
-        out_time = output_path.stat().st_ctime_ns
-        assert prev_out_time == out_time, "Do nothing if the output file is newer"
-
-
-def test_when_output_file_is_older_and_update_option_is_set(
-    source, cyclopts_runner, eliot_file_trace, eliot_mem_trace
-):
-    with eliot_file_trace("test.log"):
-        output_path = Path("1004.m")
-        output_path.touch()
-        prev_out_time = output_path.stat().st_mtime_ns
-        sleep(0.01)
-        tmp_src = Path("t.m")
-        shutil.copy(source, tmp_src)
-        result, _, _ = cyclopts_runner(app, ["split", "--when-exists", "update", str(tmp_src)])
-        eliot_mem_trace.validate()
-        assert result == 0, "Overrides older existing file"
-        out_time = output_path.stat().st_mtime_ns
-        assert prev_out_time < out_time, "Overrides older existing file"

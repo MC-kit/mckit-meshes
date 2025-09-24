@@ -17,7 +17,7 @@ def split(
     *,
     prefix: Path | None = None,
     override: bool = False,
-) -> int:
+) -> None:
     """Split MCNP meshtally file to a number of meshtally files, one for each meshtally.
 
     Parameters
@@ -32,10 +32,6 @@ def split(
 
         eliot_log
             Path to structured eliot log, default: "mckit-meshes.log
-
-    Returns:
-    --------
-        0 - on success
     """
     with start_task(
         action_type="split meshtally file",
@@ -69,8 +65,6 @@ def split(
                     print(file=out)
                     for line in m:
                         print(line, file=out)
-
-    return 0
 
 
 def check_existing_file(output_path: Path, *, override: bool = False) -> None:

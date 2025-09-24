@@ -1,14 +1,20 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Concatenate, ParamSpec, TypedDict
 
+from contextlib import contextmanager
 from pathlib import Path
-from rich.console import Console
 
+from cyclopts import App
 import pytest
 
+from eliot import FileDestination, MemoryLogger, add_destinations, remove_destination
+from rich.console import Console
+
 if TYPE_CHECKING:
-    from collections.abc import Generator
+    from collections.abc import Callable, Generator
+    from contextlib import _GeneratorContextManager
+
 
 _DATA = Path(__file__).parent / "data"
 
@@ -18,9 +24,10 @@ def data() -> Path:
     """Compute the path to test data.
 
     Returns:
-        Path to test data.
+    -------
+    Path: to test data (absolute).
     """
-    return _DATA
+    return _DATA.absolute()
 
 
 @pytest.fixture
@@ -38,8 +45,12 @@ def cd_tmpdir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 class MemoryDestination(MemoryLogger):
     """Eliot memory logger."""
 
-    def __call__(self, message):
+    def __call__(self, message: dict[str, Any]) -> None:
         self.write(message)
+
+    def check_message(self, key: str, msg: str) -> bool:
+        """Check message in memory log."""
+        return any(key in m and msg in m[key] for m in self.messages)
 
 
 @pytest.fixture
@@ -73,8 +84,22 @@ def eliot_mem_trace() -> Generator[MemoryDestination]:
 
 
 @pytest.fixture
-def cyclopts_runner(cd_tmpdir):
-    def _wrapper(app, args, **kwargs):
+def cyclopts_runner(
+    cd_tmpdir: Path,
+) -> Callable:
+    """Run cyclopts application in temporary directory and isolated console.
+
+    Parameters
+    ----------
+    cd_tmpdir
+        Reuse fixture cd_tmpdir
+
+    Returns:
+    -------
+        Callable to run the application returning tuple with result, output and tmp_path.
+    """
+
+    def _wrapper(app, args, **kwargs) -> tuple[Any, str, Path]:
         console = Console()
         with console.capture() as capture:
             result = app(args, console=console, **kwargs)
