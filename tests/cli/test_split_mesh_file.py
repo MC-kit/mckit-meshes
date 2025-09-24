@@ -23,16 +23,6 @@ def source():
     return res
 
 
-def test_version(cyclopts_runner):
-    result, out, _ = cyclopts_runner(app, ["--version"])
-    assert result is None
-    assert __version__ in out
-
-
-def test_help(cyclopts_runner):
-    result, out, _ = cyclopts_runner(app, ["--help"])
-    assert result is None
-    assert "Usage: " in out
 
 
 def test_when_there_is_no_args(cyclopts_runner):

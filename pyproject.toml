@@ -36,8 +36,9 @@ repository = "https://github.com/MC-kit/mckit-meshes"
 documentation = "https://mckit-meshes.readthedocs.io"
 Changelog = "https://github.com/MC-kit/mckit-meshes/releases"
 
+
 [project.scripts]
-mckit-meshes = "mckit_meshes.cli.runner:mckit_meshes"
+mckit-meshes = "mckit_meshes.__main__:main"
 
 [dependency-groups]
 dev = [
