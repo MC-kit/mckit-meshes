@@ -17,25 +17,26 @@ def source(data):
 
 
 def test_help(cyclopts_runner):
-    _, out, _ = cyclopts_runner(app, args=["mesh2npz", "--help"])
+    out = cyclopts_runner(app, args=["mesh2npz", "--help"])
     assert "Usage: " in out
 
 
-def test_with_prefix(tmp_path, cyclopts_runner, data):
-    prefix = tmp_path / "npz"
+def test_with_prefix(cyclopts_runner, data):
+    prefix = Path("npz")
     args = ["mesh2npz", "--prefix", str(prefix), str(data / "1.m")]
-    _, _, tmp = cyclopts_runner(app, args)
-    output_path = Path(tmp, prefix, "1004.npz")
+    cyclopts_runner(app, args)
+    output_path = Path(prefix, "1004.npz")
     assert output_path.exists()
 
 
-def test_multiple_files(tmp_path, cyclopts_runner, data):
+def test_multiple_files(cyclopts_runner, data):
+    tmp = Path.cwd()
     original = data / "1.m"
-    input1 = tmp_path / "1.m"
+    input1 = tmp / "1.m"
     shutil.copy(original, input1)
-    input2 = tmp_path / "2.m"
+    input2 = tmp / "2.m"
     shutil.copy(original, input2)
-    prefix = tmp_path / "some_npz"
+    prefix = tmp / "some_npz"
     args = ["mesh2npz", "--prefix", str(prefix), str(input1), str(input2)]
     cyclopts_runner(app, args)
     for i in [1, 2]:
@@ -49,8 +50,8 @@ def test_multiple_files(tmp_path, cyclopts_runner, data):
 
 def test_without_prefix(cyclopts_runner, source):
     args = ["mesh2npz", str(source)]
-    _, _, tmp = cyclopts_runner(app, args)
-    output_path = tmp / "npz" / "1004.npz"
+    cyclopts_runner(app, args)
+    output_path = Path("npz", "1004.npz")
     assert output_path.exists()
 
 

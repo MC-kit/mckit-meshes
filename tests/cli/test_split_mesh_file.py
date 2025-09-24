@@ -34,8 +34,9 @@ def test_not_existing_mesh_tally_file(cyclopts_runner):
 
 def test_when_only_mesh_is_specified(source, cyclopts_runner, eliot_file_trace, eliot_mem_trace):
     with eliot_file_trace("test.log"):
-        _, _, tmp = cyclopts_runner(app, ["split", str(source)])
+        cyclopts_runner(app, ["split", str(source)])
         eliot_mem_trace.validate()
+    tmp = Path.cwd()
     for i in [1004, 2004]:
         output_path = tmp / f"{i}.m"
         assert output_path.exists()

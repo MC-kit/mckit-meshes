@@ -9,18 +9,7 @@ from pathlib import Path
 from eliot import start_action
 
 from mckit_meshes import fmesh
-from mckit_meshes.utils import check_if_path_exists
-
-
-def revise_mesh_tallies(*mesh_tallies: Path) -> tuple[Path, ...]:
-    if mesh_tallies:
-        return mesh_tallies
-    with start_action(action_type="look for meshtally files") as logger:
-        cwd = Path.cwd()
-        mesh_tallies = tuple(cwd.glob("*.m"))
-        if not mesh_tallies:
-            logger.log(message_type="WARNING", reason="No .m-files found", directory=cwd.absolute())
-    return mesh_tallies
+from mckit_meshes.utils import check_if_path_exists, revise_files
 
 
 def mesh2npz(
@@ -29,7 +18,7 @@ def mesh2npz(
     override: bool = False,
 ) -> None:
     """Convert MCNP meshtal file to a number of npz files, one for each mesh tally."""
-    mesh_tallies = revise_mesh_tallies(*mesh_tallies)
+    mesh_tallies = revise_files("m", *mesh_tallies)
     single_input = len(mesh_tallies) == 1
     prefix = Path(prefix)
     for m in mesh_tallies:

@@ -96,13 +96,13 @@ def cyclopts_runner(
 
     Returns:
     -------
-        Callable to run the application returning tuple with result, output and tmp_path.
+        Callable to run the application returning the command output.
     """
 
-    def _wrapper(app, args, **kwargs) -> tuple[Any, str, Path]:
+    def _wrapper(app, args, **kwargs) -> str:
         console = Console()
         with console.capture() as capture:
-            result = app(args, console=console, **kwargs)
-        return result, capture.get(), cd_tmpdir
+            app(args, console=console, **kwargs)
+        return capture.get()
 
     return _wrapper

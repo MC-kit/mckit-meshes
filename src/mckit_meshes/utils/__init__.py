@@ -8,6 +8,7 @@ from ._io import (
     print_cols,
     print_n,
     raise_error_when_file_exists_strategy,
+    revise_files,
 )
 from .cartesian_product import cartesian_product
 
@@ -18,4 +19,5 @@ __all__ = [
     "print_cols",
     "print_n",
     "raise_error_when_file_exists_strategy",
+    "revise_files",
 ]

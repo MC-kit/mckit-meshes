@@ -2,14 +2,18 @@
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING, Any
 
 import sys
 
 from pathlib import Path
 
+from eliot import start_action
+
+__LOG = logging.getLogger("mckit_meshes.io")
+
 if TYPE_CHECKING:
-    # noinspection PyCompatibility
     from collections.abc import Callable, Iterable
 
     from _typeshed import SupportsWrite
@@ -108,3 +112,29 @@ def print_n(
         print(to_print, end="", file=io)
     if column > 0:
         print(file=io)
+
+
+def revise_files(ext: str, *files: Path) -> tuple[Path, ...]:
+    """Find files by extension, if files are not specified.
+
+    Log warning if files are neither specified nor found.
+    
+    Parameters
+    ----------
+    ext
+        Extension to search for.
+
+    Returns
+    -------
+        Specified, if available, otherwise found.
+    """
+    if not files:
+        with start_action(action_type="look for meshtally files") as logger:
+            cwd = Path.cwd()
+            files = tuple(cwd.glob(f"*.{ext}"))
+            if not files:
+                cwd = cwd.absolute()
+                logger.log(message_type="WARNING", reason=f"No .{ext}-files found", directory=cwd)
+                __LOG.warning(f"nothing to do: no .%s-files in %s", ext, cwd)
+    return files
+
