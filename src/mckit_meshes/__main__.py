@@ -21,6 +21,8 @@ from mckit_meshes.cli.commands.addnpz import add as do_add
 from mckit_meshes.cli.commands.mesh2npz import mesh2npz as do_mesh2npz
 from mckit_meshes.cli.commands.npz2vtk import npz2vtk as do_npz2vtk
 from mckit_meshes.cli.commands.invwgt import invwgt as do_invwgt
+from mckit_meshes.cli.commands.merge_weights import merge_weights as do_merge_weights
+from mckit_meshes.cli.commands.mesh2wgt import mesh2wgt as do_mesh2wg
 
 
 NAME: Final[str] = pkg_name.replace("_", "-")
@@ -153,6 +155,59 @@ def invwgt(
     if common is None:
         common = Common()
     do_invwgt(wgtfile, normalisation_point=normalisation_point, override=common.override)
+
+
+@app.command
+def merge_weights(
+    *wwinp_files: types.ResolvedExistingFile,
+    out: Path,
+    merge_spec: Path,
+    common: Common | None = None,
+) -> None:
+    """The script merges MCNP weight window meshes.
+
+    Parameters
+    ----------
+    wwin_files 
+        weight files to merge
+    out
+        An output file for merge result
+    merge_spec
+        A merge specification file
+    """
+    if common is None:
+        common = Common()
+    do_merge_weights(*wwinp_files, out=out, merge_spec=merge_spec, override=common.override)
+
+
+@app.command
+def mesh2wgt(
+    mesh_file: types.ResolvedExistingFile, 
+    beta: int = 5,
+    soft: Annotated[
+        int | None,
+        Parameter(
+            name=["--soft", "-s"],
+            help="Softening factor:"
+                "(power to apply to weight values, typically 0.5, if used) (default: None)",
+        )
+    ] = None,
+    mesh: Annotated[
+        int | None,
+        Parameter(name=["--mesh", "-m"], 
+            help="Mesh Tally number to use."
+            "default: None - use the single mesh, which is present in meshtal file"
+        )
+    ] = None
+):
+    """Converts mesh tally file to weight mesh file.
+
+    This can be used for GVR weights computing.
+    """
+    if common is None:
+        common = Common()
+    do_mesh2wg(mesh_file, beta=beta, soft=soft, out=mesh_file.with_suffix(".wwinp"), override=common.override)
+
 
 
 def init_logging(eliot_log: Path | None = None) -> None:
