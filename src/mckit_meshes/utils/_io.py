@@ -118,13 +118,13 @@ def revise_files(ext: str, *files: Path) -> tuple[Path, ...]:
     """Find files by extension, if files are not specified.
 
     Log warning if files are neither specified nor found.
-    
+
     Parameters
     ----------
     ext
         Extension to search for.
 
-    Returns
+    Returns:
     -------
         Specified, if available, otherwise found.
     """
@@ -135,6 +135,5 @@ def revise_files(ext: str, *files: Path) -> tuple[Path, ...]:
             if not files:
                 cwd = cwd.absolute()
                 logger.log(message_type="WARNING", reason=f"No .{ext}-files found", directory=cwd)
-                __LOG.warning(f"nothing to do: no .%s-files in %s", ext, cwd)
+                __LOG.warning("nothing to do: no .%s-files in %s", ext, cwd)
     return files
-

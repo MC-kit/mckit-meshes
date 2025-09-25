@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
-import typing as t
 
 import logging
 
 from pathlib import Path
 
-from eliot import start_action
+from eliot import log_message, start_action
 import numpy as np
 
 from mckit_meshes import fmesh
@@ -43,9 +42,9 @@ def add(
     if not npz_files:
         __LOG.warning("No files specified to process")
         return
-    
+
     if out is None:
-        out = Path("+".join(x.stem for x in npz_files), ".npz")
+        out = Path("+".join(x.stem for x in npz_files)).with_suffix(".npz")
 
     out.parent.mkdir(parents=True, exist_ok=True)
     file_exists_strategy = check_if_path_exists(override=override)
@@ -64,7 +63,7 @@ def add(
                     data = _sum.data
                     errors = np.power(_sum.errors * _sum.data, 2)
                     totals = _sum.totals
-                    if totals is not None:
+                    if totals is not None and _sum.totals_err is not None:
                         tot_errors = np.power(_sum.totals_err * _sum.totals, 2)
                 else:
                     if not _sum.is_equal_by_geometry(mesh):
@@ -72,7 +71,7 @@ def add(
                         raise ValueError(msg)
                     data += mesh.data
                     errors += np.power(mesh.data * mesh.errors, 2)
-                    if totals is not None:
+                    if totals is not None and mesh.totals is not None:
                         totals += mesh.totals
                         tot_errors += np.power(mesh.totals * mesh.totals_err, 2)
 
@@ -100,12 +99,19 @@ def add(
             )
             logger.add_success_fields(out=out.absolute)
 
-        __LOG.info("Sum is saved to {}", out)
+        __LOG.info("Sum is saved to %s", out)
 
 
 def _back_to_relative_values(data, errors) -> None:
+    bad_idx = data < 0.0
+    if np.any(bad_idx):
+        log_message(
+            message_type="WARNING", reason="found negative data", count=np.count_nonzero(bad_idx)
+        )
+        __LOG.warning("found negative data")
+        data[bad_idx] = 0.0
+        errors[bad_idx] = 0.0
     bad_idx = data <= 0.0
     idx = np.logical_not(bad_idx)
     errors[idx] = np.sqrt(errors[idx]) / data[idx]
-    errors[bad_idx] = 1.0
     errors[errors > 1.0] = 1.0

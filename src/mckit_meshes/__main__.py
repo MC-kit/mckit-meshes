@@ -16,10 +16,11 @@ from rich.logging import RichHandler
 
 
 from mckit_meshes import __version__, __name__ as pkg_name
-from mckit_meshes.cli.split_mesh_file import split as do_split
+from mckit_meshes.cli.commands.split_mesh_file import split as do_split
 from mckit_meshes.cli.commands.addnpz import add as do_add
 from mckit_meshes.cli.commands.mesh2npz import mesh2npz as do_mesh2npz
 from mckit_meshes.cli.commands.npz2vtk import npz2vtk as do_npz2vtk
+from mckit_meshes.cli.commands.invwgt import invwgt as do_invwgt
 
 
 NAME: Final[str] = pkg_name.replace("_", "-")
@@ -30,6 +31,7 @@ DEFAULT_NPZ = Path("npz")
 
 console = Console()
 app = App(name=NAME, version=__version__, console=console)
+
 
 @Parameter(name="*")  # https://cyclopts.readthedocs.io/en/latest/cookbook/sharing_parameters.html
 @dataclass
@@ -50,39 +52,34 @@ class Common:
         if self.prefix is None:
             self.prefix = Path.cwd()
 
+
 @app.command
-def mesh2npz(
-    *mesh_tallies: types.ResolvedExistingFile,
-    common: Common | None = None
-) -> None:
+def mesh2npz(*mesh_tallies: types.ResolvedExistingFile, common: Common | None = None) -> None:
     """Converts mesh files to npz files.
 
     By default output folder (prefix) is "npz".
-    
+
     Parameters
     ----------
     mesh_tallies
         mesh tally files to process (default: *.m)
     """
     if common is None:
-       common = Common(prefix=Path("npz"))
+        common = Common(prefix=Path("npz"))
     do_mesh2npz(*mesh_tallies, prefix=common.prefix, override=common.override)
 
 
 @app.command
-def npz2vtk(
-    *npz_files: types.ResolvedExistingFile,
-    common: Common | None = None
-) -> None:
+def npz2vtk(*npz_files: types.ResolvedExistingFile, common: Common | None = None) -> None:
     """Converts npz files to VTK files.
 
     Parameters
     ----------
     npz_files
         .npz files with compressed meshes
-    """   
+    """
     if common is None:
-       common = Common()
+        common = Common()
     do_npz2vtk(*npz_files, prefix=common.prefix, override=common.override)
 
 
@@ -92,32 +89,28 @@ def add(
     out: Annotated[types.ResolvedFile | None, Parameter(name=["--out", "-o"])] = None,
     comment: Annotated[str | None, Parameter(name=["--comment", "-c"])] = None,
     number: Annotated[int, Parameter(name=["--name", "-n"])] = 1,
-    common: Common | None = None
+    common: Common | None = None,
 ) -> None:
     """Add meshes from npz files.
 
     Parameters
     ----------
     out
-        output file for created meshtally, 
+        output file for created meshtally,
         if not specified, then it's constructed
-        from the input files stems 
+        from the input files stems
     comment, optional
         comment for meshtally, default the comment from the first mesh
     number, optional
         number of created meshtally
     """
     if common is None:
-       common = Common(prefix=Path("npz"))
-    do_add(out, *npz_files, comment=comment, number=number,override=common.override)
+        common = Common(prefix=Path("npz"))
+    do_add(*npz_files, out=out, comment=comment, number=number, override=common.override)
 
 
 @app.command
-def split(
-    meshtally_file: types.ResolvedExistingFile,
-    *,
-    common: Common | None = None
-) -> None:
+def split(meshtally_file: types.ResolvedExistingFile, *, common: Common | None = None) -> None:
     """Split MCNP meshtally file to a number of meshtally files, one for each meshtally.
 
     Parameters
@@ -126,8 +119,40 @@ def split(
         input file to split
     """
     if common is None:
-       common = Common()
+        common = Common()
     do_split(meshtally_file, prefix=common.prefix, override=common.override)
+
+
+@app.command
+def invwgt(
+    wgtfile: types.ResolvedExistingPath,
+    *,
+    normalisation_point: Annotated[
+        str, Parameter(name=["--normalization-point", "-n"])
+    ] = "610, 0, 57",
+    common: Common | None = None,
+) -> None:
+    """Inverts MCNP weight window file: all values became reciprocals (w[...] = 1/w[...]).
+
+    Use this for anti-forward weight estimations.
+
+    Features:
+        - Zero values remain zeros.
+        - After all normalises the resulting weights, so at given point the weight is 1.0.
+
+    Multiple energy bins are not implemented yet.
+
+    Parameters
+    ----------
+    normalisation_point
+        Point where to set weight to 1
+        (default ITER magnetic axis intersection with PY=0: "610, 0, 57")
+    wgtfile
+        _description_
+    """
+    if common is None:
+        common = Common()
+    do_invwgt(wgtfile, normalisation_point=normalisation_point, override=common.override)
 
 
 def init_logging(eliot_log: Path | None = None) -> None:
@@ -135,7 +160,9 @@ def init_logging(eliot_log: Path | None = None) -> None:
         level="NOTSET",
         format="%(message)s",
         datefmt="[%X]",
-        handlers=[RichHandler(console=app.console, rich_tracebacks=True, tracebacks_suppress=[cyclopts])]
+        handlers=[
+            RichHandler(console=app.console, rich_tracebacks=True, tracebacks_suppress=[cyclopts])
+        ],
     )
     if not eliot_log and "pytest" not in sys.modules:
         eliot_log = PREFIX.with_suffix(".log")

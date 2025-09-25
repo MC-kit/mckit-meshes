@@ -2,14 +2,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from pathlib import Path
 
-import click
 import numpy as np
 
 from mckit_meshes.wgtmesh import WgtMesh
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from mckit_meshes.wgtmesh import Point
 
 
@@ -34,26 +34,7 @@ def save(mesh: WgtMesh, path: Path) -> None:
         mesh.write(stream)
 
 
-@click.command(options_metavar="options...")
-@click.option(
-    "--override/--no-override",
-    is_flag=True,
-    default=False,
-    help="override existing file (default:False)",
-)
-@click.option(
-    "--normalisation-point",
-    default="610, 0, 57",  # ITER magnetic axis position in standard scenario
-    help='Point where to set weight to 1 (default:"610, 0, 57")',
-)
-@click.argument(
-    "wgtfile",
-    metavar="WGTFILE",
-    type=click.Path(exists=True),
-    nargs=1,
-    required=True,
-)
-def invwgt(normalisation_point: str, wgtfile: click.Path, *, override: bool) -> None:
+def invwgt(path: Path, *, normalisation_point: str, override: bool = False) -> None:
     """Inverts MCNP weight window file: all values became reciprocals (w[...] = 1/w[...]).
 
     Use this for anti-forward weight estimations.
@@ -64,13 +45,8 @@ def invwgt(normalisation_point: str, wgtfile: click.Path, *, override: bool) -> 
 
     Multiple energy bins are not implemented yet.
     """
-    path = Path(str(wgtfile))
     _normalisation_point = np.fromstring(normalisation_point, sep=",", dtype=float)
     save(
         invert(load(path), _normalisation_point),
         check_output_exists(path.with_suffix(".inv-wwinp"), override=override),
     )
-
-
-if __name__ == "__main__":
-    invwgt()

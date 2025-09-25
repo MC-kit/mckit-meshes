@@ -541,7 +541,7 @@ class WgtMesh:
         return WgtMesh(_gs, self.energies, new_weights)
 
     def invert(self, normalization_point: Point, normalized_value: float = 1.0) -> WgtMesh:
-        """Get reciprocal of self weights and normalize to 1 at given point.
+        """Get reciprocal of self weights and normalize to `normalization_value` at given point.
 
         Important:
             A caller specifies normalization_point in local coordinates.

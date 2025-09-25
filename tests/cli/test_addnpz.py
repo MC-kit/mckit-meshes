@@ -14,7 +14,7 @@ def source(data):
 
 
 def test_help(cyclopts_runner):
-    out = cyclopts_runner(mckit_meshes, ["add", "--help"])  
+    out = cyclopts_runner(mckit_meshes, ["add", "--help"])
     assert "Usage: " in out
 
 
@@ -25,9 +25,8 @@ def test_add_with_out_specified(cyclopts_runner, data):
     cyclopts_runner(
         mckit_meshes,
         ["add", "-o", str(out), str(m1), str(m2)],
-        
-    )   
-    assert out.exists()
+    )
+    assert out.exists(), f"Should create output file {out}"
     mesh_out = FMesh.load_npz(out)
     mesh1 = FMesh.load_npz(m1)
     mesh2 = FMesh.load_npz(m2)
@@ -43,7 +42,6 @@ def test_add_with_out_not_specified(cyclopts_runner, data):
     cyclopts_runner(
         mckit_meshes,
         ["add", str(m1), str(m2)],
-        
     )
-    
+
     assert out.exists()

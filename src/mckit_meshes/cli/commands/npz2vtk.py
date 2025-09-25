@@ -6,15 +6,12 @@ from __future__ import annotations
 from pathlib import Path
 
 from eliot import start_action
-from rich.console import Console
 
 from mckit_meshes import fmesh
 from mckit_meshes.utils import check_if_path_exists, revise_files
 
 
-def npz2vtk(
-    *npz_files: Path, prefix: str | Path,  override: bool = False
-) -> None:
+def npz2vtk(*npz_files: Path, prefix: str | Path, override: bool = False) -> None:
     """Convert MCNP meshtal file to a number of npz files, one for each mesh tally.
 
     Parameters
@@ -23,7 +20,7 @@ def npz2vtk(
             output directory
         npz_files
             files to process, optional
-        override 
+        override
             define behaviour when output file, exists, default - rise FileExistsError.
     """
     npz_files = revise_files("npz", *npz_files)
@@ -39,4 +36,4 @@ def npz2vtk(
             )  # TODO dvp: revise this when it comes to saving structured mesh
             file_exists_strategy(vtk_file_name)
             vtk = mesh.save2vtk(vtk_file_stem)
-            logger.add_success_fields(saved_to = vtk)
+            logger.add_success_fields(saved_to=vtk)

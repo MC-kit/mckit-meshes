@@ -8,20 +8,19 @@ from mckit_meshes.__main__ import __version__, app
 
 
 def test_version(cyclopts_runner):
-    result, out, _ = cyclopts_runner(app, ["--version"])
-    assert result is None
+    out = cyclopts_runner(app, ["--version"])
     assert __version__ in out
 
 
 def test_help(cyclopts_runner):
-    result, out, _ = cyclopts_runner(app, ["--help"])
-    assert result is None
+    out = cyclopts_runner(app, ["--help"])
+
     assert "Usage: " in out
 
 
 def test_when_there_is_no_command(cyclopts_runner):
-    result, out, _ = cyclopts_runner(app, [], exit_on_error=False)
-    assert result is None
+    out = cyclopts_runner(app, [], exit_on_error=False)
+
     assert "Usage: " in out
 
 
