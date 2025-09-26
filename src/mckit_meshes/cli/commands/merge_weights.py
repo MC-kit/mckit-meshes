@@ -6,10 +6,10 @@ from collections.abc import Iterable, Mapping
 from pathlib import Path
 
 
-
 from mckit_meshes.wgtmesh import WgtMesh
 
 __LOG = logging.getLogger("mckit_meshes.merge_weights")
+
 
 def load_merge_descriptor(merge_descriptor_file: Path) -> Mapping[str, int]:
     def convert(line: str) -> tuple[str, int]:

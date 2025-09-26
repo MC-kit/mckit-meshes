@@ -64,7 +64,14 @@ def convert_mesh_to_weights(
     return wgtmesh
 
 
-def mesh2wgt( mesh_file: Path, *, mesh: int | None = None, beta: int = 5, soft: float | None = None, override: bool= False):
+def mesh2wgt(
+    mesh_file: Path,
+    *,
+    mesh: int | None = None,
+    beta: int = 5,
+    soft: float | None = None,
+    override: bool = False,
+):
     """Converts mesh tally file to weight mesh file.
 
     This can be used for GVR weights computing.

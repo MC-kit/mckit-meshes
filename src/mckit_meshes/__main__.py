@@ -168,7 +168,7 @@ def merge_weights(
 
     Parameters
     ----------
-    wwin_files 
+    wwin_files
         weight files to merge
     out
         An output file for merge result
@@ -182,23 +182,24 @@ def merge_weights(
 
 @app.command
 def mesh2wgt(
-    mesh_file: types.ResolvedExistingFile, 
+    mesh_file: types.ResolvedExistingFile,
     beta: int = 5,
     soft: Annotated[
         int | None,
         Parameter(
             name=["--soft", "-s"],
             help="Softening factor:"
-                "(power to apply to weight values, typically 0.5, if used) (default: None)",
-        )
+            "(power to apply to weight values, typically 0.5, if used) (default: None)",
+        ),
     ] = None,
     mesh: Annotated[
         int | None,
-        Parameter(name=["--mesh", "-m"], 
+        Parameter(
+            name=["--mesh", "-m"],
             help="Mesh Tally number to use."
-            "default: None - use the single mesh, which is present in meshtal file"
-        )
-    ] = None
+            "default: None - use the single mesh, which is present in meshtal file",
+        ),
+    ] = None,
 ):
     """Converts mesh tally file to weight mesh file.
 
@@ -206,8 +207,13 @@ def mesh2wgt(
     """
     if common is None:
         common = Common()
-    do_mesh2wg(mesh_file, beta=beta, soft=soft, out=mesh_file.with_suffix(".wwinp"), override=common.override)
-
+    do_mesh2wg(
+        mesh_file,
+        beta=beta,
+        soft=soft,
+        out=mesh_file.with_suffix(".wwinp"),
+        override=common.override,
+    )
 
 
 def init_logging(eliot_log: Path | None = None) -> None:

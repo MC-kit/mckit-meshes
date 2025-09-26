@@ -90,4 +90,3 @@ def test_when_output_file_exist_and_override_is_specified(
         assert prev_out_time < out_time, (
             "Overrides existing file if '--override' option is specified"
         )
-
