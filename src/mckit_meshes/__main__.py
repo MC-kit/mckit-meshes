@@ -22,7 +22,8 @@ from mckit_meshes.cli.commands.mesh2npz import mesh2npz as do_mesh2npz
 from mckit_meshes.cli.commands.npz2vtk import npz2vtk as do_npz2vtk
 from mckit_meshes.cli.commands.invwgt import invwgt as do_invwgt
 from mckit_meshes.cli.commands.merge_weights import merge_weights as do_merge_weights
-from mckit_meshes.cli.commands.mesh2wgt import mesh2wgt as do_mesh2wg
+from mckit_meshes.cli.commands.mesh2wgt import mesh2wgt as do_mesh2wgt
+from mckit_meshes.cli.commands.normalize_weights import normalize_weights as do_normalize_weights
 
 
 NAME: Final[str] = pkg_name.replace("_", "-")
@@ -207,12 +208,47 @@ def mesh2wgt(
     """
     if common is None:
         common = Common()
-    do_mesh2wg(
+    do_mesh2wgt(
         mesh_file,
         beta=beta,
         soft=soft,
         out=mesh_file.with_suffix(".wwinp"),
         override=common.override,
+    )
+
+
+@app.command
+def normalize_weights(
+    weight_file: types.ResolvedExistingPath,
+    normalization_point: str  = "610, 0, 57",
+    normalization_value: float = 1/3,
+    energy_bin: int = 1,
+    common: Common | None = None,
+):
+    """Normalize weights file.
+
+    Parameters
+    ----------
+    weight_file
+        weights file
+    normalization_point, optional
+        coordinates to normalize the weights at, by default "610, 0, 57"
+    normalization_value, optional
+        value to set, by default 1/3
+    energy_bin, optional
+        at which energy bin, by default 1
+    common, optional
+        shared parameters, by default None
+
+    """
+    if common is None:
+        common = Common()
+    do_normalize_weights(
+        weight_file=weight_file,
+        override=common.override,                           
+        normalization_point=normalization_point,
+        normalization_value=normalization_value,
+        energy_bin=energy_bin,
     )
 
 

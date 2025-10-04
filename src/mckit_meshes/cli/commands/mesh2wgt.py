@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING
 
 from pathlib import Path
 
-import click
 import numpy as np
 
 from mckit_meshes.fmesh import read_meshtal
