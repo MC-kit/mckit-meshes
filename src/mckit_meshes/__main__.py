@@ -220,8 +220,8 @@ def mesh2wgt(
 @app.command
 def normalize_weights(
     weight_file: types.ResolvedExistingPath,
-    normalization_point: str  = "610, 0, 57",
-    normalization_value: float = 1/3,
+    normalization_point: str = "610, 0, 57",
+    normalization_value: float = 1 / 3,
     energy_bin: int = 1,
     common: Common | None = None,
 ):
@@ -245,7 +245,7 @@ def normalize_weights(
         common = Common()
     do_normalize_weights(
         weight_file=weight_file,
-        override=common.override,                           
+        override=common.override,
         normalization_point=normalization_point,
         normalization_value=normalization_value,
         energy_bin=energy_bin,
