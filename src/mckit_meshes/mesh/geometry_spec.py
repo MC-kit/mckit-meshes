@@ -44,10 +44,11 @@ import numpy.typing as npt
 from numpy import linalg
 
 from mckit_meshes.utils import cartesian_product, print_n
+from mckit_meshes.utils._io import format_floats
 
 if TYPE_CHECKING:
     # noinspection PyCompatibility
-    from collections.abc import Generator, Iterable, Sequence
+    from collections.abc import Iterable, Sequence
 
     import numpy.typing as npt
 
@@ -78,7 +79,8 @@ def as_float_array(array: npt.ArrayLike) -> Bins:
     Args:
         array: Anything that can be converted to numpy ndarray.
 
-    Returns:
+    Returns
+    -------
         np.ndarray:  either original or conversion.
     """
     return np.asarray(array, dtype=float)
@@ -90,7 +92,8 @@ class AbstractGeometrySpecData:
 
     Provides reusable data fields.
 
-    Notes:
+    Notes
+    -----
         The meaning of `origin` is different for cartesian and cylindrical meshes
 
         In cartesian mesh `origin` means most negative coordinates, all the coordinates
@@ -110,7 +113,8 @@ class AbstractGeometrySpecData:
     def __post_init__(self) -> None:
         """Force a caller provided data as numpy arrays.
 
-        Raises:
+        Raises
+        ------
             TypeError: if any of the fields is not a numpy array.
         """
         for b in self.bins:
@@ -130,7 +134,8 @@ class AbstractGeometrySpecData:
     def bins(self) -> tuple[Bins, ...]:
         """Pack the fields to tuple.
 
-        Returns:
+        Returns
+        -------
             tuple of bins.
         """
         return self.ibins, self.jbins, self.kbins
@@ -184,7 +189,8 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
     def bins_shape(self) -> tuple[int, int, int]:
         """Shape of data corresponding to spatial bins.
 
-        Returns:
+        Returns
+        -------
             Tuple with the data shape.
         """
         return (self.ibins.size - 1), (self.jbins.size - 1), (self.kbins.size - 1)
@@ -193,7 +199,8 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
     def bins_size(self) -> int:
         """Size of data corresponding to spatial bins.
 
-        Returns:
+        Returns
+        -------
             int: number of voxels
         """
         return (self.ibins.size - 1) * (self.jbins.size - 1) * (self.kbins.size - 1)
@@ -239,7 +246,8 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
             j_values: ... along j (Y or Z)
             k_values: ... along k (Z or Theta)
 
-        Returns:
+        Returns
+        -------
             see :func:`select_indexes()`
         """
         return (
@@ -322,7 +330,8 @@ class CartesianGeometrySpec(AbstractGeometrySpec):
 class CylinderGeometrySpec(AbstractGeometrySpec):
     """Cylinder spec.
 
-    Attributes:
+    Attributes
+    ----------
         axs: cylinder axis
         vec: vector to measure angle (theta) from
     """
@@ -488,7 +497,7 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
             - `self.vec` is in PY=0 plane
             - `self.axs` is vertical
 
-        Returns:
+        Returns
         -------
         gs:
             new CylinderGeometrySpec with adjusted `axs` and `vec` attributes.
@@ -529,7 +538,8 @@ def select_indexes(
 
     Assumes that `a` is sorted.
 
-    Examples:
+    Examples
+    --------
         >>> r = np.arange(5)
         >>> r
         array([0, 1, 2, 3, 4])
@@ -568,7 +578,8 @@ def select_indexes(
         a:  bin boundaries
         x: one or more coordinates along `a`-boundaries
 
-    Returns:
+    Returns
+    -------
         index or indices for each given coordinate
     """
     assert a.size > 1, "Parameter a doesn't represent binning"
@@ -593,20 +604,14 @@ def select_indexes(
     return i
 
 
-def format_floats(floats: Iterable[float], _format: str = "{:.6g}") -> Generator[str]:
-    def _fmt(item: float) -> str:
-        return _format.format(item)
-
-    yield from map(_fmt, floats)
-
-
 def compute_intervals_and_coarse_bins(
     arr: Sequence[float],
     tolerance: float = 1.0e-4,
 ) -> tuple[list[int], Sequence[float]]:
     """Compute fine intervals and coarse binning.
 
-    Examples:
+    Examples
+    --------
     Find equidistant bins and report as intervals
     >>> arry = np.array([1, 2, 3, 4], dtype=float)
     >>> arry
@@ -636,7 +641,8 @@ def compute_intervals_and_coarse_bins(
         arr: actual bins
         tolerance: precision to distinguish intervals with
 
-    Returns:
+    Returns
+    -------
         Tuple: numbers of fine intervals between coarse bins, coarse binning
     """
     if tolerance <= 0.0:

@@ -37,7 +37,8 @@ def _expand_args(args):
     Args:
         args: what to rebin and how
 
-    Returns:
+    Returns
+    -------
         Rebinned result
     """
     return rebin.rebin_nd(*args)
@@ -139,7 +140,8 @@ class FMesh:
 
         If True, then totals and totals err should present.
 
-        Returns:
+        Returns
+        -------
             True if there are more than one energy bins.
         """
         return self.e.size > 2
@@ -153,7 +155,8 @@ class FMesh:
     def jbins(self) -> np.ndarray:
         """Synonym to geometry jbins (y or Z).
 
-        Returns:
+        Returns
+        -------
             jbins from the geometry spec
         """
         return self._geometry_spec.jbins
@@ -162,7 +165,8 @@ class FMesh:
     def kbins(self) -> np.ndarray:
         """Synonym to geometry kbins (z or Theta).
 
-        Returns:
+        Returns
+        -------
             kbins from the geometry spec
         """
         return self._geometry_spec.kbins
@@ -205,7 +209,8 @@ class FMesh:
             MCNP uses `origin` on mesh tally specification, both rectilinear and cylinder,
             but outputs origin only for cylinder mesh.
 
-        Returns:
+        Returns
+        -------
             True if this is a cylinder mesh.
         """
         return self._geometry_spec.cylinder
@@ -220,7 +225,8 @@ class FMesh:
     def total_precision(self) -> float:
         """Get total precision of this mesh.
 
-        Returns:
+        Returns
+        -------
             total precision from totals or errors, if there are no totals.
         """
         if self.has_multiple_energy_bins:
@@ -247,7 +253,8 @@ class FMesh:
         Args:
           other: mesh to compare to
 
-        Returns:
+        Returns
+        -------
             True, if this mesh is equal to other by geometry, otherwise False
         """
         return self._geometry_spec == other._geometry_spec
@@ -258,7 +265,8 @@ class FMesh:
         Args:
           other: "FMesh":
 
-        Returns:
+        Returns
+        -------
             True, if this mesh is equal to other by kind and geometry, otherwise False
         """
         return (
@@ -273,7 +281,8 @@ class FMesh:
         Args:
             other: mesh
 
-        Returns:
+        Returns
+        -------
             True if this mesh is more precise than other one.
         """
         assert self.is_equal_by_mesh(other), "Incompatible meshes for precision comparison."
@@ -288,7 +297,8 @@ class FMesh:
             z: ... z
             local: if True the point coordinates are local for the mesh
 
-        Returns:
+        Returns
+        -------
             True if point is within the mesh's grid.
         """
         return self._geometry_spec.surrounds_point(x, y, z, local=local)
@@ -307,7 +317,8 @@ class FMesh:
             y: ...
             z: ...
 
-        Returns:
+        Returns
+        -------
             ebins, data, err or None
                 Energy bin boundaries, group energy spectrum and relative errors.
         """
@@ -340,7 +351,8 @@ class FMesh:
             y:  (Default value = None)
             z:  (Default value = None)
 
-        Returns:
+        Returns
+        -------
             tuple of indexes along the coordinates
         """
         return self._geometry_spec.select_indexes(i_values=x, j_values=y, k_values=z)
@@ -361,7 +373,8 @@ class FMesh:
             y:  (Default value = None)
             z:  (Default value = None)
 
-        Returns:
+        Returns
+        -------
             totals, total_err for the specified coordinates
         """
         if self._totals is None:
@@ -422,7 +435,8 @@ class FMesh:
         Args:
           _file: npz-file to load from.
 
-        Returns:
+        Returns
+        -------
             The loaded FMesh object.
         """
         if isinstance(_file, Path):
@@ -498,7 +512,8 @@ class FMesh:
             data_name: Name of data which will appear in vtk file. If None, tally name
                 and type will be used.
 
-        Returns:
+        Returns
+        -------
             Full path to saved VTK file.
         """
         assert not self.is_cylinder, "Not implemented for cylinder geometry"
@@ -610,7 +625,8 @@ class FMesh:
         Args:
             new_name: name for new `FMesh`  (Default value = 0)
 
-        Returns:
+        Returns
+        -------
             The new FMesh object with only one energy bin.
         """
         e = np.array([self.e[0], self.e[-1]])
@@ -643,7 +659,8 @@ class FMesh:
             zmax:  (Default value = None)
             new_name: name for mesh to be created, default -1.
 
-        Returns:
+        Returns
+        -------
             A new FMesh with reduced bins.
         """
         trim_spec = list(
@@ -705,7 +722,8 @@ class FMesh:
             new_name: A name for the rebinned mesh to be created. (Default value = -1)
             extra_process_threshold:  At which size of data use multiple Python processes
 
-        Returns:
+        Returns
+        -------
             New FMesh object with the rebinned data.
         """
         assert not self.is_cylinder, "Not implemented for cylinder meshes"
@@ -769,7 +787,8 @@ class FMesh:
             new_z: A new binning over Z axis.
             new_name: name for the rebinned mesh to be created.
 
-        Returns:
+        Returns
+        -------
             New FMesh object with the rebinned data.
         """
         assert not self.is_cylinder, "Not implemented for cylinder meshes"
@@ -885,7 +904,8 @@ def merge_tallies(
                     is float.
         comment: A comment to assign to the new mesh tally
 
-    Returns:
+    Returns
+    -------
         The merged FMesh.
     """
     result_data = None
@@ -928,7 +948,8 @@ def read_meshtal(stream: TextIO, select=None, mesh_file_info=None) -> list[FMesh
         select: Selects the meshes actually to process (Default value = None)
         mesh_file_info: object to collect information from m-file header (Default value = None)
 
-    Returns:
+    Returns
+    -------
         The list of individual fmesh tally.
     """
     next(stream)  # TODO dvp check if we need to store problem time stamp
@@ -948,7 +969,8 @@ def _iterate_bins(stream, _n, _with_ebins):
         _n: number of items
         _with_ebins: are ebins specified
 
-    Yields:
+    Yields
+    ------
         pairs value - error
     """
     value_start, value_end = (39, 51) if _with_ebins else (30, 42)
@@ -977,7 +999,8 @@ def iter_meshtal(
         tally_select: A function returning True,
             if total tally content is acceptable
 
-    Yields:
+    Yields
+    ------
         Mesh tallies filtered.
     """
     try:
@@ -1078,7 +1101,8 @@ def iter_meshtal(
                         stream: sequence or stream of strings
                         totals_number: number of items to read
 
-                    Yields:
+                    Yields
+                    ------
                         total values and errors
                     """
                     for _ in range(totals_number):
@@ -1128,10 +1152,12 @@ def check_ebins(fid: Iterable[str], keys: list[str]) -> bool:
         fid: Iterable[str]:
         keys: List[str]:
 
-    Returns:
+    Returns
+    -------
         True if energy bins are present, False otherwise.
 
-    Raises:
+    Raises
+    ------
         ValueError: if keys don't correspond to the nonempty line.
     """
     title_line = _next_not_empty_line(fid)
@@ -1153,7 +1179,8 @@ def _next_not_empty_line(f: Iterable[str]) -> list[str] | None:
     Args:
         f: sequence or stream of strings
 
-    Returns:
+    Returns
+    -------
         The first not empty line.
     """
     for line in f:
@@ -1174,7 +1201,8 @@ def _find_words_after(f: TextIO, *keywords: str) -> list[str]:
         f: File in which words are searched.
         keywords: List of keywords after which right words are. The order is important.
 
-    Returns:
+    Returns
+    -------
         The list of words that follow keywords.
     """
     for line in f:
@@ -1217,7 +1245,8 @@ def m_2_npz(
         prefix: Path:
         suffix: str:  (Default value = "")
 
-    Returns:
+    Returns
+    -------
         Total number of files created
     """
     next(stream)  # TODO dvp check if we need to store problem time stamp
@@ -1256,7 +1285,8 @@ def fix_mesh_comment(mesh_no: int, comment: str) -> str:
         mesh_no: mesh tally number
         comment: ... comment
 
-    Returns:
+    Returns
+    -------
         corrected comment
     """
     str_mesh_no = f"{mesh_no}"

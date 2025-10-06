@@ -19,7 +19,8 @@ class ParticleKind(IntEnum):
     def short(self) -> str:
         """One letter synonym for a long name.
 
-        Returns:
+        Returns
+        -------
             the first letter of the name
         """
         return self.name[0]
@@ -28,10 +29,12 @@ class ParticleKind(IntEnum):
     def heating_reactions(self) -> str:
         """MCNP specified heating reactions for neutrons and photons.
 
-        Returns:
+        Returns
+        -------
             reaction specification for neutron or photon particle
 
-        Raises:
+        Raises
+        ------
             ValueError: if there's no specification for the particle
         """
         if self is self.n:

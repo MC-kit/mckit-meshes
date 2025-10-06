@@ -29,7 +29,8 @@ def cartesian_product(
             May return scalar or numpy ndarray.
         kw: keyword arguments to pass to aggregator
 
-    Examples:
+    Examples
+    --------
         >>> a = [1, 2, 3]
         >>> b = [4, 5, 6]
         >>> cartesian_product(a, b, aggregator=lambda x: x[0] * x[1])
@@ -48,7 +49,8 @@ def cartesian_product(
                 [3, 5],
                 [3, 6]]])
 
-    Returns:
+    Returns
+    -------
         ret: Numpy array with dimension of arrays and
             additional dimensions for their cartesian product.
     """

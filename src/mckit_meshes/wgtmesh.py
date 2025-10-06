@@ -13,7 +13,7 @@ import numpy as np
 
 import mckit_meshes.mesh.geometry_spec as gs
 
-from mckit_meshes.utils import print_n
+from mckit_meshes.utils import format_floats, print_n
 
 if TYPE_CHECKING:
     # noinspection PyCompatibility
@@ -61,7 +61,7 @@ class WgtMesh:
         print("wwge:n", end=" ", file=io)
         second_indent = " " * 15
         print_n(
-            gs.format_floats(self.energies[0][1:]),
+            format_floats(self.energies[0][1:]),
             io=io,
             indent=second_indent,
             max_columns=columns,
@@ -69,7 +69,7 @@ class WgtMesh:
         if len(self.energies) > 1:
             print("wwge:p", end=" ", file=io)
             print_n(
-                gs.format_floats(self.energies[1][1:]),
+                format_floats(self.energies[1][1:]),
                 io=io,
                 indent=second_indent,
                 max_columns=columns,
@@ -91,7 +91,7 @@ class WgtMesh:
         print(indent, "emesh=", sep="", end="", file=io)
         second_indent = indent + " " * 6
         print_n(
-            gs.format_floats(self.energies[0][1:]),
+            format_floats(self.energies[0][1:]),
             io=io,
             indent=second_indent,
             max_columns=columns,
@@ -103,7 +103,7 @@ class WgtMesh:
             print(indent, "emesh=", sep="", end="", file=io)
             # TODO dvp: try to use do_print_bins here
             print_n(
-                gs.format_floats(self.energies[1][1:]),
+                format_floats(self.energies[1][1:]),
                 io=io,
                 indent=second_indent,
                 max_columns=columns,
@@ -132,23 +132,23 @@ class WgtMesh:
                 raise ValueError(msg)
 
     @property
-    def energies(self) -> list[ArrayLike]:
+    def energies(self) -> list[np.ndarray]:
         return self._energies
 
     @property
-    def origin(self) -> ArrayLike:
+    def origin(self) -> np.ndarray:
         return self._geometry_spec.origin
 
     @property
-    def ibins(self) -> ArrayLike:
+    def ibins(self) -> np.ndarray:
         return self._geometry_spec.ibins
 
     @property
-    def jbins(self) -> ArrayLike:
+    def jbins(self) -> np.ndarray:
         return self._geometry_spec.jbins
 
     @property
-    def kbins(self) -> ArrayLike:
+    def kbins(self) -> np.ndarray:
         return self._geometry_spec.kbins
 
     @property
@@ -172,13 +172,19 @@ class WgtMesh:
     def is_cylinder(self) -> bool:
         return self._geometry_spec.cylinder
 
+    def _ensure_is_cylinder_mesh(self) -> gs.CylinderGeometrySpec:
+        if not isinstance(self._geometry_spec, gs.CylinderGeometrySpec):
+            msg = "Only applicable to CylinderGeometrySpec"
+            raise TypeError(msg)
+        return self._geometry_spec
+
     @property
     def axs(self) -> np.ndarray | None:
-        return self._geometry_spec.axs
+        return self._ensure_is_cylinder_mesh().axs
 
     @property
     def vec(self) -> np.ndarray | None:
-        return self._geometry_spec.vec
+        return self._ensure_is_cylinder_mesh().vec
 
     @property
     def count_parts(self) -> int:
@@ -196,7 +202,9 @@ class WgtMesh:
             ),
         )
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, WgtMesh):
+            return False
         if not self.bins_are_equal(other):
             return False
         for p in range(len(self.weights)):
@@ -205,9 +213,6 @@ class WgtMesh:
         return True
 
     def bins_are_equal(self, other: WgtMesh) -> bool:
-        if not isinstance(other, WgtMesh):
-            msg = f"Invalid class of object to compare: {other.__class__}"
-            raise TypeError(msg)
         if self._geometry_spec == other.geometry_spec:
             le = len(self.energies)
             if le == len(other.energies):
@@ -247,7 +252,7 @@ class WgtMesh:
 
     # noinspection SpellCheckingInspection
     def write(self, stream: TextIO) -> None:
-        """Writes the mesh to stream.
+        """Write the mesh to stream.
 
         See WWINP format, MCNP User Manual, Appendix J, Table J.1
 
@@ -342,7 +347,8 @@ class WgtMesh:
         Args:
             f: Input file in WWINP format
 
-        Returns:
+        Returns
+        -------
             WgtMesh: loaded mesh.
         """
         _if, _iv, number_of_particles, number_of_parameters = (
@@ -456,7 +462,8 @@ class WgtMesh:
         Args:
             merge_specs: iterable of pairs (WgtMesh, nps), where `nps` is weighting factor
 
-        Returns:
+        Returns
+        -------
             MergeSpec: merged weights and total nps (or sum of weighting factors)
 
 
@@ -499,7 +506,7 @@ class WgtMesh:
 
         To be used for anti-forward method of weight generation.
 
-        Returns:
+        Returns
         -------
         out:
             Reciprocal of this weights
@@ -521,7 +528,8 @@ class WgtMesh:
             normalized_value: The value which should be at `normalization_point`
             energy_bin: index of energy bin at which set normalized value, default - the last one.
 
-        Returns:
+        Returns
+        -------
             New normalized weights.
         """
         _gs = self._geometry_spec
@@ -551,7 +559,8 @@ class WgtMesh:
             normalization_point: Point at which output weights should be 1
             normalized_value: value which should be set at `normalization_point`.
 
-        Returns:
+        Returns
+        -------
             WgtMesh: Normalized reciprocal of self weights.
         """
         return self.reciprocal().normalize(normalization_point, normalized_value)
@@ -688,7 +697,8 @@ def make_geometry_spec(ibins, jbins, kbins, origin=None, axs=None, vec=None) -> 
         axs:    Cylinder mesh axis
         vec:    Cylinder mesh angle reference vector
 
-    Returns:
+    Returns
+    -------
         spec - new geometry specification
     """
     origin, ibins, jbins, kbins = (

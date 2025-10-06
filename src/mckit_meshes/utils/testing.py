@@ -18,10 +18,12 @@ def a(*args, dtype=float) -> np.ndarray:
         args:  sequence of numbers (any type) will be converted to the specified type.
         dtype: A type for the output array
 
-    Returns:
+    Returns
+    -------
         np.ndarray:  The ndarray with the given numbers and type.
 
-    Examples:
+    Examples
+    --------
     >>> a(1, 2, 3)
     array([1., 2., 3.])
     >>> a(1, 2, 3, dtype=np.int32)

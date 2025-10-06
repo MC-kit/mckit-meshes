@@ -16,14 +16,15 @@ from rich.logging import RichHandler
 
 
 from mckit_meshes import __version__, __name__ as pkg_name
-from mckit_meshes.cli.commands.split_mesh_file import split as do_split
-from mckit_meshes.cli.commands.addnpz import add as do_add
-from mckit_meshes.cli.commands.mesh2npz import mesh2npz as do_mesh2npz
-from mckit_meshes.cli.commands.npz2vtk import npz2vtk as do_npz2vtk
-from mckit_meshes.cli.commands.invwgt import invwgt as do_invwgt
-from mckit_meshes.cli.commands.merge_weights import merge_weights as do_merge_weights
-from mckit_meshes.cli.commands.mesh2wgt import mesh2wgt as do_mesh2wgt
-from mckit_meshes.cli.commands.normalize_weights import normalize_weights as do_normalize_weights
+from mckit_meshes.cli.split_mesh_file import split as do_split
+from mckit_meshes.cli.addnpz import add as do_add
+from mckit_meshes.cli.mesh2npz import mesh2npz as do_mesh2npz
+from mckit_meshes.cli.npz2vtk import npz2vtk as do_npz2vtk
+from mckit_meshes.cli.invwgt import invwgt as do_invwgt
+from mckit_meshes.cli.merge_weights import merge_weights as do_merge_weights
+from mckit_meshes.cli.mesh2wgt import mesh2wgt as do_mesh2wgt
+from mckit_meshes.cli.normalize_weights import normalize_weights as do_normalize_weights
+from mckit_meshes.cli.wgt_drop_ebins import wgt_drop_ebins as do_wgt_drop_ebins
 
 
 NAME: Final[str] = pkg_name.replace("_", "-")
@@ -46,12 +47,10 @@ class Common:
     "Override existing output files"
 
     def __post_init__(self):
-        """Initialize prefix, if not specified.
-
-        Should be initialized here, not at field definition,
-        to be set to current directory when the Common instance
-        is created.
-        """
+        """Initialize prefix, if not specified."""
+        # Should be initialized here, not at field definition,
+        # to be set to current directory when the Common instance
+        # is created.
         if self.prefix is None:
             self.prefix = Path.cwd()
 
@@ -201,6 +200,7 @@ def mesh2wgt(
             "default: None - use the single mesh, which is present in meshtal file",
         ),
     ] = None,
+    common: Common | None = None,
 ):
     """Converts mesh tally file to weight mesh file.
 
@@ -208,12 +208,13 @@ def mesh2wgt(
     """
     if common is None:
         common = Common()
+
     do_mesh2wgt(
         mesh_file,
         beta=beta,
         soft=soft,
-        out=mesh_file.with_suffix(".wwinp"),
         override=common.override,
+        mesh=mesh,
     )
 
 
@@ -252,6 +253,40 @@ def normalize_weights(
     )
 
 
+@app.command
+def wgt_drop_ebins(
+    wgtfile: types.ResolvedExistingPath,
+    output: types.ResolvedPath,
+    min_energy: float,
+    part: int,
+    common: Common | None = None,
+) -> None:
+    """Drop bins with upper boundary below the specified min_energy.
+
+    Use this to drop the too ambitious bins generated with ADVANTG at lower energies.
+
+    Parameters
+    ----------
+    wgtfile
+        input weights file
+    output
+        output weights file
+    min_energy
+        Min energy upper boundary.
+    part
+        "Part: 0 - neutron, 1 - photon [default=0]
+    """
+    if common is None:
+        common = Common()
+    do_wgt_drop_ebins(
+        wgtfile=wgtfile,
+        output=output,
+        min_energy=min_energy,
+        part=part,
+        override=common.override,
+    )
+
+
 def init_logging(eliot_log: Path | None = None) -> None:
     logging.basicConfig(
         level="NOTSET",
@@ -284,7 +319,7 @@ def meta(
     env_cfg = cyclopts.config.Env(prefix=pkg_name)
     app.config = cast("tuple[str, ...]", (toml_cfg, env_cfg))
     init_logging(eliot_log)
-    with start_task(action_type=NAME, version=__version__, working_dir=Path.cwd()):
+    with start_task(action_type=NAME, version=__version__, working_dir=Path.cwd().absolute()):
         app(tokens)
 
 

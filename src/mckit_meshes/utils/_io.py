@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Generator, Iterable
 import logging
 from typing import TYPE_CHECKING, Any
 
@@ -11,6 +12,14 @@ from pathlib import Path
 
 from eliot import start_action
 
+
+def format_floats(floats: Iterable[float], _format: str = "{:.6g}") -> Generator[str]:
+    def _fmt(item: float) -> str:
+        return _format.format(item)
+
+    yield from map(_fmt, floats)
+
+
 __LOG = logging.getLogger("mckit_meshes.io")
 
 if TYPE_CHECKING:
@@ -19,34 +28,37 @@ if TYPE_CHECKING:
     from _typeshed import SupportsWrite
 
 
-def ignore_existing_file_strategy(_: str | Path) -> None:
+def ignore_existing_file_strategy(path: Path) -> Path:
     """Do nothing if file exists."""
+    return path
 
 
-def raise_error_when_file_exists_strategy(path: str | Path) -> None:
+def raise_error_when_file_exists_strategy(path: Path) -> Path:
     """Strategy to use when file exists.
 
     Args:
         path: path to check
 
-    Raises:
+    Raises
+    ------
         FileExistsError: if `path` exits.
     """
-    path = Path(path)
     if path.exists():
         errmsg = f"""\
 Cannot override existing file \"{path}\".
 Please remove the file or specify --override option"""
         raise FileExistsError(errmsg)
+    return path
 
 
-def check_if_path_exists(*, override: bool) -> Callable[[str | Path], None]:
+def get_override_strategy(*, override: bool) -> Callable[[Path], Path]:
     """Select strategy to handle existing files, depending on option `override`.
 
     Args:
         override: if True ignore the case if file exists, otherwise rise Error
 
-    Returns:
+    Returns
+    -------
         The selected strategy.
     """
     return ignore_existing_file_strategy if override else raise_error_when_file_exists_strategy
@@ -66,7 +78,8 @@ def print_cols(
         max_columns: max columns in a line
         fmt: format string
 
-    Returns:
+    Returns
+    -------
         int: the number of the last column printed on the last row
     """
     i = 0
@@ -124,7 +137,7 @@ def revise_files(ext: str, *files: Path) -> tuple[Path, ...]:
     ext
         Extension to search for.
 
-    Returns:
+    Returns
     -------
         Specified, if available, otherwise found.
     """

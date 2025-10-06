@@ -108,7 +108,8 @@ def rebin_1d(
     define like `bins` to equivalent (see the terms below) histogram defined
     on other limiting points defined as `new_bins`.
 
-    Notes:
+    Notes
+    -----
         The algorithm maintains the equality of integral on intervals defined on
         new_bins for the original and rebinned distributions.
 
@@ -131,7 +132,8 @@ def rebin_1d(
             If True, then skip assertion of bins sorting order,
             by default False - asserts the input_file data
 
-    Returns:
+    Returns
+    -------
         rebinned data
     """
     assert bins[0] <= new_bins[0], (
@@ -202,7 +204,8 @@ def rebin_nd(
             If size of `a` is greater than that, then the computation
             is executed in external process, to achieve immediate memory cleanup.
 
-    Returns:
+    Returns
+    -------
         Rebinned data.
     """
     if not isinstance(rebin_spec, collections.abc.Iterator):
@@ -259,7 +262,8 @@ def rebin_spec_composer(
             If constant boolean value is proved, then for
             all the axes this value is applied.
 
-    Returns:
+    Returns
+    -------
         Iterator over the sequence of tuples (bins, new_bins, axis, grouped)
     """
     if not axes:
@@ -303,7 +307,8 @@ def shrink_1d(
             If True skip assertion of bins sorting order,
             by default False - asserts the input_file data
 
-    Returns:
+    Returns
+    -------
         new_bins: ndarray
             The shrank bins
         new_data: ndarray
@@ -373,7 +378,8 @@ def shrink_nd(
         assume_sorted:  If True skip assertion of bins sorting order,
                         by default False - asserts the input_file data
 
-    Returns:
+    Returns
+    -------
             A sequence with  new bins, if any, the shrunk or initial grid.
     """
     if not isinstance(trim_spec, collections.abc.Iterator):
@@ -412,7 +418,8 @@ def trim_spec_composer(
             Iterates over the list of corresponding axes.
             If not provided (default), then iterates over sequence 0..len(bins).
 
-    Returns:
+    Returns
+    -------
         Iterator over the sequence of tuples (bins, lefts, rights, axis)
     """
     if not lefts:

@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Concatenate, ParamSpec, TypedDict
+from typing import TYPE_CHECKING, Any
 
 from contextlib import contextmanager
 from pathlib import Path
 
-from cyclopts import App
 import pytest
 
 from eliot import FileDestination, MemoryLogger, add_destinations, remove_destination
@@ -34,23 +33,12 @@ def data() -> Path:
 def cd_tmpdir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     """Temporarily change to temp directory.
 
-    Returns:
-    --------
+    Returns
+    -------
     Path: to temporary directory
     """
     monkeypatch.chdir(tmp_path)
     return tmp_path
-
-
-class MemoryDestination(MemoryLogger):
-    """Eliot memory logger."""
-
-    def __call__(self, message: dict[str, Any]) -> None:
-        self.write(message)
-
-    def check_message(self, key: str, msg: str) -> bool:
-        """Check message in memory log."""
-        return any(key in m and msg in m[key] for m in self.messages)
 
 
 @pytest.fixture
@@ -72,6 +60,17 @@ def eliot_file_trace() -> Callable[[Path | str], _GeneratorContextManager[None]]
     return _wrap
 
 
+class MemoryDestination(MemoryLogger):
+    """Eliot memory logger."""
+
+    def __call__(self, message: dict[str, Any]) -> None:
+        self.write(message)
+
+    def check_message(self, key: str, msg: str) -> bool:
+        """Check message in memory log."""
+        return any(key in m and msg in m[key] for m in self.messages)
+
+
 @pytest.fixture
 def eliot_mem_trace() -> Generator[MemoryDestination]:
     """Eliot trace to memory logger."""
@@ -85,7 +84,7 @@ def eliot_mem_trace() -> Generator[MemoryDestination]:
 
 @pytest.fixture
 def cyclopts_runner(
-    cd_tmpdir: Path,
+    cd_tmpdir: Path,  # noqa: ARG001
 ) -> Callable:
     """Run cyclopts application in temporary directory and isolated console.
 
@@ -94,7 +93,7 @@ def cyclopts_runner(
     cd_tmpdir
         Reuse fixture cd_tmpdir
 
-    Returns:
+    Returns
     -------
         Callable to run the application returning the command output.
     """
