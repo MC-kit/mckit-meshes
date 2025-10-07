@@ -432,14 +432,15 @@ class WgtMesh:
     def merge(cls, *merge_specs: MergeSpec | tuple[WgtMesh, int]) -> MergeSpec:
         r"""Combine weight meshes produced from different runs with weighting factor.
 
-        Note:
-            Importance of a mesh voxel `i` is $1/w_i$ and is proportional
-            to average portion $p_i$ of passing particle weight W to a tally,
+        Note::
+
+            Importance of a mesh voxel `i` is :math:`1/w_i` and is proportional
+            to average portion :math:`p_i` of passing particle weight `W` to a tally,
             for which the weight mesh is computed.
             To obtain combined weight on merging two meshes,
             we will combine the probabilities using weighting factors and
             use reciprocal of a result as a resulting weight of mesh voxel.
-            The weighting factors are usually NPS (Number particles sampled)
+            The weighting factors are usually NPS (Number of Particles Sampled)
             from a run on which a mesh was produced.
 
             The combined probability in resulting voxel `i` is:
@@ -447,6 +448,7 @@ class WgtMesh:
             .. math::
 
                 w_ij - weight in voxel i of mesh j
+
                 n_j -  nps - weighting factor on combining of mesh j
 
                 p_ij = 1/w_ij - probability for voxel i of mesh j
@@ -456,11 +458,14 @@ class WgtMesh:
             So, the resulting voxel `i` weight level is:
 
             .. math::
+
                 w_i = \frac{1} {p_i}
 
 
-        Args:
-            merge_specs: iterable of pairs (WgtMesh, nps), where `nps` is weighting factor
+        Parameters
+        ----------
+        merge_specs
+            iterable of pairs (WgtMesh, nps), where `nps` is weighting factor
 
         Returns
         -------
@@ -523,10 +528,14 @@ class WgtMesh:
 
         All other voxels are scaled proportionally.
 
-        Args:
-            normalization_point:  Coordinates of point where the weights should equal `value`.
-            normalized_value: The value which should be at `normalization_point`
-            energy_bin: index of energy bin at which set normalized value, default - the last one.
+        Parameters
+        ----------
+        normalization_point
+            Coordinates of point where the weights should equal `value`.
+        normalized_value
+            The value which should be at `normalization_point`
+        energy_bin
+            index of energy bin at which set normalized value, default - the last one.
 
         Returns
         -------

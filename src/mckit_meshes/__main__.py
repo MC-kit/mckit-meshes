@@ -90,7 +90,7 @@ def add(
     *npz_files: types.ResolvedExistingFile,
     out: Annotated[types.ResolvedFile | None, Parameter(name=["--out", "-o"])] = None,
     comment: Annotated[str | None, Parameter(name=["--comment", "-c"])] = None,
-    number: Annotated[int, Parameter(name=["--name", "-n"])] = 1,
+    number: Annotated[int, Parameter(name=["--number", "-n"])] = 1,
     common: Common | None = None,
 ) -> None:
     """Add meshes from npz files.
@@ -107,7 +107,7 @@ def add(
         number of created meshtally
     """
     if common is None:
-        common = Common(prefix=Path("npz"))
+        common = Common()
     do_add(*npz_files, out=out, comment=comment, number=number, override=common.override)
 
 
@@ -129,13 +129,16 @@ def split(meshtally_file: types.ResolvedExistingFile, *, common: Common | None =
 def invwgt(
     wgtfile: types.ResolvedExistingPath,
     *,
-    normalisation_point: Annotated[
+    out: Annotated[types.ResolvedFile | None, Parameter(name=["--out", "-o"])] = None,
+    normalization_point: Annotated[
         str, Parameter(name=["--normalization-point", "-n"])
     ] = "610, 0, 57",
+    normalization_value: float = 1.0,
     common: Common | None = None,
 ) -> None:
-    """Inverts MCNP weight window file: all values became reciprocals (w[...] = 1/w[...]).
+    """Invert MCNP weight window file.
 
+    All values became reciprocals (w[...] = 1/w[...]).
     Use this for anti-forward weight estimations.
 
     Features:
@@ -146,15 +149,25 @@ def invwgt(
 
     Parameters
     ----------
-    normalisation_point
-        Point where to set weight to 1
+    out
+        output file, default - computed from input file name and saved in current directory
+    normalization_point
+        Point where to set weight to `normalization_value`
         (default ITER magnetic axis intersection with PY=0: "610, 0, 57")
+    normalization_value
+        value to be at `normalization point`
     wgtfile
-        _description_
+        Weights file to invert
     """
     if common is None:
         common = Common()
-    do_invwgt(wgtfile, normalisation_point=normalisation_point, override=common.override)
+    do_invwgt(
+        wgtfile,
+        normalization_point=normalization_point,
+        normalization_value=normalization_value,
+        out=out,
+        override=common.override,
+    )
 
 
 @app.command
@@ -164,7 +177,7 @@ def merge_weights(
     merge_spec: Path,
     common: Common | None = None,
 ) -> None:
-    """The script merges MCNP weight window meshes.
+    """Merge MCNP weight window meshes.
 
     Parameters
     ----------
@@ -202,7 +215,7 @@ def mesh2wgt(
     ] = None,
     common: Common | None = None,
 ):
-    """Converts mesh tally file to weight mesh file.
+    """Convert mesh tally file to weight mesh file.
 
     This can be used for GVR weights computing.
     """
@@ -323,7 +336,7 @@ def meta(
         app(tokens)
 
 
-def main():
+def main():  # pragma: no cover
     try:
         app.meta()
     except Exception:  # noqa: BLE001

@@ -26,6 +26,8 @@ def test_creation_from_long_name():
 def test_heating_spec():
     spec = ParticleKind.p.heating_reactions
     assert spec == "-5 -6"
+    spec = ParticleKind.n.heating_reactions
+    assert spec == "1 -4"
 
 
 def test_heating_spec_fail():

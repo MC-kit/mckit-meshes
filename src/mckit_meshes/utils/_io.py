@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Generator, Iterable
+from collections.abc import Iterable
 import logging
 from typing import TYPE_CHECKING, Any
 
@@ -12,6 +12,9 @@ from pathlib import Path
 
 from eliot import start_action
 
+if TYPE_CHECKING:
+    from collections.abc import Generator
+
 
 def format_floats(floats: Iterable[float], _format: str = "{:.6g}") -> Generator[str]:
     def _fmt(item: float) -> str:
@@ -20,7 +23,7 @@ def format_floats(floats: Iterable[float], _format: str = "{:.6g}") -> Generator
     yield from map(_fmt, floats)
 
 
-__LOG = logging.getLogger("mckit_meshes.io")
+__LOG = logging.getLogger("mckit_meshes.utils._io")
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
@@ -29,19 +32,35 @@ if TYPE_CHECKING:
 
 
 def ignore_existing_file_strategy(path: Path) -> Path:
-    """Do nothing if file exists."""
+    """Do nothing if file exists.
+
+    Parameters
+    ----------
+    path
+        a path to check
+
+    Returns
+    -------
+    `path` regardless if it exists or not (for chaining calls)
+    """
     return path
 
 
 def raise_error_when_file_exists_strategy(path: Path) -> Path:
     """Strategy to use when file exists.
 
-    Args:
-        path: path to check
+    Parameters
+    ----------
+    path
+        a path to check
 
     Raises
     ------
-        FileExistsError: if `path` exits.
+        FileExistsError: if a `path` exits.
+
+    Returns
+    -------
+    `path` if it does not exist (for chaining calls)
     """
     if path.exists():
         errmsg = f"""\
@@ -54,12 +73,15 @@ Please remove the file or specify --override option"""
 def get_override_strategy(*, override: bool) -> Callable[[Path], Path]:
     """Select strategy to handle existing files, depending on option `override`.
 
-    Args:
-        override: if True ignore the case if file exists, otherwise rise Error
+    Parameters
+    ----------
+    override
+        if ``True`` ignore the case if file exists, otherwise rise :class:`FileExistsError`
 
     Returns
     -------
-        The selected strategy.
+    :py:meth:`ignore_existing_file_strategy` if ovrride,
+    otherwise - :py:meth:`raise_error_when_file_exists_strategy`".
     """
     return ignore_existing_file_strategy if override else raise_error_when_file_exists_strategy
 
@@ -72,11 +94,16 @@ def print_cols(
 ) -> int:
     """Print sequence in columns.
 
-    Args:
-        seq: sequence to print
-        fid: output
-        max_columns: max columns in a line
-        fmt: format string
+    Parameters
+    ----------
+    seq
+        sequence to print
+    fid
+        output
+    max_columns
+        max columns in a line
+    fmt
+        format string
 
     Returns
     -------
@@ -105,11 +132,16 @@ def print_n(
 
     If anything was printed, add a newline.
 
-    Args:
-        words: sequence ot items to print
-        io: where to print
-        indent: indent to apply starting the second row
-        max_columns: max number of columns in row
+    Parameters
+    ----------
+    words
+        sequence ot items to print
+    io
+        where to print
+    indent
+        indent to apply starting the second row
+    max_columns
+        max number of columns in row
     """
     column = 0
     for w in words:

@@ -22,7 +22,7 @@ _DATA = Path(__file__).parent / "data"
 def data() -> Path:
     """Compute the path to test data.
 
-    Returns:
+    Returns
     -------
     Path: to test data (absolute).
     """

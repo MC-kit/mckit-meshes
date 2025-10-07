@@ -383,13 +383,13 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
 
     def local_coordinates(self, points: np.ndarray) -> np.ndarray:
         assert points.shape[-1] == 3, "Expected cartesian point array or single point"
-        assert np.array_equal(
-            self.axs,
-            DEFAULT_AXIS,
-        ), "Tilted cylinder meshes are not implemented yet"
-        assert (
-            np.array_equal(self.vec, DEFAULT_VEC) or self.vec[1] == 0.0  # vec is in xz plane
-        ), "Tilted cylinder meshes are not implemented yet"
+        # assert np.array_equal(
+        #     self.axs,
+        #     DEFAULT_AXIS,
+        # ), "Tilted cylinder meshes are not implemented yet"
+
+        # self.axs should be parallel to DEFAULT_AXIS, i.e. Z-axis
+        assert self._axis_is_z_aligned(), "Tilted cylinder meshes are not implemented yet"
         # TODO dvp: implement tilted cylinder meshes
         local_points: np.ndarray = points - self.origin
         local_points[..., :] = (
@@ -399,6 +399,9 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
             * _1_TO_2PI,  # theta in rotations
         )
         return local_points
+
+    def _axis_is_z_aligned(self):
+        return self.axs[0] == 0.0 and self.axs[1] == 0.0
 
     # TODO dvp: add opposite method global_coordinates
 

@@ -43,5 +43,17 @@ def test_add_with_out_not_specified(cyclopts_runner, data):
         mckit_meshes,
         ["add", str(m1), str(m2)],
     )
-
     assert out.exists()
+
+
+def test_add_with_override_specified(cyclopts_runner, data):
+    out = Path.cwd() / "1004+2004.npz"
+    m1 = data / "1004.npz"  # the two meshes differ only by name
+    m2 = data / "2004.npz"
+    out.touch()
+    assert out.stat().st_size == 0
+    cyclopts_runner(
+        mckit_meshes,
+        ["add", "--override", str(m1), str(m2)],
+    )
+    assert out.stat().st_size > 0

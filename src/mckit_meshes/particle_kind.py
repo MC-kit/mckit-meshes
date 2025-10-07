@@ -11,9 +11,9 @@ class ParticleKind(IntEnum):
     neutron = 1
     photon = 2
     electron = 3
-    n = 1
-    p = 2
-    e = 3
+    n = neutron
+    p = photon
+    e = electron
 
     @property
     def short(self) -> str:
