@@ -430,10 +430,12 @@ class FMesh:
 
     @classmethod
     def load_npz(cls, _file: str | Path) -> FMesh:
-        """Loads Fmesh object from the binary file.
+        """Load Fmesh object from the binary file.
 
-        Args:
-          _file: npz-file to load from.
+        Parameters
+        ----------
+        _file
+            npz-file to load from.
 
         Returns
         -------
@@ -501,16 +503,19 @@ class FMesh:
             raise FMesh.FMeshError(f"Invalid version {version} for FMesh file")
 
     def save2vtk(self, filename: str | None = None, data_name: str | None = None) -> str:
-        """Saves this fmesh data to vtk file.
+        """Save this fmesh data to vtk file.
 
         Data is saved for every energy bin and, if there are multiple energy bins,
         for total values (sum across energy axis).
 
-        Args:
-            filename: Name of file to which this object is stored. A .vtk extension will
-                be appended. By default, the name of file is the tally name.
-            data_name: Name of data which will appear in vtk file. If None, tally name
-                and type will be used.
+        Parameters
+        ----------
+        filename
+            Name of file to which this object is stored. A .vtk extension will
+            be appended. By default, the name of file is the tally name.
+        data_name
+            Name of data which will appear in vtk file. If None, tally name
+            and type will be used.
 
         Returns
         -------
@@ -533,9 +538,8 @@ class FMesh:
             cell_data[name] = np.sum(self.data, axis=0)
         return gridToVTK(filename, self.ibins, self.jbins, self.kbins, cellData=cell_data)
 
-    # noinspection PyUnresolvedReferences,PyTypeChecker
     def save_2_mcnp_mesh(self, stream: TextIO) -> None:
-        """Saves the mesh in a file in a format similar to mcnp mesh tally textual representation.
+        """Save this mesh in a file in a format of mcnp mesh tally textual representation.
 
         Args:
             stream: stream to store the mesh.

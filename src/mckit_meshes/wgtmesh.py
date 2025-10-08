@@ -40,7 +40,7 @@ class Particles(IntEnum):
 
 # noinspection GrazieInspection,PyUnresolvedReferences
 class WgtMesh:
-    """Class to work with MCNP weight window files."""
+    """Class represent information from MCNP weight window files."""
 
     def __init__(
         self,
@@ -470,9 +470,6 @@ class WgtMesh:
         Returns
         -------
             MergeSpec: merged weights and total nps (or sum of weighting factors)
-
-
-
         """
         first = merge_specs[0]
 
@@ -614,16 +611,17 @@ def reciprocal(a: np.ndarray, zero_index: np.ndarray | None = None) -> np.ndarra
 
 
 def prepare_probabilities_and_nps(_nps: int, _weights: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    """Computes intermediate data for merging procedure.
+    """Compute intermediate data for merging procedure.
 
     The probabilities are reciprocals to weights.
-    Zero weights mean zero probabilities and don't affect the merged result.
+    Zero weights mean missed probabilities and don't affect the merged result.
 
-    Args:
-        _nps:
-            weighting multiplier
-        _weights:
-            weights to convert to probabilities
+    Parameters
+    ----------
+    _nps
+        weighting multiplier
+    _weights
+        weights to convert to probabilities
     Returns:
         normalization factors and probabilities
     """
@@ -698,13 +696,20 @@ def make_geometry_spec(ibins, jbins, kbins, origin=None, axs=None, vec=None) -> 
 
     The parameters are converted to numpy arrays.
 
-    Args:
-        ibins:  X or R bins
-        jbins:  Y or Z bins
-        kbins:  Z or Theta bins
-        origin: origin point
-        axs:    Cylinder mesh axis
-        vec:    Cylinder mesh angle reference vector
+    Parameters
+    ----------
+    ibins
+        X or R bins
+    jbins
+        Y or Z bins
+    kbins
+        Z or Theta bins
+    origin
+        origin point
+    axs
+        Cylinder mesh axis
+    vec
+        Cylinder mesh angle reference vector
 
     Returns
     -------

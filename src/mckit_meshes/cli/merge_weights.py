@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import logging
 
-from collections.abc import Iterable, Mapping
-from pathlib import Path
-
 
 from mckit_meshes.wgtmesh import WgtMesh
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pathlib import Path
+    from collections.abc import Iterable, Mapping
 
 __LOG = logging.getLogger("mckit_meshes.merge_weights")
 
@@ -56,7 +58,7 @@ def merge_weights(
     merge_spec: Path,
     override: bool = False,
 ) -> None:
-    """The script merges MCNP weight window meshes.
+    """Merge MCNP weight window meshes.
 
     Parameters
     ----------

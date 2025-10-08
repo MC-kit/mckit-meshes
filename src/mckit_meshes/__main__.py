@@ -57,7 +57,7 @@ class Common:
 
 @app.command
 def mesh2npz(*mesh_tallies: types.ResolvedExistingFile, common: Common | None = None) -> None:
-    """Converts mesh files to npz files.
+    """Convert mesh files to npz files.
 
     By default output folder (prefix) is "npz".
 
@@ -73,7 +73,7 @@ def mesh2npz(*mesh_tallies: types.ResolvedExistingFile, common: Common | None = 
 
 @app.command
 def npz2vtk(*npz_files: types.ResolvedExistingFile, common: Common | None = None) -> None:
-    """Converts npz files to VTK files.
+    """Convert npz files to VTK files.
 
     Parameters
     ----------

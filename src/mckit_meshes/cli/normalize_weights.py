@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 
 from eliot import start_action
 import numpy as np
 
-from mckit_meshes.wgtmesh import Point, WgtMesh
+from mckit_meshes.wgtmesh import WgtMesh
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from mckit_meshes.wgtmesh import Point
+    from pathlib import Path
 
 
 def do_normalize_weights(

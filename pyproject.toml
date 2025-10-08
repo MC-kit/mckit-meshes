@@ -171,18 +171,20 @@ sort = "Cover"
 [tool.mypy]
 python_version = "3.13"
 cache_dir = ".cache/mypy"
+error_summary = true
 # strict = true     # TODO dvp: uncomment this to get strict control
+files = "src/**/*.py"
 follow_imports = "silent"
 # namespace_packages = true
-warn_return_any = true
-warn_unused_configs = true
 show_error_codes = true
 show_error_context = true
-error_summary = true
+plugins = ["numpy.typing.mypy_plugin"]
 warn_redundant_casts = true
+warn_return_any = true
 warn_unreachable = true
+warn_unused_configs = true
 warn_unused_ignores = true
-files = "src/**/*.py"
+
 
 [[tool.mypy.overrides]]
 module = [
