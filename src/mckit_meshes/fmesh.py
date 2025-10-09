@@ -203,15 +203,16 @@ class FMesh:
 
     @property
     def is_cylinder(self) -> bool:
-        """Is this mesh cylinder?
+        """Check, if this mesh is cylinder.
 
-        Note:
-            MCNP uses `origin` on mesh tally specification, both rectilinear and cylinder,
-            but outputs origin only for cylinder mesh.
+        Note
+        ----
+        MCNP uses `origin` on mesh tally specification, both rectilinear and cylinder,
+        but outputs origin only for cylinder mesh.
 
         Returns
         -------
-            True if this is a cylinder mesh.
+        True: if this is a cylinder mesh.
         """
         return self._geometry_spec.cylinder
 
@@ -309,7 +310,7 @@ class FMesh:
         y: float,
         z: float,
     ) -> tuple[ArrayLike, ArrayLike, ArrayLike] | None:
-        """Gets energy spectrum at the specified point.
+        """Get energy spectrum at the specified point.
 
         Args:
             x: X, Y and Z coordinate of the point where energy spectrum is
@@ -391,7 +392,7 @@ class FMesh:
         filename: Path,
         check_existing_file_strategy=raise_error_when_file_exists_strategy,
     ) -> None:
-        """Writes this object to numpy npz file.
+        """Write this object to numpy npz file.
 
         Args:
             filename: Filename to which the object is saved. If file is a
@@ -899,14 +900,18 @@ def merge_tallies(
     *tally_weight: tuple[FMesh, float],
     comment: str | None = None,
 ) -> FMesh:
-    """Makes superposition of tallies with specific weights.
+    """Make superposition of tallies with specific weights.
 
-    Args:
-        name: Name of new fmesh tally.
-        kind: Type of new fmesh tally. It can be -1 (or any arbitrary integer).
-        tally_weight: List of tally-weight pairs (tuples). tally is FMesh instance. weight
-                    is float.
-        comment: A comment to assign to the new mesh tally
+    Parameters
+    ----------
+    name
+        Name of new fmesh tally.
+    kind
+        Type of new fmesh tally. It can be -1 (or any arbitrary integer).
+    tally_weight
+        List of tally-weight pairs (tuples). tally is FMesh instance. weight is float.
+    comment
+        A comment to assign to the new mesh tally
 
     Returns
     -------
@@ -916,7 +921,7 @@ def merge_tallies(
     errors = None
     geometry_spec = None
     ebins = None
-    for t, w in tally_weight:  # type: FMesh, float
+    for t, w in tally_weight:
         if result_data is None:
             result_data = t.data * w
             errors = (t.errors * t.data * w) ** 2
@@ -926,10 +931,18 @@ def merge_tallies(
             result_data += t.data * w
             errors += (t.errors * t.data * w) ** 2
             assert geometry_spec == t._geometry_spec
+            if ebins is None:
+                raise ValueError
             assert np.array_equal(
                 ebins.size,
                 t.e.size,
-            )  # allow merging neutron and photon heating meshes
+            )
+    if result_data is None:
+        raise ValueError
+    if errors is None:
+        raise ValueError  # allow merging neutron and photon heating meshes
+    if geometry_spec is None:
+        raise ValueError
     nonzero_idx = np.logical_and(result_data > 0.0, errors > 0.0)
     result_error = np.zeros_like(result_data)
     result_error[nonzero_idx] = np.sqrt(errors[nonzero_idx]) / result_data[nonzero_idx]
@@ -945,12 +958,16 @@ def merge_tallies(
 
 
 def read_meshtal(stream: TextIO, select=None, mesh_file_info=None) -> list[FMesh]:
-    """Reads fmesh tallies from a stream.
+    """Read fmesh tallies from a stream.
 
-    Args:
-        stream: The text stream to read.
-        select: Selects the meshes actually to process (Default value = None)
-        mesh_file_info: object to collect information from m-file header (Default value = None)
+    Parameters
+    ----------
+    stream
+        The text stream to read.
+    select
+        Selects the meshes actually to process (Default value = None)
+    mesh_file_info
+        object to collect information from m-file header (Default value = None)
 
     Returns
     -------
@@ -994,7 +1011,7 @@ def iter_meshtal(
     name_select: Callable[[int], bool] | None = None,
     tally_select: Callable[[FMesh], bool] | None = None,
 ) -> Generator[FMesh]:
-    """Iterates fmesh tallies from fid.
+    """Iterate fmesh tallies from stream.
 
     Args:
         fid: A stream to read meshes from.
@@ -1099,7 +1116,7 @@ def iter_meshtal(
                 data, error = data_items[:, 0].reshape(shape), data_items[:, 1].reshape(shape)
 
                 def _iterate_totals(stream, totals_number):
-                    """Reading totals.
+                    """Read totals.
 
                     Args:
                         stream: sequence or stream of strings
@@ -1195,7 +1212,7 @@ def _next_not_empty_line(f: Iterable[str]) -> list[str] | None:
 
 
 def _find_words_after(f: TextIO, *keywords: str) -> list[str]:
-    """Searches for words that follow keywords.
+    """Search for words that follow keywords.
 
     The line from file f is read. Then it is split into words (by spaces).
     If its first words are the same as keywords, then remaining words (up to
@@ -1231,7 +1248,7 @@ def m_2_npz(
     mesh_file_info=None,
     check_existing_file_strategy=raise_error_when_file_exists_strategy,
 ) -> int:
-    """Splits the tallies from the mesh file into separate npz files.
+    """Split the tallies from the mesh file into separate npz files.
 
     Args:
         stream: File with MCNP mesh tallies to read

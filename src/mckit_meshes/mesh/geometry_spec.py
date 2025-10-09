@@ -148,7 +148,7 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
     @property
     @abc.abstractmethod
     def cylinder(self) -> bool:
-        """Is this an instance of a cylinder mesh specification?"""
+        """Check, if this is an instance of a cylinder mesh specification."""
 
     @abc.abstractmethod
     def get_origin(self) -> Bins:

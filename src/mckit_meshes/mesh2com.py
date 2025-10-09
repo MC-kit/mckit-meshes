@@ -1,12 +1,29 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, TextIO
+
 import sys
 
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
 
-def mesh2com(xbins, ybins, zbins, out=sys.stdout):
-    """Prints content for mcnp com file to plot crossections over mesh.
 
-    voxels centers and with normals in x, y and z directions.
+def mesh2com(xbins: NDArray, ybins: NDArray, zbins: NDArray, out: TextIO = sys.stdout) -> None:
+    """Print content for mcnp COM-file to plot crossections.
+
+    The bins are usually from mesh spec.
+    The crossections go through the voxels centers and with normals in x, y and z directions.
+
+    Parameters
+    ----------
+    xbins
+        Bins along X-axis
+    ybins
+        ... Y-axis
+    zbins
+        ... Z-axis
+    out, optional
+        output stream, by default sys.stdout
     """
     print("label 0 0", file=out)
     print("file all", file=out)

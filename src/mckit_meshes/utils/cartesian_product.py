@@ -9,25 +9,29 @@ from itertools import product
 import numpy as np
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Collection
 
-    from numpy.typing import ArrayLike, NDArray
+    from numpy.typing import NDArray
 
 
 # noinspection PyUnresolvedReferences
 def cartesian_product(
-    *arrays: ArrayLike,
+    *arrays: Collection,
     aggregator: Callable = lambda x: np.array(x),
     **kw: Any,  # noqa: ANN401
 ) -> NDArray:
-    """Computes transformations of cartesian product of all the elements in arrays.
+    """Compute transformations of cartesian product of all the elements in arrays.
 
-    Args:
-        arrays:  The arrays to product.
-        aggregator: Callable to handle an item from product iterator.
-            The first parameter of the callable is tuple of current product item.
-            May return scalar or numpy ndarray.
-        kw: keyword arguments to pass to aggregator
+    Parameters
+    ----------
+    arrays
+        The arrays to product.
+    aggregator
+        Callable to handle an item from product iterator.
+        The first parameter of the callable is tuple of current product item.
+        May return scalar or numpy ndarray.
+    kw
+        keyword arguments to pass to aggregator
 
     Examples
     --------

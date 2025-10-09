@@ -71,8 +71,8 @@ def interpolate(x_new: NDArray, x: NDArray, y: NDArray, axis: int = 0) -> NDArra
     nd = y.ndim
     slice1 = [slice(None)] * nd
     slice2 = [slice(None)] * nd
-    slice1[axis] = lo
-    slice2[axis] = hi
+    slice1[axis] = lo  # type: ignore[call-overload]
+    slice2[axis] = hi  # type: ignore[call-overload]
     tslice1 = tuple(slice1)
     tslice2 = tuple(slice2)
     y_lo = y[tslice1]
@@ -81,7 +81,7 @@ def interpolate(x_new: NDArray, x: NDArray, y: NDArray, axis: int = 0) -> NDArra
     slope = y_deltas / deltas
     new_deltas = x_new - x_lo
     new_deltas = set_axis(new_deltas, axis, slope.shape)
-    return slope * new_deltas + y_lo
+    return cast("NDArray", slope * new_deltas + y_lo)
 
 
 # noinspection PyUnresolvedReferences
