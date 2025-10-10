@@ -151,8 +151,7 @@ def rebin_1d(
         if ndim > 1:
             diffs_shape = [1] * ndim
             diffs_shape[axis] = a.shape[axis]
-            diffs_shape = tuple(diffs_shape)
-            diff = diff.reshape(diffs_shape)
+            diff = diff.reshape(tuple(diffs_shape))
         t = a * diff
 
     cum = np.cumsum(t, axis=axis)
@@ -333,7 +332,7 @@ def shrink_1d(
     if low < bins[0] or bins[-1] < low:
         msg = (
             f"Low shrink edge is beyond the bins range: {low:g}"
-            f" is not in [{bins[0]:g}..{bins[-1]:g}]",
+            f" is not in [{bins[0]:g}..{bins[-1]:g}]"
         )
         raise ValueError(msg)
 
@@ -341,7 +340,10 @@ def shrink_1d(
         msg = f"High shrink edge is beyond the bins range: {high} is not in [{bins[0]}..{bins[-1]}]"
         raise ValueError(msg)
 
-    left_idx, right_idx = np.digitize([low, high], bins) - 1
+    indices = np.digitize([low, high], bins) - 1
+    if not isinstance(indices, np.ndarray):
+        raise TypeError
+    left_idx, right_idx = indices
 
     if left_idx > 0 and bins[left_idx] > low:
         left_idx -= 1

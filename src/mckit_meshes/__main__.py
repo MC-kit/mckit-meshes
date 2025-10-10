@@ -68,6 +68,8 @@ def mesh2npz(*mesh_tallies: types.ResolvedExistingFile, common: Common | None = 
     """
     if common is None:
         common = Common(prefix=Path("npz"))
+    if common.prefix is None:
+        common.prefix = Path("npz")
     do_mesh2npz(*mesh_tallies, prefix=common.prefix, override=common.override)
 
 
@@ -81,7 +83,9 @@ def npz2vtk(*npz_files: types.ResolvedExistingFile, common: Common | None = None
         .npz files with compressed meshes
     """
     if common is None:
-        common = Common()
+        common = Common(prefix=Path("vtk"))
+    if common.prefix is None:
+        common.prefix = Path("vtk")
     do_npz2vtk(*npz_files, prefix=common.prefix, override=common.override)
 
 

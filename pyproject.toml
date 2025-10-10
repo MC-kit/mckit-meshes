@@ -178,7 +178,6 @@ follow_imports = "silent"
 # namespace_packages = true
 show_error_codes = true
 show_error_context = true
-plugins = ["numpy.typing.mypy_plugin"]
 warn_redundant_casts = true
 warn_return_any = true
 warn_unreachable = true
@@ -206,6 +205,7 @@ module = [
     "numpy.testing",
     "pandas",
     "polars",
+    "pyevtk.*",
     "pytest",
     "rich",
     "rich.*",
@@ -213,6 +213,7 @@ module = [
     "scipy.sparse",
     "tomli",
     "tomllib",
+    "toolz.*",
     "xdoctest",
 ]
 ignore_missing_imports = true

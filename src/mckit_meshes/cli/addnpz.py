@@ -80,7 +80,7 @@ def add(
         if totals is not None:
             _back_to_relative_values(totals, tot_errors)
 
-        if _sum is None:
+        if _sum is None or data is None or errors is None:
             msg = "No npz-files found."
             raise ValueError(msg)
 

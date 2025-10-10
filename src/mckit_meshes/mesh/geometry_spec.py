@@ -178,9 +178,12 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
     def print_geom(self, io: TextIO, indent: str) -> None:
         """Print geometry specification.
 
-        Args:
-            io: stream to print to
-            indent: indent to insert before lines
+        Parameters
+        ----------
+        io
+            stream to print to
+        indent
+            indent to insert before lines
         """
 
     # Generic methods
@@ -191,7 +194,7 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
 
         Returns
         -------
-            Tuple with the data shape.
+        Tuple with the data shape.
         """
         return (self.ibins.size - 1), (self.jbins.size - 1), (self.kbins.size - 1)
 
@@ -201,7 +204,7 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
 
         Returns
         -------
-            int: number of voxels
+        int: number of voxels
         """
         return (self.ibins.size - 1) * (self.jbins.size - 1) * (self.kbins.size - 1)
 

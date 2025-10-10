@@ -7,6 +7,7 @@ from pathlib import Path
 import numpy as np
 
 from mckit_meshes.fmesh import read_meshtal
+from mckit_meshes.mesh.geometry_spec import CylinderGeometrySpec
 from mckit_meshes.wgtmesh import WgtMesh, make_geometry_spec
 from mckit_meshes.utils import get_override_strategy
 
@@ -57,6 +58,8 @@ def convert_mesh_to_weights(
             axs=mesh.axis,
             vec=mesh.vec,
         )
+        if not isinstance(gs, CylinderGeometrySpec):
+            raise TypeError
         gs.adjust_axs_vec_for_mcnp()
     else:
         gs = make_geometry_spec(

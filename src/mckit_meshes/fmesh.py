@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, TextIO
+from typing import TYPE_CHECKING, Literal, TextIO, cast
 
 import logging
 
@@ -26,7 +26,9 @@ from mckit_meshes.utils import raise_error_when_file_exists_strategy, rebin
 if TYPE_CHECKING:
     from collections.abc import Callable, Generator, Iterable
 
-    from numpy.typing import ArrayLike
+    from numpy.typing import ArrayLike, NDArray
+
+    from mckit_meshes.wgtmesh import GeometrySpec
 
 __LOG = logging.getLogger(__name__)
 
@@ -105,15 +107,15 @@ class FMesh:
         self.bins["Y"] = self._y = geometry_spec.jbins
         self.bins["Z"] = self._z = geometry_spec.kbins
         self.bins["E"] = self._e = np.asarray(ebins)
-        self.data = np.asarray(data)
-        self.errors = np.asarray(errors)
+        self.data: NDArray[np.float32] = np.asarray(data, dtype=np.float32)
+        self.errors: NDArray[np.float32] = np.asarray(errors, dtype=np.float32)
         if self._e.size > 2:
             if totals is None:
                 if totals_err is not None:
                     raise ValueError("totals are omitted but totals_err are provided")
-                self._totals = np.sum(self.data, axis=0)
+                self._totals: NDArray[np.float32] | None = np.sum(self.data, axis=0)
                 non_zero = self._totals > 0.0
-                self._totals_err = np.zeros_like(self._totals)
+                self._totals_err: NDArray[np.float32] | None = np.zeros_like(self._totals)
                 self._totals_err[non_zero] = (
                     np.sqrt(np.sum((self.errors * self.data) ** 2, axis=0))[non_zero]
                     / self._totals[non_zero]
@@ -157,7 +159,7 @@ class FMesh:
 
         Returns
         -------
-            jbins from the geometry spec
+        jbins from the geometry spec
         """
         return self._geometry_spec.jbins
 
@@ -167,17 +169,17 @@ class FMesh:
 
         Returns
         -------
-            kbins from the geometry spec
+        kbins from the geometry spec
         """
         return self._geometry_spec.kbins
 
     @property
-    def totals(self) -> np.ndarray | None:
+    def totals(self) -> NDArray | None:
         """Total values over energy."""
         return self._totals
 
     @property
-    def totals_err(self) -> np.ndarray | None:
+    def totals_err(self) -> NDArray | None:
         """Relative errors of total values over energy."""
         return self._totals_err
 
@@ -187,19 +189,25 @@ class FMesh:
         return self._comment
 
     @property
-    def origin(self) -> np.ndarray:
+    def origin(self) -> NDArray:
         """Get origin for cylinder mesh."""
-        return self._geometry_spec.origin
+        if isinstance(self._geometry_spec, gc.CylinderGeometrySpec):
+            return self._geometry_spec.origin
+        raise TypeError
 
     @property
-    def axis(self) -> np.ndarray:
+    def axis(self) -> NDArray:
         """Get axis of a cylinder mesh."""
-        return self._geometry_spec.axs
+        if isinstance(self._geometry_spec, gc.CylinderGeometrySpec):
+            return self._geometry_spec.axs
+        raise TypeError
 
     @property
     def vec(self) -> np.ndarray:
         """Get Theta reference direction for cylinder mesh."""
-        return self._geometry_spec.vec
+        if isinstance(self._geometry_spec, gc.CylinderGeometrySpec):
+            return self._geometry_spec.vec
+        raise TypeError
 
     @property
     def is_cylinder(self) -> bool:
@@ -228,12 +236,12 @@ class FMesh:
 
         Returns
         -------
-            total precision from totals or errors, if there are no totals.
+        total precision from totals or errors, if there are no totals.
         """
-        if self.has_multiple_energy_bins:
-            return self.totals_err[
-                -1
-            ]  # TODO dvp: assumes max energy bin is most representative, check usage
+        if self.has_multiple_energy_bins and self.totals_err is not None:
+            return cast(
+                "float", self.totals_err[-1]
+            )  # TODO dvp: assumes max energy bin is most representative, check usage
         return self.errors[0, 0, 0, 0].item()
 
     def check_attributes(self) -> None:
@@ -251,8 +259,10 @@ class FMesh:
     def is_equal_by_geometry(self, other: FMesh) -> bool:
         """Check if the meshes are equivalent by geometry.
 
-        Args:
-          other: mesh to compare to
+        Parameters
+        ----------
+        other
+            mesh to compare to
 
         Returns
         -------
@@ -263,8 +273,10 @@ class FMesh:
     def is_equal_by_mesh(self, other: FMesh) -> bool:
         """Check if the meshes are equivalent by kind and geometry.
 
-        Args:
-          other: "FMesh":
+        Parameters
+        ----------
+        other
+            "FMesh" to compare to
 
         Returns
         -------
@@ -489,6 +501,8 @@ class FMesh:
                 if origin is None:
                     geometry_spec = gc.CartesianGeometrySpec(x, y, z)
                 else:
+                    if axis is None:
+                        raise ValueError
                     geometry_spec = gc.CylinderGeometrySpec(x, y, z, origin=origin, axs=axis)
                 return cls(
                     name,
@@ -839,6 +853,8 @@ class FMesh:
     def format_cylinder_origin_and_axis_label(self) -> str:
         """Format the first string for cylinder mesh."""
         if self.is_cylinder:
+            if not isinstance(self._geometry_spec, gc.CylinderGeometrySpec):
+                raise TypeError
             return (
                 f"\n  Cylinder origin at {' '.join(self._geometry_spec.origin)}, "
                 f"axis in {' '.join(self._geometry_spec.axs)} direction\n"
@@ -848,16 +864,22 @@ class FMesh:
     def __eq__(self, other) -> bool:
         if not isinstance(other, FMesh):
             return False
-        res = (
+        res: bool = (
             self.name == other.name
             and self.is_equal_by_mesh(other)
             and np.array_equal(self.data, other.data)
             and np.array_equal(self.errors, other.errors)
             and self.comment == other.comment
         )
-        if res and self._totals:
-            res = np.all(np.isclose(self.totals, other.totals)) and np.all(
-                np.isclose(self.totals_err, other.totals_err),
+        if res and self.totals and other.totals:
+            if self.totals_err is None or other.totals_err is None:
+                raise ValueError
+            res = cast(
+                "bool",
+                np.all(np.isclose(self.totals, other.totals))
+                and np.all(
+                    np.isclose(self.totals_err, other.totals_err),
+                ),
             )
         return res
 
@@ -915,7 +937,7 @@ def merge_tallies(
 
     Returns
     -------
-        The merged FMesh.
+    The merged FMesh.
     """
     result_data = None
     errors = None
@@ -937,12 +959,9 @@ def merge_tallies(
                 ebins.size,
                 t.e.size,
             )
-    if result_data is None:
+    if result_data is None or errors is None or geometry_spec is None or ebins is None:
         raise ValueError
-    if errors is None:
-        raise ValueError  # allow merging neutron and photon heating meshes
-    if geometry_spec is None:
-        raise ValueError
+
     nonzero_idx = np.logical_and(result_data > 0.0, errors > 0.0)
     result_error = np.zeros_like(result_data)
     result_error[nonzero_idx] = np.sqrt(errors[nonzero_idx]) / result_data[nonzero_idx]
@@ -971,7 +990,7 @@ def read_meshtal(stream: TextIO, select=None, mesh_file_info=None) -> list[FMesh
 
     Returns
     -------
-        The list of individual fmesh tally.
+    The list of individual fmesh tally.
     """
     next(stream)  # TODO dvp check if we need to store problem time stamp
     next(stream)  # TODO dvp check if we need to store problem title
@@ -985,10 +1004,14 @@ def read_meshtal(stream: TextIO, select=None, mesh_file_info=None) -> list[FMesh
 def _iterate_bins(stream, _n, _with_ebins):
     """Parse line with mesh values.
 
-    Args:
-        stream: stream of strings
-        _n: number of items
-        _with_ebins: are ebins specified
+    Paramters
+    ---------
+    stream
+        stream of strings
+    _n
+        number of items
+    _with_ebins
+        are ebins specified
 
     Yields
     ------
@@ -1013,12 +1036,15 @@ def iter_meshtal(
 ) -> Generator[FMesh]:
     """Iterate fmesh tallies from stream.
 
-    Args:
-        fid: A stream to read meshes from.
-        name_select: A function returning True,
-            if tally name is acceptable, otherwise skips tally reading and parsing
-        tally_select: A function returning True,
-            if total tally content is acceptable
+    Parameters
+    ----------
+    fid
+        A stream to read meshes from.
+    name_select
+        A function returning True, if tally name is acceptable,
+        otherwise skips tally reading and parsing
+    tally_select
+        A function returning True, if total tally content is acceptable
 
     Yields
     ------
@@ -1070,7 +1096,7 @@ def iter_meshtal(
                         ],
                     )
 
-                    geometry_spec = gc.CylinderGeometrySpec(
+                    geometry_spec: GeometrySpec = gc.CylinderGeometrySpec(
                         ibins,
                         jbins,
                         kbins,
@@ -1136,9 +1162,9 @@ def iter_meshtal(
                 if ebins.size > 2:  # Totals are not output if there's only one bin in energy domain
                     totals_items = np.fromiter(_iterate_totals(fid, spatial_bins_size), dtype=float)
                     totals_items = totals_items.reshape(spatial_bins_size, 2)
-                    shape = geometry_spec.bins_shape
-                    totals = totals_items[:, 0].reshape(shape)
-                    totals_err = totals_items[:, 1].reshape(shape)
+                    totals_shape = geometry_spec.bins_shape
+                    totals = totals_items[:, 0].reshape(totals_shape)
+                    totals_err = totals_items[:, 1].reshape(totals_shape)
                 else:
                     totals = None
                     totals_err = None

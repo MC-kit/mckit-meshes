@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import cast
-
 import numpy as np
 
 __all__ = ["a"]
@@ -12,11 +10,14 @@ __all__ = ["a"]
 def a(*args, dtype=float) -> np.ndarray:
     """Shorten typing in parametrized tests.
 
-    Equivalent to np.ndarray([*args], dtype='dtype')`.
+    Equivalent to ``np.ndarray([*args], dtype=`dtype`)``.
 
-    Args:
-        args:  sequence of numbers (any type) will be converted to the specified type.
-        dtype: A type for the output array
+    Parameters
+    ----------
+    args
+        sequence of numbers (any type) will be converted to the specified type.
+    dtype
+        A type for the output array
 
     Returns
     -------
@@ -32,10 +33,10 @@ def a(*args, dtype=float) -> np.ndarray:
     array([[0., 1.],
            [2., 3.]])
     """
-    return cast("np.ndarray", np.fromiter(args, dtype=dtype))
+    return np.fromiter(args, dtype=dtype)
 
 
 if __name__ == "__main__":
-    import doctest
+    import xdoctest
 
-    doctest.testmod(verbose=True)
+    xdoctest.doctest_module(command="all")
