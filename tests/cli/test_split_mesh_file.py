@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-import shutil
 import sys
 
 from importlib.resources import files
 from pathlib import Path
 from time import sleep
-from typing import Any
 
 import pytest
 

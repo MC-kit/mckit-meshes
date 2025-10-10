@@ -98,8 +98,8 @@ def merge_weights(
     files = list(wwinp_files)
     merge_descriptor = load_merge_descriptor(merge_spec)
     check_merge_descriptor_is_complete(merge_descriptor, files)
-    merge_spec = list(create_working_merge_spec(merge_descriptor, files))
-    result = WgtMesh.merge(*merge_spec)
+    merge_spec_list = list(create_working_merge_spec(merge_descriptor, files))
+    result = WgtMesh.merge(*merge_spec_list)
     out.parent.mkdir(parents=True, exist_ok=True)
     with out.open("wt") as io:
         result.wm.write(io)

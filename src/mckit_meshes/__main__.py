@@ -196,13 +196,22 @@ def merge_weights(
 @app.command
 def mesh2wgt(
     mesh_file: types.ResolvedExistingFile,
+    *,
+    out: Annotated[
+        types.ResolvedFile | None,
+        Parameter(
+            name=["--out", "-o"],
+            help="Output file"
+            "[default - compute from mesh_file name and store in current directory]",
+        ),
+    ] = None,
     beta: int = 5,
     soft: Annotated[
         int | None,
         Parameter(
             name=["--soft", "-s"],
             help="Softening factor:"
-            "(power to apply to weight values, typically 0.5, if used) (default: None)",
+            "(power to apply to weight values, typically 0.5, if used) [default: no softening]",
         ),
     ] = None,
     mesh: Annotated[
@@ -210,7 +219,7 @@ def mesh2wgt(
         Parameter(
             name=["--mesh", "-m"],
             help="Mesh Tally number to use."
-            "default: None - use the single mesh, which is present in meshtal file",
+            "[default: use the single mesh, which is present in meshtal file]",
         ),
     ] = None,
     common: Common | None = None,
@@ -224,6 +233,7 @@ def mesh2wgt(
 
     do_mesh2wgt(
         mesh_file,
+        out=out,
         beta=beta,
         soft=soft,
         override=common.override,
@@ -234,6 +244,7 @@ def mesh2wgt(
 @app.command
 def normalize_weights(
     weight_file: types.ResolvedExistingPath,
+    out: Annotated[types.ResolvedFile | None, Parameter(name=["--out", "-o"])] = None,
     normalization_point: str = "610, 0, 57",
     normalization_value: float = 1 / 3,
     energy_bin: int = 1,
@@ -245,24 +256,24 @@ def normalize_weights(
     ----------
     weight_file
         weights file
+    out
+        output file, optional
     normalization_point, optional
         coordinates to normalize the weights at, by default "610, 0, 57"
     normalization_value, optional
         value to set, by default 1/3
     energy_bin, optional
         at which energy bin, by default 1
-    common, optional
-        shared parameters, by default None
-
     """
     if common is None:
         common = Common()
     do_normalize_weights(
         weight_file=weight_file,
-        override=common.override,
+        out=out,
         normalization_point=normalization_point,
         normalization_value=normalization_value,
         energy_bin=energy_bin,
+        override=common.override,
     )
 
 

@@ -22,16 +22,16 @@ def split(
 
     Parameters
     ----------
-        meshtally_file
-            input file to split
-        override
-            An output directory for the output files (default: current directory),
-            output files are also prepended with a meshtally number.
-        override
-            override existing output files, otherwise raise FileExistsError
+    meshtally_file
+        input file to split
+    override
+        An output directory for the output files (default: current directory),
+        output files are also prepended with a meshtally number.
+    override
+        override existing output files, otherwise raise FileExistsError
 
-        eliot_log
-            Path to structured eliot log, default: "mckit-meshes.log
+    eliot_log
+        Path to structured eliot log, default: "mckit-meshes.log
     """
     with start_task(
         action_type="split meshtally file",
@@ -68,24 +68,20 @@ def split(
 
 
 def check_existing_file(output_path: Path, *, override: bool = False) -> None:
-    (
-        """Define if the output file should be overriden.
+    """Define if the output file should be overriden.
 
     Parameters
     ----------
     output_path
         Output file
-    override
-        override existing file(s)
+        override
+        if ``True``, override existing file(s), otherwise rise FileExistsError
 
     Raises
     ------
     FileExistsError
         if output file exists and option `when_exists` != "override"
     """
-        """"""
-    )
-
     with start_action(
         action_type="check if output exists",
         output_path=output_path,

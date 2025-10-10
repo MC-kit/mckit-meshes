@@ -7,8 +7,8 @@ from pathlib import Path
 import numpy as np
 
 from mckit_meshes.fmesh import read_meshtal
-from mckit_meshes.mesh.geometry_spec import CylinderGeometrySpec
 from mckit_meshes.wgtmesh import WgtMesh, make_geometry_spec
+from mckit_meshes.utils import get_override_strategy
 
 if TYPE_CHECKING:
     from mckit_meshes.fmesh import FMesh
@@ -48,16 +48,23 @@ def convert_mesh_to_weights(
         energies = [mesh.e]
         weights = [get_weights(mesh)]
 
-    gs = make_geometry_spec(
-        origin=mesh.origin,
-        ibins=mesh.ibins,
-        jbins=mesh.jbins,
-        kbins=mesh.kbins,
-        axs=mesh.axis,
-        vec=mesh.vec,
-    )
-    if isinstance(gs, CylinderGeometrySpec):
+    if mesh.is_cylinder:
+        gs = make_geometry_spec(
+            origin=mesh.origin,
+            ibins=mesh.ibins,
+            jbins=mesh.jbins,
+            kbins=mesh.kbins,
+            axs=mesh.axis,
+            vec=mesh.vec,
+        )
         gs.adjust_axs_vec_for_mcnp()
+    else:
+        gs = make_geometry_spec(
+            origin=mesh.origin,
+            ibins=mesh.ibins,
+            jbins=mesh.jbins,
+            kbins=mesh.kbins,
+        )
     return WgtMesh(
         geometry_spec=gs,
         energies=energies,
@@ -68,6 +75,7 @@ def convert_mesh_to_weights(
 def mesh2wgt(
     mesh_file: Path,
     *,
+    out: Path | None,
     mesh: int | None = None,
     beta: int = 5,
     soft: float | None = None,
@@ -77,12 +85,10 @@ def mesh2wgt(
 
     This can be used for GVR weights computing.
     """
-    path = Path(str(mesh_file))
-    assert path.exists(), f"Path {path} is not found"
-    wgtmesh = convert_mesh_to_weights(path, mesh_no=mesh, beta=beta, soft=soft)
-    out = path.with_suffix(".wwinp")
-    if override or not out.exists():
-        with out.open("wt") as stream:
-            wgtmesh.write(stream)
-    else:
-        raise FileExistsError(out, " consider --override option")
+    assert mesh_file.exists(), f"Path {mesh_file} is not found"
+    wgtmesh = convert_mesh_to_weights(mesh_file, mesh_no=mesh, beta=beta, soft=soft)
+    if out is None:
+        out = Path(mesh_file.name).with_suffix(".wwinp")
+    out = get_override_strategy(override=override)(out)
+    with out.open("wt") as stream:
+        wgtmesh.write(stream)

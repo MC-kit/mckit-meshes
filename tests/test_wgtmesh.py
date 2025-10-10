@@ -30,7 +30,8 @@ def weights_ijk() -> Callable[[float], WgtMesh]:
 
     Single energy bin.
 
-    Returns:
+    Returns
+    -------
         Callable to build weights with given offset.
     """
     ebins = np.array([0.0, 20], dtype=float)
@@ -64,7 +65,8 @@ def weights_ijk() -> Callable[[float], WgtMesh]:
 def weights_eijk() -> Callable[[float], WgtMesh]:
     """Weights vary along all dimensions.
 
-    Returns:
+    Returns
+    -------
         Callable to build weights with given offset.
     """
     ebins = np.linspace(0.0, 20, 5, endpoint=True, dtype=float)

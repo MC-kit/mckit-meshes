@@ -79,5 +79,5 @@ def test_glob_inputs(cyclopts_runner, data):
 
 
 def test_absent_npz_files(cyclopts_runner, eliot_mem_trace):
-    out = cyclopts_runner(mckit_meshes, ["npz2vtk"])
+    cyclopts_runner(mckit_meshes, ["npz2vtk"])
     eliot_mem_trace.check_message("message_type", "WARNING")
