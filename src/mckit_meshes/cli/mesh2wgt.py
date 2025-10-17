@@ -63,7 +63,6 @@ def convert_mesh_to_weights(
         gs.adjust_axs_vec_for_mcnp()
     else:
         gs = make_geometry_spec(
-            origin=mesh.origin,
             ibins=mesh.ibins,
             jbins=mesh.jbins,
             kbins=mesh.kbins,

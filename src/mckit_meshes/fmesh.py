@@ -107,15 +107,15 @@ class FMesh:
         self.bins["Y"] = self._y = geometry_spec.jbins
         self.bins["Z"] = self._z = geometry_spec.kbins
         self.bins["E"] = self._e = np.asarray(ebins)
-        self.data: NDArray[np.float32] = np.asarray(data, dtype=np.float32)
-        self.errors: NDArray[np.float32] = np.asarray(errors, dtype=np.float32)
+        self.data = np.asarray(data, dtype=float)
+        self.errors = np.asarray(errors, dtype=float)
         if self._e.size > 2:
             if totals is None:
                 if totals_err is not None:
                     raise ValueError("totals are omitted but totals_err are provided")
-                self._totals: NDArray[np.float32] | None = np.sum(self.data, axis=0)
+                self._totals: NDArray[np.floating] | None = np.sum(self.data, axis=0)
                 non_zero = self._totals > 0.0
-                self._totals_err: NDArray[np.float32] | None = np.zeros_like(self._totals)
+                self._totals_err: NDArray[np.floating] | None = np.zeros_like(self._totals, dtype=float)
                 self._totals_err[non_zero] = (
                     np.sqrt(np.sum((self.errors * self.data) ** 2, axis=0))[non_zero]
                     / self._totals[non_zero]

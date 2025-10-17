@@ -367,10 +367,13 @@ class WgtMesh:
         # coarse bins along axes
         _ncx, _ncy, _ncz = reader.get_ints_written_as_floats(3)
         if number_of_parameters == 16:
+            # origin
+            origin = np.array([_x0, _y0, _z0], dtype=float)
             _xmax, _ymax, _zmax, _xr, _yr, _zr = reader.get_floats(6)
             axs = np.array([_xmax, _ymax, _zmax], dtype=float)
             vec = np.array([_xr, _yr, _zr], dtype=float)
         else:
+            origin = None
             axs = None
             vec = None
 
@@ -407,7 +410,7 @@ class WgtMesh:
                 assert np.all(
                     np.transpose(_wp_data.reshape((nep, _nfz, _nfy, _nfx)), (0, 3, 2, 1)) == _wp,
                 )
-        geometry_spec = make_geometry_spec(_x, _y, _z, [_x0, _y0, _z0], axs=axs, vec=vec)
+        geometry_spec = make_geometry_spec(_x, _y, _z, origin=origin, axs=axs, vec=vec)
         return cls(geometry_spec, _e, _w)
 
     def get_mean_square_distance_weights(self, point) -> WgtMesh:
@@ -715,8 +718,8 @@ def make_geometry_spec(ibins, jbins, kbins, origin=None, axs=None, vec=None) -> 
     -------
         spec - new geometry specification
     """
-    origin, ibins, jbins, kbins = (
-        np.asarray(x, dtype=float) for x in (origin, ibins, jbins, kbins)
+    ibins, jbins, kbins = (
+        np.asarray(x, dtype=float) for x in (ibins, jbins, kbins)
     )
     if axs is None:
         geometry_spec = gs.CartesianGeometrySpec(ibins, jbins, kbins)
