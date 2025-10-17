@@ -62,9 +62,13 @@ export JUST_LOG := log
 [group: 'dev']
 @check: pre-commit test
 
+# Check style includeing mypy and pylint and test
+[group: 'dev']
+@check-full: check mypy pylint pyright
+ 
 # Bump project version
 [group: 'dev']
-@bump *args="dev 1":
+@bump *args="patch":
   uv version --bump {{args}}
   git commit -m "bump: version $(uv version)" pyproject.toml uv.lock 
 
@@ -144,11 +148,15 @@ typeguard *args:
 # Run mypy
 [group: 'lint']
 @mypy:
-  uv run --no-dev --group mypy mypy src docs/source/conf.py
+  uv run --no-dev --group mypy mypy src tests docs/source/conf.py
 
 [group: 'lint']
 @pylint:
-  uv run --no-dev --group lint pylint --recursive=y src 
+  uv run --no-dev --group lint pylint --recursive=y src tests
+
+[group: 'lint']
+@pyright:
+  uv run --no-dev --group pyright pyright src tests
 
 # Check rst-texts
 [group: 'docs']

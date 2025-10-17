@@ -72,7 +72,7 @@ jobs = 0
 
 # List of plugins (as comma separated values of python module names) to load,
 # usually to register additional checkers.
-# load-plugins =
+load-plugins = [ "pylint_per_file_ignores" ]
 
 # Pickle collected data for later comparisons.
 #persistent = true
@@ -83,7 +83,7 @@ jobs = 0
 
 # Minimum Python version to use for version dependent checks. Will default to the
 # version used to run pylint.
-#py-version = "3.10"
+#py-version = "3.13"
 
 # Discover python modules and packages in the file system subtree.
 # recursive =
@@ -345,7 +345,7 @@ max-line-length = 120
 # known-standard-library =
 
 # Force import order to recognize a module as part of a third party library.
-#known-third-party = ["enchant"]
+known-third-party = ["enchant", "pytest"]
 
 # Couples of modules and preferred modules, separated by a comma.
 # preferred-modules =
@@ -359,10 +359,14 @@ max-line-length = 120
 # function parameter format.
 #logging-modules = ["logging"]
 
-#[tool.pylint."messages control"]
+[tool.pylint."messages control"]
 # Only show warnings with the listed confidence levels. Leave empty to show all.
 # Valid levels: HIGH, CONTROL_FLOW, INFERENCE, INFERENCE_FAILURE, UNDEFINED.
 #confidence = ["HIGH", "CONTROL_FLOW", "INFERENCE", "INFERENCE_FAILURE", "UNDEFINED"]
+per-file-ignores =[
+  "tests/*:C0114,C0116,W0621"
+]
+
 
 # Disable the message, report, category or checker with the given id(s). You can
 # either give multiple identifiers separated by comma (,) or put this option

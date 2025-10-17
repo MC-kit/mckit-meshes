@@ -94,7 +94,7 @@ strict = true
 # or `format.skip-magic-trailing-comma=false`.
 
 [lint.isort]
-known-first-party = ["src", "tests"]
+known-first-party = ["src"]
 known-third-party = [
   "mpl_toolkits",
   "matplotlib",
@@ -123,7 +123,7 @@ section-order = [
 "testing" = ["tests"]
 
 [lint.pydocstyle]
-convention = "numpy" # Use Google-style docstrings.
+convention = "numpy"
 
 [format]
 docstring-code-format = true
