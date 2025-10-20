@@ -47,7 +47,7 @@ def test_multiple_files(cyclopts_runner, data):
 
 def test_without_prefix(cyclopts_runner, source):
     cyclopts_runner(mckit_meshes, ["npz2vtk", str(source)])
-    output_path = Path("1004.vtr")
+    output_path = Path("vtk", "1004.vtr")
     assert output_path.exists()
 
 
