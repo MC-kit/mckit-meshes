@@ -718,9 +718,7 @@ def make_geometry_spec(ibins, jbins, kbins, origin=None, axs=None, vec=None) -> 
     -------
         spec - new geometry specification
     """
-    ibins, jbins, kbins = (
-        np.asarray(x, dtype=float) for x in (ibins, jbins, kbins)
-    )
+    ibins, jbins, kbins = (np.asarray(x, dtype=float) for x in (ibins, jbins, kbins))
     if axs is None:
         geometry_spec = gs.CartesianGeometrySpec(ibins, jbins, kbins)
         if origin is not None and not np.array_equal(origin, geometry_spec.origin):

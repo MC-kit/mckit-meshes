@@ -115,7 +115,9 @@ class FMesh:
                     raise ValueError("totals are omitted but totals_err are provided")
                 self._totals: NDArray[np.floating] | None = np.sum(self.data, axis=0)
                 non_zero = self._totals > 0.0
-                self._totals_err: NDArray[np.floating] | None = np.zeros_like(self._totals, dtype=float)
+                self._totals_err: NDArray[np.floating] | None = np.zeros_like(
+                    self._totals, dtype=float
+                )
                 self._totals_err[non_zero] = (
                     np.sqrt(np.sum((self.errors * self.data) ** 2, axis=0))[non_zero]
                     / self._totals[non_zero]
