@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Generator
     from contextlib import _GeneratorContextManager
 
+    from cyclopts import App
 
 _DATA = Path(__file__).parent / "data"
 
@@ -60,7 +61,7 @@ def eliot_file_trace() -> Callable[[Path | str], _GeneratorContextManager[None]]
     return _wrap
 
 
-class MemoryDestination(MemoryLogger):
+class MemoryDestination(MemoryLogger):  # type: ignore[misc]
     """Eliot memory logger."""
 
     def __call__(self, message: dict[str, Any]) -> None:
@@ -85,7 +86,7 @@ def eliot_mem_trace() -> Generator[MemoryDestination]:
 @pytest.fixture
 def cyclopts_runner(
     cd_tmpdir: Path,  # noqa: ARG001
-) -> Callable:
+) -> Callable[..., str]:
     """Run cyclopts application in temporary directory and isolated console.
 
     Parameters
@@ -98,10 +99,14 @@ def cyclopts_runner(
         Callable to run the application returning the command output.
     """
 
-    def _wrapper(app, args, **kwargs) -> str:
+    def _wrapper(
+        app: App,
+        args: None | str | Iterable[str] = None,
+        **kwargs: Any,
+    ) -> str:
         console = Console()
         with console.capture() as capture:
-            app(args, console=console, **kwargs)
+            app(args, console=console, result_action="return_value", **kwargs)
         return capture.get()
 
     return _wrapper
