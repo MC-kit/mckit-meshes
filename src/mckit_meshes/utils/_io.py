@@ -29,7 +29,6 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
 
 
-
 def ignore_existing_file_strategy(path: Path) -> Path:
     """Do nothing if file exists.
 

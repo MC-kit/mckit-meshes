@@ -58,6 +58,7 @@ class FMesh:
 
     NPZ_FORMAT = np.int16(4)
     """Identifies version of format of data stored in npz file."""
+
     class FMeshError(RuntimeError):
         """FMesh class specific exception."""
 

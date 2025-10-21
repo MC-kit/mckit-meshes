@@ -431,7 +431,6 @@ class WgtMesh:
             _w,
         )
 
-
     @classmethod
     def merge(cls, *merge_specs: MergeSpec | tuple[WgtMesh, int]) -> MergeSpec:
         r"""Combine weight meshes produced from different runs with weighting factor.
@@ -631,7 +630,7 @@ def prepare_probabilities_and_nps(_nps: int, _weights: np.ndarray) -> tuple[np.n
         weighting multiplier
     _weights
         weights to convert to probabilities
-    
+
     Returns
     -------
     normalization factors and probabilities

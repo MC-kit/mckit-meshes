@@ -11,7 +11,7 @@ from eliot import FileDestination, MemoryLogger, add_destinations, remove_destin
 from rich.console import Console
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Generator
+    from collections.abc import Callable, Generator, Iterable
     from contextlib import _GeneratorContextManager
 
     from cyclopts import App
