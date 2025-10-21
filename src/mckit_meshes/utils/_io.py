@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import IO, TYPE_CHECKING, Any
 
 import sys
 
@@ -28,7 +28,6 @@ __LOG = logging.getLogger("mckit_meshes.utils._io")
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
 
-    from _typeshed import SupportsWrite
 
 
 def ignore_existing_file_strategy(path: Path) -> Path:
@@ -41,7 +40,7 @@ def ignore_existing_file_strategy(path: Path) -> Path:
 
     Returns
     -------
-    `path` regardless if it exists or not (for chaining calls)
+    ``path`` regardless if it exists or not (for chaining calls)
     """
     return path
 
@@ -88,7 +87,7 @@ def get_override_strategy(*, override: bool) -> Callable[[Path], Path]:
 
 def print_cols(
     seq: Iterable[Any],
-    fid: SupportsWrite[str] = sys.stdout,
+    fid: IO[str] = sys.stdout,
     max_columns: int = 6,
     fmt: str = "{}",
 ) -> int:
@@ -124,7 +123,7 @@ def print_cols(
 
 def print_n(
     words: Iterable,
-    io: SupportsWrite[str] = sys.stdout,
+    io: IO[str] = sys.stdout,
     indent: str = "",
     max_columns: int = 5,
 ) -> None:

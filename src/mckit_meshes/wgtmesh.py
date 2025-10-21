@@ -38,7 +38,11 @@ class Particles(IntEnum):
     p = 1
 
 
-# noinspection GrazieInspection,PyUnresolvedReferences
+class MergeSpec(NamedTuple):
+    wm: WgtMesh
+    nps: int
+
+
 class WgtMesh:
     """Class represent information from MCNP weight window files."""
 
@@ -427,42 +431,40 @@ class WgtMesh:
             _w,
         )
 
-    class MergeSpec(NamedTuple):
-        wm: WgtMesh
-        nps: int
 
     @classmethod
     def merge(cls, *merge_specs: MergeSpec | tuple[WgtMesh, int]) -> MergeSpec:
         r"""Combine weight meshes produced from different runs with weighting factor.
 
-        Note::
+        Note
+        ----
 
-            Importance of a mesh voxel `i` is :math:`1/w_i` and is proportional
-            to average portion :math:`p_i` of passing particle weight `W` to a tally,
-            for which the weight mesh is computed.
-            To obtain combined weight on merging two meshes,
-            we will combine the probabilities using weighting factors and
-            use reciprocal of a result as a resulting weight of mesh voxel.
-            The weighting factors are usually NPS (Number of Particles Sampled)
-            from a run on which a mesh was produced.
+        Importance of a mesh voxel `i` is :math:`1/w_i` and is proportional
+        to average portion :math:`p_i` of passing particle weight `W` to a tally,
+        for which the weight mesh is computed.
+        To obtain combined weight on merging two meshes,
+        we will combine the probabilities using weighting factors and
+        use reciprocal of a result as a resulting weight of mesh voxel.
+        The weighting factors are usually NPS (Number of Particles Sampled)
+        from a run on which a mesh was produced.
 
-            The combined probability in resulting voxel `i` is:
+        The combined probability in resulting voxel `i` is:
 
-            .. math::
+        .. math::
 
-                w_ij - weight in voxel i of mesh j
+            w_ij - weight in voxel i of mesh j
 
-                n_j -  nps - weighting factor on combining of mesh j
+            n_j -  nps - weighting factor on combining of mesh j
 
-                p_ij = 1/w_ij - probability for voxel i of mesh j
+            p_ij = 1/w_ij - probability for voxel i of mesh j
 
-                p_i = \frac{ \sum_j{n_j*p_ij} { \sum_j{n_j} }
+            p_i = \frac{ \sum_j{n_j*p_ij} { \sum_j{n_j} }
 
-            So, the resulting voxel `i` weight level is:
+        So, the resulting voxel `i` weight level is:
 
-            .. math::
+        .. math::
 
-                w_i = \frac{1} {p_i}
+            w_i = \frac{1} {p_i}
 
 
         Parameters
@@ -472,12 +474,12 @@ class WgtMesh:
 
         Returns
         -------
-            MergeSpec: merged weights and total nps (or sum of weighting factors)
+        MergeSpec: merged weights and total nps (or sum of weighting factors)
         """
         first = merge_specs[0]
 
-        if not isinstance(first, WgtMesh.MergeSpec):
-            first = WgtMesh.MergeSpec(*first)  # convert tuple to MergeSpec
+        if not isinstance(first, MergeSpec):
+            first = MergeSpec(*first)  # convert tuple to MergeSpec
 
         if len(merge_specs) > 1:
             second = WgtMesh.merge(*merge_specs[1:])
@@ -495,7 +497,7 @@ class WgtMesh:
                 ) * reciprocal(nps)
                 merged_weights.append(reciprocal(combined_probabilities))
             wm = first.wm
-            return WgtMesh.MergeSpec(
+            return MergeSpec(
                 cls(
                     wm.geometry_spec,
                     wm.energies,
@@ -539,7 +541,7 @@ class WgtMesh:
 
         Returns
         -------
-            New normalized weights.
+        New normalized weights.
         """
         _gs = self._geometry_spec
         x, y, z = normalization_point
@@ -560,17 +562,21 @@ class WgtMesh:
     def invert(self, normalization_point: Point, normalized_value: float = 1.0) -> WgtMesh:
         """Get reciprocal of self weights and normalize to `normalization_value` at given point.
 
-        Important:
-            A caller specifies normalization_point in local coordinates.
-            See :class:`GeometrySpec.local_coordinates`.
+        Important
+        ---------
+        A caller specifies normalization_point in local coordinates.
+        See :class:`GeometrySpec.local_coordinates`.
 
-        Args:
-            normalization_point: Point at which output weights should be 1
-            normalized_value: value which should be set at `normalization_point`.
+        Parameters
+        ----------
+        normalization_point
+            Point at which output weights should be 1
+        normalized_value
+            value which should be set at `normalization_point`.
 
         Returns
         -------
-            WgtMesh: Normalized reciprocal of self weights.
+        WgtMesh: Normalized reciprocal of self weights.
         """
         return self.reciprocal().normalize(normalization_point, normalized_value)
 
@@ -625,8 +631,10 @@ def prepare_probabilities_and_nps(_nps: int, _weights: np.ndarray) -> tuple[np.n
         weighting multiplier
     _weights
         weights to convert to probabilities
-    Returns:
-        normalization factors and probabilities
+    
+    Returns
+    -------
+    normalization factors and probabilities
     """
     nps_array = np.full_like(_weights, _nps, dtype=int)
     zero_index = _weights == 0.0

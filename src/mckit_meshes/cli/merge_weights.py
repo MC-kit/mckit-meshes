@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 
 
-from mckit_meshes.wgtmesh import WgtMesh
+from mckit_meshes.wgtmesh import MergeSpec, WgtMesh
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -31,14 +31,14 @@ def load_merge_descriptor(merge_descriptor_file: Path) -> Mapping[str, int]:
 
 def create_working_merge_spec(
     merge_descriptor: Mapping[str, int], wgt_mesh_files: Iterable[Path]
-) -> Iterable[WgtMesh.MergeSpec]:
+) -> Iterable[MergeSpec]:
     def make_merge_spec(wgt_mesh_file: Path) -> WgtMesh.MergeSpec:
         with wgt_mesh_file.open("rt", encoding="cp1251") as io:
             wgt_mesh: WgtMesh = WgtMesh.read(io)
             __LOG.info(f"Loaded weight mesh from {wgt_mesh_file}")
         _id = wgt_mesh_file.stem
         _nps = merge_descriptor[_id]
-        return WgtMesh.MergeSpec(wgt_mesh, _nps)
+        return MergeSpec(wgt_mesh, _nps)
 
     return map(make_merge_spec, wgt_mesh_files)
 

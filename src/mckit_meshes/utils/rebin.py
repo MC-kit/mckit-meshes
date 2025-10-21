@@ -101,27 +101,27 @@ def rebin_1d(
 
     Notes
     -----
-        The algorithm maintains the equality of integral on intervals defined on
-        new_bins for the original and rebinned distributions.
+    The algorithm maintains the equality of integral on intervals defined on
+    new_bins for the original and rebinned distributions.
 
     Parameters
     ----------
     a
         The array to rebin
     bins
-        Defines 1-D array representing `a` binning along the given `axis
+        Defines 1-D array representing ``a`` binning along the given ``axis``
     new_bins
         The new binning required.
     axis
-        An axis along which to rebin array `a`, optional (default=0)
+        An axis along which to rebin array ``a``, optional (default=0)
     grouped
         Defines the approach for rebinning, optional (default=False).
-        - If ``True``, then the values in `a` represent the data already
-            integrated over bins, like in energy group distributions.
-            On rebinning maintain equivalence of integral over same
-            energy range in old and new bins.
-        - If ``False``, as for spatial binning - maintain the same
-            average value in the same volume in old and new bins.
+            - If ``True``, then the values in ``a`` represent the data already
+                integrated over bins, like in energy group distributions.
+                On rebinning maintain equivalence of integral over same
+                energy range in old and new bins.
+            - If ``False``, as for spatial binning - maintain the same
+                average value in the same volume in old and new bins.
     assume_sorted
         If ``True``, then skip assertion of bins sorting order,
         by default False - asserts the input_file data

@@ -51,16 +51,13 @@ class FMesh:
 
     Class to load MCNP FMESH output file, process and write in various formats.
     Processing includes normalization, merging and conversion to weights mesh.
-
-    Attrs:
-        NPZ_MARK: Signature to be stored in the of meta entry in a npz file.
-            This is used to check that the file is for FMesh object.
-        NPZ_FORMAT: Identifies version of format of data stored in npz file.
     """
 
     NPZ_MARK = np.int16(5445)
-    NPZ_FORMAT = np.int16(4)
+    """Signature to be stored in the of meta entry in a npz file."""
 
+    NPZ_FORMAT = np.int16(4)
+    """Identifies version of format of data stored in npz file."""
     class FMeshError(RuntimeError):
         """FMesh class specific exception."""
 
