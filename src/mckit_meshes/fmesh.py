@@ -36,12 +36,14 @@ __LOG = logging.getLogger(__name__)
 def _expand_args(args):
     """Adapter to invoke rebin.
 
-    Args:
-        args: what to rebin and how
+    Parameters
+    ----------
+    args
+        what to rebin and how
 
     Returns
     -------
-        Rebinned result
+    Rebinned result
     """
     return rebin.rebin_nd(*args)
 
@@ -76,23 +78,32 @@ class FMesh:
     ) -> None:
         """Construct FMesh instance object.
 
-        Args:
-            name: FMESH tally number
-            kind: neutron, photon or generic number if not a particle kind
-            geometry_spec: mesh geometry specification
-            ebins: Energy bin boundaries.
-            data: Data values at centers of mesh cells.
-                  Shape (Ne-1)x(Nx-1)x(Ny-1)x(Nz-1), where Ne, Nx, Ny and Nz - the number
-                  of corresponding bin boundaries.
-            errors:
-                Relative errors of corresponding data values.
+        Parameters
+        ----------
+        name
+            FMESH tally number
+        kind
+            neutron, photon or generic number if not a particle kind
+        geometry_spec
+            mesh geometry specification
+        ebins
+            Energy bin boundaries.
+        data
+            Data values at centers of mesh cells.
                 Shape (Ne-1)x(Nx-1)x(Ny-1)x(Nz-1), where Ne, Nx, Ny and Nz - the number
                 of corresponding bin boundaries.
-            totals: Can be provided with 'Total' data from mesh file,
-                    if there are more than 1 energy bin, optional.
-            totals_err: Can be provided with data from mesh file,
-                    if there are more than 1 energy bin, optional.
-            comment: Comment from a meshtal file (content of FC card in MCNP model).
+        errors
+            Relative errors of corresponding data values.
+            Shape (Ne-1)x(Nx-1)x(Ny-1)x(Nz-1), where Ne, Nx, Ny and Nz - the number
+            of corresponding bin boundaries.
+        totals
+            Can be provided with 'Total' data from mesh file,
+            if there are more than 1 energy bin, optional.
+        totals_err
+            Can be provided with data from mesh file,
+            if there are more than 1 energy bin, optional.
+        comment
+            Comment from a meshtal file (content of FC card in MCNP model).
         """
         self.name = int(name)
         self.kind = Kind(kind)  # may be not a particle kind, when this is a sum of heating
@@ -291,8 +302,10 @@ class FMesh:
     def has_better_precision_than(self, other: FMesh) -> bool:
         """Compare precision achieved for the meshes.
 
-        Args:
-            other: mesh
+        Parameters
+        ----------
+        other
+            mesh
 
         Returns
         -------
@@ -304,15 +317,19 @@ class FMesh:
     def surrounds_point(self, x: float, y: float, z: float, *, local: bool = True) -> bool:
         """Check if a point x,y,z is within the mesh spatial grid.
 
-        Args:
-            x: point's coordinate x
-            y: ... y
-            z: ... z
-            local: if True the point coordinates are local for the mesh
+        Parameters
+        ----------
+        x
+            point's coordinate x
+        y
+            ... y
+        z
+            ... z
+        local: if True the point coordinates are local for the mesh
 
         Returns
         -------
-            True if point is within the mesh's grid.
+        True, if the point is within the mesh's grid.
         """
         return self._geometry_spec.surrounds_point(x, y, z, local=local)
 
@@ -324,16 +341,20 @@ class FMesh:
     ) -> tuple[ArrayLike, ArrayLike, ArrayLike] | None:
         """Get energy spectrum at the specified point.
 
-        Args:
-            x: X, Y and Z coordinate of the point where energy spectrum is
+        Parameters
+        ----------
+        x
+            X, Y and Z coordinate of the point where energy spectrum is
                 required. If point is located outside the mesh, zeros are returned.
-            y: ...
-            z: ...
+        y
+            ...
+        z
+            ...
 
         Returns
         -------
-            ebins, data, err or None
-                Energy bin boundaries, group energy spectrum and relative errors.
+        ebins, data, err or None
+            Energy bin boundaries, group energy spectrum and relative errors.
         """
         key_index: dict[int, Literal["X", "Y", "Z"]] = {0: "X", 1: "Y", 2: "Z"}
         values = [x, y, z]
@@ -359,14 +380,18 @@ class FMesh:
 
         If coordinate is not specified, then return all the points along this coordinate.
 
-        Args:
-            x:  (Default value = None)
-            y:  (Default value = None)
-            z:  (Default value = None)
+        Parameters
+        ----------
+        x
+            (Default value = None)
+        y
+            (Default value = None)
+        z
+            (Default value = None)
 
         Returns
         -------
-            tuple of indexes along the coordinates
+        tuple of indexes along the coordinates
         """
         return self._geometry_spec.select_indexes(i_values=x, j_values=y, k_values=z)
 
@@ -381,14 +406,18 @@ class FMesh:
 
         If a coordinate is not specified, then all the points along this coordinate.
 
-        Args:
-            x:  (Default value = None)
-            y:  (Default value = None)
-            z:  (Default value = None)
+        Parameters
+        ----------
+        x
+            (Default value = None)
+        y
+            (Default value = None)
+        z
+            (Default value = None)
 
         Returns
         -------
-            totals, total_err for the specified coordinates
+        totals, total_err for the specified coordinates
         """
         if self._totals is None:
             return None
@@ -406,7 +435,8 @@ class FMesh:
     ) -> None:
         """Write this object to numpy npz file.
 
-        Args:
+        Parameters
+        ----------
             filename: Filename to which the object is saved. If file is a
                 file-object, then the filename is unchanged. If file is a string,
                 a .npz extension will be appended to the file name if it does not
@@ -556,8 +586,10 @@ class FMesh:
     def save_2_mcnp_mesh(self, stream: TextIO) -> None:
         """Save this mesh in a file in a format of mcnp mesh tally textual representation.
 
-        Args:
-            stream: stream to store the mesh.
+        Parameters
+        ----------
+        stream
+            stream to store the mesh.
         """
 
         def format_comment(a: FMesh) -> str:
@@ -641,12 +673,14 @@ class FMesh:
     def total_by_energy(self, new_name: int = 0) -> FMesh:
         """Integrate over energy bins.
 
-        Args:
-            new_name: name for new `FMesh`  (Default value = 0)
+        Parameters
+        ----------
+        new_name
+            name for new `FMesh`  (Default value = 0)
 
         Returns
         -------
-            The new FMesh object with only one energy bin.
+        The new FMesh object with only one energy bin.
         """
         e = np.array([self.e[0], self.e[-1]])
         data = self.totals[np.newaxis, ...]
@@ -667,16 +701,26 @@ class FMesh:
     ) -> FMesh:
         """Select subset of e-voxels within given geometry and energy limits.
 
-        Args:
-            emin:  limits for new bins
-            emax:  (Default value = None)
-            xmin:  (Default value = None)
-            xmax:  (Default value = None)
-            ymin:  (Default value = None)
-            ymax:  (Default value = None)
-            zmin:  (Default value = None)
-            zmax:  (Default value = None)
-            new_name: name for mesh to be created, default -1.
+        Parameters
+        ----------
+        emin
+            min energy
+        emax
+            max enegry
+        xmin
+            (Default value = None)
+        xmax
+            (Default value = None)
+        ymin
+            (Default value = None)
+        ymax
+            (Default value = None)
+        zmin
+            (Default value = None)
+        zmax
+            (Default value = None)
+        new_name
+            name for mesh to be created, default -1.
 
         Returns
         -------
@@ -734,16 +778,22 @@ class FMesh:
     ) -> FMesh:
         """Extract data for a new spatial grid.
 
-        Args:
-            new_x: A new binning over X axis.
-            new_y: A new binning over Y axis.
-            new_z: A new binning over Z axis.
-            new_name: A name for the rebinned mesh to be created. (Default value = -1)
-            extra_process_threshold:  At which size of data use multiple Python processes
+        Parameters
+        ----------
+        new_x
+            A new binning over X axis.
+        new_y
+            A new binning over Y axis.
+        new_z
+            A new binning over Z axis.
+        new_name
+            A name for the rebinned mesh to be created. (Default value = -1)
+        extra_process_threshold
+            At which size of data use multiple Python processes
 
         Returns
         -------
-            New FMesh object with the rebinned data.
+        New FMesh object with the rebinned data.
         """
         assert not self.is_cylinder, "Not implemented for cylinder meshes"
 
@@ -800,15 +850,20 @@ class FMesh:
     ) -> FMesh:
         """Create FMesh object corresponding to this one by fluxes, but over new mesh.
 
-        Ags:
-            new_x: A new binning over X axis.
-            new_y: A new binning over Y axis.
-            new_z: A new binning over Z axis.
-            new_name: name for the rebinned mesh to be created.
+        Parameters
+        ----------
+        new_x
+            A new binning over X axis.
+        new_y
+            A new binning over Y axis.
+        new_z
+            A new binning over Z axis.
+        new_name
+            name for the rebinned mesh to be created.
 
         Returns
         -------
-            New FMesh object with the rebinned data.
+        New FMesh object with the rebinned data.
         """
         assert not self.is_cylinder, "Not implemented for cylinder meshes"
 
@@ -1015,7 +1070,7 @@ def _iterate_bins(stream, _n):
 
     Yields
     ------
-        pairs value - error
+    pairs value - error
     """
     for _ in range(_n):
         __line = next(stream).strip()
@@ -1047,7 +1102,7 @@ def iter_meshtal(
 
     Yields
     ------
-        Mesh tallies filtered.
+    Mesh tallies filtered.
     """
     try:
         while True:
@@ -1249,9 +1304,12 @@ def _find_words_after(f: TextIO, *keywords: str) -> list[str]:
     If its first words are the same as keywords, then remaining words (up to
     newline character) are returned. Otherwise, new line is read.
 
-    Args:
-        f: File in which words are searched.
-        keywords: List of keywords after which right words are. The order is important.
+    Parameters
+    ----------
+    f
+        File in which words are searched.
+    keywords
+        List of keywords after which right words are. The order is important.
 
     Returns
     -------
@@ -1300,7 +1358,7 @@ def m_2_npz(
 
     Returns
     -------
-        Total number of files created
+    Total number of files created
     """
     next(stream)  # TODO dvp check if we need to store problem time stamp
     next(stream)  # TODO dvp check if we need to store problem title
@@ -1335,13 +1393,16 @@ def fix_mesh_comment(mesh_no: int, comment: str) -> str:
     MCNP error: prints digits in front of comment when the tally
     number takes more than 3 digits.
 
-    Args:
-        mesh_no: mesh tally number
-        comment: ... comment
+    Parameters
+    ----------
+    mesh_no
+        mesh tally number
+    comment
+        - comment
 
     Returns
     -------
-        corrected comment
+    corrected comment
     """
     str_mesh_no = f"{mesh_no}"
     chars_to_remove = len(str_mesh_no) - 3
@@ -1357,10 +1418,14 @@ def meshes_to_vtk(
 ) -> None:
     """Export FMesh objects to VTK files.
 
-    Args:
-        meshes: one or more meshes to output
-        out_dir: path to output directory
-        get_mesh_description_strategy: strategy to create a mesh description
+    Parameters
+    ----------
+    meshes
+        one or more meshes to output
+    out_dir
+        path to output directory
+    get_mesh_description_strategy
+        strategy to create a mesh description
     """
     if out_dir:
         out_dir.mkdir(parents=True, exist_ok=True)
