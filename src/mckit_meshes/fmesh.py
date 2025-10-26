@@ -1001,11 +1001,11 @@ def read_meshtal(stream: TextIO, select=None, mesh_file_info=None) -> list[FMesh
     return list(iter_meshtal(stream, select))
 
 
-def _iterate_bins(stream, _n, _with_ebins):
+def _iterate_bins(stream, _n):
     """Parse line with mesh values.
 
-    Paramters
-    ---------
+    Parameters
+    ----------
     stream
         stream of strings
     _n
@@ -1017,11 +1017,10 @@ def _iterate_bins(stream, _n, _with_ebins):
     ------
         pairs value - error
     """
-    value_start, value_end = (39, 51) if _with_ebins else (30, 42)
     for _ in range(_n):
-        _line = next(stream).lstrip()
-        _value = float(_line[value_start:value_end])
-        _error = float(_line[value_end:])
+        __line = next(stream).strip()
+        _line = __line[-24:]  # 11 chars - value, space, 11 chars error
+        _value, _error = (float(x) for x in _line.split())
         if _value < 0.0:
             _value = _error = 0.0
         yield _value
@@ -1107,7 +1106,7 @@ def iter_meshtal(
                     ebins = np.array(
                         [float(w) for w in _find_words_after(fid, "Energy", "bin", "boundaries:")],
                     )
-                    with_ebins = check_ebins(
+                    _with_ebins = check_ebins(
                         fid,
                         ["Energy", "R", "Z", "Th", "Result", "Rel", "Error"],
                     )
@@ -1128,7 +1127,7 @@ def iter_meshtal(
                     ebins = np.array(
                         [float(w) for w in _find_words_after(fid, "Energy", "bin", "boundaries:")],
                     )
-                    with_ebins = check_ebins(
+                    _with_ebins = check_ebins(
                         fid,
                         ["Energy", "X", "Y", "Z", "Result", "Rel", "Error"],
                     )
@@ -1136,7 +1135,7 @@ def iter_meshtal(
                 spatial_bins_size = geometry_spec.bins_size
                 bins_size = spatial_bins_size * (ebins.size - 1)
 
-                data_items = np.fromiter(_iterate_bins(fid, bins_size, with_ebins), dtype=float)
+                data_items = np.fromiter(_iterate_bins(fid, bins_size), dtype=float)
                 data_items = data_items.reshape(bins_size, 2)
                 shape = (ebins.size - 1, *geometry_spec.bins_shape)
                 data, error = data_items[:, 0].reshape(shape), data_items[:, 1].reshape(shape)
@@ -1144,9 +1143,12 @@ def iter_meshtal(
                 def _iterate_totals(stream, totals_number):
                     """Read totals.
 
-                    Args:
-                        stream: sequence or stream of strings
-                        totals_number: number of items to read
+                    Parameters
+                    ----------
+                    stream
+                        sequence or stream of strings
+                    totals_number
+                        number of items to read
 
                     Yields
                     ------
@@ -1193,19 +1195,20 @@ def check_ebins(fid: Iterable[str], keys: list[str]) -> bool:
     If next nonempty line starts with a word keys[0] (i.e. "Energy"), then the energy bins present.
     Also check that the remaining keys correspond to the nonempty line.
 
-    Args:
-        fid: text rows to scan, including prepending empty rows
-        keys: sequence of words to check
-        fid: Iterable[str]:
-        keys: List[str]:
+    Parameters
+    ----------
+    fid
+        text rows to scan, including prepending empty rows
+    keys
+        sequence of words to check
 
     Returns
     -------
-        True if energy bins are present, False otherwise.
+    True if energy bins are present, False otherwise.
 
     Raises
     ------
-        ValueError: if keys don't correspond to the nonempty line.
+    ValueError: if keys don't correspond to the nonempty line.
     """
     title_line = _next_not_empty_line(fid)
     if title_line is None:
@@ -1223,12 +1226,14 @@ def check_ebins(fid: Iterable[str], keys: list[str]) -> bool:
 def _next_not_empty_line(f: Iterable[str]) -> list[str] | None:
     """Skip empty lines from a string sequence.
 
-    Args:
-        f: sequence or stream of strings
+    Parameters
+    ----------
+    f
+        sequence or stream of strings
 
     Returns
     -------
-        The first not empty line.
+    The first not empty line.
     """
     for line in f:
         words = line.split()
@@ -1276,21 +1281,22 @@ def m_2_npz(
 ) -> int:
     """Split the tallies from the mesh file into separate npz files.
 
-    Args:
-        stream: File with MCNP mesh tallies to read
-        prefix: Prefix for separate mesh files names
-        name_select:
-            Filter fmesh by names (default: no filter)
-        tally_select: function(FMesh)->bool
-            Filter fmesh by content. (default: no filter)
-        suffix:
-            Prefix for separate mesh files names
-        mesh_file_info: structure to store meshtal file header info: nps.
-        check_existing_file_strategy:
-            what to do if an output file already exists
-        stream: TextIO:
-        prefix: Path:
-        suffix: str:  (Default value = "")
+    Parameters
+    ----------
+    stream
+        File with MCNP mesh tallies to read
+    prefix
+        Prefix for separate mesh files names
+    name_select
+        Filter fmesh by names (default: no filter)
+    tally_select : function(FMesh)->bool
+        Filter fmesh by content. (default: no filter)
+    suffix
+        Prefix for separate mesh files names
+    mesh_file_info
+        structure to store meshtal file header info: nps.
+    check_existing_file_strategy
+        what to do if an output file already exists
 
     Returns
     -------
@@ -1305,6 +1311,7 @@ def m_2_npz(
         mesh_file_info.nps = nps
     total = 0  # : ignore[SIM113]
     for t in iter_meshtal(stream, name_select=name_select, tally_select=tally_select):
+        __LOG.info("Tally: %s", t.name)
         if t.comment:
             __LOG.info("Comment: %s", t.comment)
         __LOG.info(
