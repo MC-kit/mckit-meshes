@@ -10,11 +10,31 @@ if TYPE_CHECKING:
 
 
 def load(path: Path) -> WgtMesh:
+    """Load weight mesh file.
+
+    Parameters
+    ----------
+    path
+        to the weight file
+
+    Returns
+    -------
+    The loaded weight mesh object.
+    """
     with path.open("r") as fid:
         return WgtMesh.read(fid)
 
 
 def save(mesh: WgtMesh, path: Path) -> None:
+    """Save weight mesh object ot file.
+
+    Parameters
+    ----------
+    mesh
+        weight mesh object
+    path
+        where to save to
+    """
     with path.open("wt") as stream:
         mesh.write(stream)
 

@@ -372,15 +372,19 @@ def shrink_nd(
 ) -> tuple[list[np.ndarray] | None, np.ndarray]:
     """Perform multidimensional shrink.
 
-    Args:
-        a: The grid to shrink.
-        trim_spec: sequence of tuples (bins, low, high, axis)
-        assume_sorted:  If True skip assertion of bins sorting order,
-                        by default False - asserts the input_file data
+    Parameters
+    ----------
+    a
+        The grid to shrink.
+    trim_spec
+        sequence of tuples (bins, low, high, axis)
+    assume_sorted
+        If True skip assertion of bins sorting order,
+        by default False - asserts the input_file data
 
     Returns
     -------
-            A sequence with  new bins, if any, the shrunk or initial grid.
+    A sequence with  new bins, if any, the shrunk or initial grid.
     """
     if not isinstance(trim_spec, collections.abc.Iterator):
         trim_spec = iter(trim_spec)
@@ -409,13 +413,17 @@ def trim_spec_composer(
 
     Parameters
     ----------
-    bins_seq: sequence of ndarrays
+    bins_seq
+        sequence of ndarrays
         Iterates over the list of bins associated with a grid to be trimmed.
-    lefts: sequence of floats
+    lefts
+        sequence of floats
         Iterates over the list of left edges for trimming.
-    rights: sequence of floats
+    rights
+        sequence of floats
         Iterates over the list of right edges for trimming.
-    axes: sequence of ints, optional
+    axes
+        sequence of ints, optional
         Iterates over the list of corresponding axes.
         If not provided (default), then iterates over sequence 0..len(bins).
 

@@ -14,7 +14,6 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
 
-# noinspection PyUnresolvedReferences
 def cartesian_product(
     *arrays: Collection,
     aggregator: Callable = lambda x: np.array(x),
@@ -35,28 +34,27 @@ def cartesian_product(
 
     Examples
     --------
-        >>> a = [1, 2, 3]
-        >>> b = [4, 5, 6]
-        >>> cartesian_product(a, b, aggregator=lambda x: x[0] * x[1])
-        array([[ 4,  5,  6],
-               [ 8, 10, 12],
-               [12, 15, 18]])
+    >>> a = [1, 2, 3]
+    >>> b = [4, 5, 6]
+    >>> cartesian_product(a, b, aggregator=lambda x: x[0] * x[1])
+    array([[ 4,  5,  6],
+            [ 8, 10, 12],
+            [12, 15, 18]])
 
-        >>> cartesian_product(a, b)
-        array([[[1, 4],
-                [1, 5],
-                [1, 6]],
-               [[2, 4],
-                [2, 5],
-                [2, 6]],
-               [[3, 4],
-                [3, 5],
-                [3, 6]]])
+    >>> cartesian_product(a, b)
+    array([[[1, 4],
+            [1, 5],
+            [1, 6]],
+            [[2, 4],
+            [2, 5],
+            [2, 6]],
+            [[3, 4],
+            [3, 5],
+            [3, 6]]])
 
     Returns
     -------
-        ret: Numpy array with dimension of arrays and
-            additional dimensions for their cartesian product.
+    Numpy array with dimension of arrays and additional dimensions for their cartesian product.
     """
     res = np.stack([aggregator(x, **kw) for x in product(*arrays)])
     shape = tuple(map(len, arrays))

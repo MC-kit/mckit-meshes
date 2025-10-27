@@ -277,7 +277,7 @@ class FMesh:
 
         Returns
         -------
-            True, if this mesh is equal to other by geometry, otherwise False
+        True, if this mesh is equal to other by geometry, otherwise False
         """
         return self._geometry_spec == other._geometry_spec
 
@@ -291,7 +291,7 @@ class FMesh:
 
         Returns
         -------
-            True, if this mesh is equal to other by kind and geometry, otherwise False
+        True, if this mesh is equal to other by kind and geometry, otherwise False
         """
         return (
             self.kind == other.kind
@@ -309,7 +309,7 @@ class FMesh:
 
         Returns
         -------
-            True if this mesh is more precise than other one.
+        True if this mesh is more precise than other one.
         """
         assert self.is_equal_by_mesh(other), "Incompatible meshes for precision comparison."
         return self.total_precision < other.total_precision
@@ -437,11 +437,13 @@ class FMesh:
 
         Parameters
         ----------
-            filename: Filename to which the object is saved. If file is a
-                file-object, then the filename is unchanged. If file is a string,
-                a .npz extension will be appended to the file name if it does not
-                already have one. By default, the name of file is the tally name.
-            check_existing_file_strategy: what to do if an output file already exists
+        filename
+            Filename to which the object is saved. If file is a
+            file-object, then the filename is unchanged. If file is a string,
+            a .npz extension will be appended to the file name if it does not
+            already have one. By default, the name of file is the tally name.
+        check_existing_file_strategy
+            what to do if an output file already exists
         """
         if filename.suffix != ".npz":
             filename = filename.with_suffix(".npz")
@@ -482,7 +484,7 @@ class FMesh:
 
         Returns
         -------
-            The loaded FMesh object.
+        The loaded FMesh object.
         """
         if isinstance(_file, Path):
             _file = str(_file)
@@ -564,7 +566,7 @@ class FMesh:
 
         Returns
         -------
-            Full path to saved VTK file.
+        Full path to saved VTK file.
         """
         assert not self.is_cylinder, "Not implemented for cylinder geometry"
         # TODO dvp: implement for cylinder geometry (see iwwgvr or F4Enix projects for example).
@@ -724,7 +726,7 @@ class FMesh:
 
         Returns
         -------
-            A new FMesh with reduced bins.
+        A new FMesh with reduced bins.
         """
         trim_spec = list(
             rebin.trim_spec_composer(
@@ -1313,7 +1315,7 @@ def _find_words_after(f: TextIO, *keywords: str) -> list[str]:
 
     Returns
     -------
-        The list of words that follow keywords.
+    The list of words that follow keywords.
     """
     for line in f:
         words: list[str] = line.split()

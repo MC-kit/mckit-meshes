@@ -21,7 +21,7 @@ class ParticleKind(IntEnum):
 
         Returns
         -------
-            the first letter of the name
+        the first letter of the name
         """
         return self.name[0]
 
@@ -31,11 +31,11 @@ class ParticleKind(IntEnum):
 
         Returns
         -------
-            reaction specification for neutron or photon particle
+        reaction specification for neutron or photon particle
 
         Raises
         ------
-            ValueError: if there's no specification for the particle
+        ValueError: if there's no specification for the particle
         """
         if self is self.n:
             return "1 -4"

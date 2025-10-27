@@ -348,12 +348,14 @@ class WgtMesh:
 
         See format description at MCNP User Manual, Version 5 (p.489 or Appendix J, p. J-1)
 
-        Args:
-            f: Input file in WWINP format
+        Parameters
+        ----------
+        f
+            Input file in WWINP format
 
         Returns
         -------
-            WgtMesh: loaded mesh.
+        loaded mesh.
         """
         _if, _iv, number_of_particles, number_of_parameters = (
             int(s) for s in f.readline().split()[:4]
@@ -514,8 +516,7 @@ class WgtMesh:
 
         Returns
         -------
-        out:
-            Reciprocal of this weights
+        Reciprocal of this weights
         """
         return WgtMesh(self._geometry_spec, self.energies, list(map(reciprocal, self.weights)))
 
@@ -723,7 +724,7 @@ def make_geometry_spec(ibins, jbins, kbins, origin=None, axs=None, vec=None) -> 
 
     Returns
     -------
-        spec - new geometry specification
+    new geometry specification
     """
     ibins, jbins, kbins = (np.asarray(x, dtype=float) for x in (ibins, jbins, kbins))
     if axs is None:

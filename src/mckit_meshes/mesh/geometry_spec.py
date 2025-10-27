@@ -73,15 +73,18 @@ ZERO_ORIGIN: Final[Bins] = np.zeros((3,), dtype=float)
 def as_float_array(array: npt.ArrayLike) -> Bins:
     """Convert any sequence of numbers to numpy array of floats.
 
-    Note:
-        We rely on unified representation all the 'floats' with Python float.
+    Note
+    ----
+    We rely on unified representation all the 'floats' with Python float.
 
-    Args:
-        array: Anything that can be converted to numpy ndarray.
+    Parameters
+    ----------
+    array
+        Anything that can be converted to numpy ndarray.
 
     Returns
     -------
-        np.ndarray:  either original or conversion.
+    either original or conversion.
     """
     return np.asarray(array, dtype=float)
 
@@ -94,16 +97,16 @@ class AbstractGeometrySpecData:
 
     Notes
     -----
-        The meaning of `origin` is different for cartesian and cylindrical meshes
+    The meaning of `origin` is different for cartesian and cylindrical meshes
 
-        In cartesian mesh `origin` means most negative coordinates, all the coordinates
-        (ibins, jbins, kbins) are absolute
-        (or in coordinate system given with transformation).
+    In cartesian mesh `origin` means most negative coordinates, all the coordinates
+    (ibins, jbins, kbins) are absolute
+    (or in coordinate system given with transformation).
 
-        In cylindrical mesh `origin` is a center of a cylinder bottom,
-        the coordinates are relative to the coordinate system given
-        with `origin`, `axs` and `vec`.
-        Plus, if specified, in coordinate system given with transformation.
+    In cylindrical mesh `origin` is a center of a cylinder bottom,
+    the coordinates are relative to the coordinate system given
+    with `origin`, `axs` and `vec`.
+    Plus, if specified, in coordinate system given with transformation.
     """
 
     ibins: Bins
@@ -115,7 +118,7 @@ class AbstractGeometrySpecData:
 
         Raises
         ------
-            TypeError: if any of the fields is not a numpy array.
+        TypeError: if any of the fields is not a numpy array.
         """
         for b in self.bins:
             if not isinstance(b, np.ndarray):  # pragma: no cover
@@ -136,7 +139,7 @@ class AbstractGeometrySpecData:
 
         Returns
         -------
-            tuple of bins.
+        tuple of bins.
         """
         return self.ibins, self.jbins, self.kbins
 
@@ -158,16 +161,20 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
     def local_coordinates(self, points: Bins) -> Bins:
         """Convert points coordinates to local system.
 
-        Args:
-            points: ... with global coordinates
+        Parameters
+        ----------
+        points
+            ... with global coordinates
         """
 
     @abc.abstractmethod
     def get_mean_square_distance_weights(self, point: Bins) -> Bins:
         """Estimate weights as a voxel mean square distance from the point.
 
-        Args:
-            point: ... from where to compute distance
+        Parameters
+        ----------
+        point
+            ... from where to compute distance
         """
 
     @abc.abstractmethod
@@ -244,14 +251,18 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
     ) -> tuple[int | slice | npt.NDArray, int | slice | npt.NDArray, int | slice | npt.NDArray]:
         """Select indices for data corresponding to given spatial values.
 
-        Args:
-            i_values: indices along i (X or R) dimension
-            j_values: ... along j (Y or Z)
-            k_values: ... along k (Z or Theta)
+        Parameters
+        ----------
+        i_values
+            indices along i (X or R) dimension
+        j_values
+            ... along j (Y or Z)
+        k_values
+            ... along k (Z or Theta)
 
         Returns
         -------
-            see :func:`select_indexes()`
+        see :func:`select_indexes()`
         """
         return (
             select_indexes(self.ibins, i_values),
@@ -335,8 +346,10 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
 
     Attributes
     ----------
-        axs: cylinder axis
-        vec: vector to measure angle (theta) from
+    axs
+        cylinder axis
+    vec
+        vector to measure angle (theta) from
     """
 
     origin: Bins
@@ -505,8 +518,7 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
 
         Returns
         -------
-        gs:
-            new CylinderGeometrySpec with adjusted `axs` and `vec` attributes.
+        new CylinderGeometrySpec with adjusted `axs` and `vec` attributes.
         """
         # TODO dvp: fix for arbitrary axs and vec
         axs = self.origin + DEFAULT_AXIS * self.z[-1]
@@ -546,47 +558,50 @@ def select_indexes(
 
     Examples
     --------
-        >>> r = np.arange(5)
-        >>> r
-        array([0, 1, 2, 3, 4])
+    >>> r = np.arange(5)
+    >>> r
+    array([0, 1, 2, 3, 4])
 
-        For x is None return slice over all `a` indexes.
+    For x is None return slice over all `a` indexes.
 
-        >>> select_indexes(r, None)
-        slice(0, 5, None)
+    >>> select_indexes(r, None)
+    slice(0, 5, None)
 
-        For none specified x, if input array represents just one bin,
-        then return index 0 to squeeze results.
-        >>> select_indexes(np.array([10, 20]), None)
-        0
+    For none specified x, if input array represents just one bin,
+    then return index 0 to squeeze results.
+    >>> select_indexes(np.array([10, 20]), None)
+    0
 
-        For x = 1.5, we have 1 < 1.5 < 2, so the bin index is to be 1
-        >>> select_indexes(r, 1.5)
-        1
+    For x = 1.5, we have 1 < 1.5 < 2, so the bin index is to be 1
+    >>> select_indexes(r, 1.5)
+    1
 
-        For x = 0, it's the first bin, and index is to be 0
-        >>> select_indexes(r, 0)
-        0
+    For x = 0, it's the first bin, and index is to be 0
+    >>> select_indexes(r, 0)
+    0
 
-        For coordinates below r[0] return -1.
-        >>> select_indexes(r, -1)
-        -1
+    For coordinates below r[0] return -1.
+    >>> select_indexes(r, -1)
+    -1
 
-        For coordinates above  r[-1] return a.size-1.
-        >>> select_indexes(r, 5)
-        4
+    For coordinates above  r[-1] return a.size-1.
+    >>> select_indexes(r, 5)
+    4
 
-        And for array of coordinates
-        >>> select_indexes(r, np.array([1.5, 0, -1, 5]))
-        array([ 1,  0, -1,  4])
+    And for array of coordinates
+    >>> select_indexes(r, np.array([1.5, 0, -1, 5]))
+    array([ 1,  0, -1,  4])
 
-    Args:
-        a:  bin boundaries
-        x: one or more coordinates along `a`-boundaries
+    Parameters
+    ----------
+    a
+        bin boundaries
+    x
+        one or more coordinates along `a`-boundaries
 
     Returns
     -------
-        index or indices for each given coordinate
+    index or indices for each given coordinate
     """
     assert a.size > 1, "Parameter a doesn't represent binning"
 
@@ -643,13 +658,16 @@ def compute_intervals_and_coarse_bins(
     >>> coarse is arry
     True
 
-    Args:
-        arr: actual bins
-        tolerance: precision to distinguish intervals with
+    Parameters
+    ----------
+    arr
+        actual bins
+    tolerance
+        precision to distinguish intervals with
 
     Returns
     -------
-        Tuple: numbers of fine intervals between coarse bins, coarse binning
+    Tuple: numbers of fine intervals between coarse bins, coarse binning
     """
     if tolerance <= 0.0:
         return [1] * (len(arr) - 1), arr

@@ -27,17 +27,24 @@ def add(
 
     Applicable to meshes with the same geometry.
 
-    Note:
-        We assume that statistics is the same for all the meshes, preferably they
-        are produced in the same run (like neutron and photon heat).
+    Note
+    ----
+    We assume that statistics is the same for all the meshes, preferably they
+    are produced in the same run (like neutron and photon heat).
 
-    Args:
-        out: output file
-        comment: comment for a new fmesh npz file,
-                 if not provided, then the comment from the first mesh is used
-        number: ... to assign to resulting mesh
-        npz_files: files to process, optional
-        override: define behaviour when output file, exists, default - rise FileExistsError.
+    Parameters
+    ----------
+    out
+        output file
+    comment
+        comment for a new fmesh npz file,
+        if not provided, then the comment from the first mesh is used
+    number
+        ... to assign to resulting mesh
+    npz_files
+        files to process, optional
+    override
+        define behaviour when output file, exists, default - rise FileExistsError.
     """
     if not npz_files:
         __LOG.warning("No files specified to process")
