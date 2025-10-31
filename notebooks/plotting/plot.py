@@ -1,8 +1,10 @@
 from __future__ import annotations
 
-from typing import Any, Callable, Final
+from typing import Any, Final
 
 import warnings
+
+from collections.abc import Callable
 
 import matplotlib
 import numpy as np
@@ -11,9 +13,8 @@ from matplotlib import collections, colors, patches
 from matplotlib import pyplot as plt
 from matplotlib.path import Path as PlotPath
 
-import mckit_meshes.read_plotm_file as rpf
-
-from mckit_meshes.plotting.BriefTicksAroundOneTicker import BriefTicksAroundOneTicker
+from triniti_ne.mcnp import read_plotm_file as rpf
+from triniti_ne.ploting import BriefTicksAroundOneTicker
 
 SetupAxesStrategyType = Callable[[plt.Axes], None]
 

@@ -1,16 +1,20 @@
 from __future__ import annotations
 
-from typing import Generator, Iterator, TextIO
+from typing import TYPE_CHECKING, TextIO
 
+import datetime
 import datetime as dt
 import re
 
 from dataclasses import dataclass
-from pathlib import Path
 
 import numpy as np
 
-from numpy import ndarray as array
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+    from pathlib import Path
+
+    from numpy import ndarray as array
 
 X, Y, Z = np.eye(3, dtype=float)
 XY = np.vstack((X, Y))
@@ -33,7 +37,7 @@ class Page:
     probid: dt.datetime = None
     rescaled: bool = None
 
-    def __post_init__(self) -> None:
+    def __post_init__(self):
         assert self.lines.shape[1:] == (
             2,
             2,
@@ -68,15 +72,15 @@ class Page:
     def get_2d_origin(self):
         if self.basis is XY:
             return self.origin[:2]
-        elif self.basis is XZ:
+        if self.basis is XZ:
             return self.origin[0:3:2]
-        elif self.basis is YZ:
+        if self.basis is YZ:
             return self.origin[1:]
-        else:
-            raise RuntimeError("Only XY, XZ and YZ bases are supported for now")
+        msg = "Only XY, XZ and YZ bases are supported for now"
+        raise RuntimeError(msg)
 
 
-def read(input_stream: TextIO) -> Generator[Page, None, None]:
+def read(input_stream: TextIO) -> Iterator[Page]:
     for page in load_pages(input_stream):
         yield transform_page(page)
 
@@ -107,7 +111,7 @@ def extract_description_lines(lines: list[str]) -> list[str]:
     return description_lines
 
 
-def parse_description_lines(description_lines: list[str]):
+def parse_description_lines(description_lines):
     date = extract_date(description_lines[0])
     title = select_part_in_parenthesis(description_lines[1])
     line_no = 2
@@ -137,13 +141,13 @@ def transform_page(
 
 def collect_lines(page: list[str]) -> array:
     lines = []
-    for line in page[:-9]:
+    for _line in page[:-9]:
+        line = _line
         line = line.split()
-        if len(line) == 6:
-            if line[2] == "moveto" and line[5] == "lineto":
-                from_x, from_y = map(int, line[0:2])
-                to_x, to_y = map(int, line[3:5])
-                lines.append([[from_x, from_y], [to_x, to_y]])
+        if len(line) == 6 and line[2] == "moveto" and line[5] == "lineto":
+            from_x, from_y = map(int, line[0:2])
+            to_x, to_y = map(int, line[3:5])
+            lines.append([[from_x, from_y], [to_x, to_y]])
     return np.array(lines, dtype=np.int32)
 
 
@@ -153,8 +157,7 @@ DOUBLE_PARENTHESIS_MATCHER = re.compile(r".*\(.*\\\((?P<numbers>.*)\\\)\).*")
 def select_numbers(line: str) -> array:
     res = DOUBLE_PARENTHESIS_MATCHER.match(line)
     numbers = res.group("numbers")
-    numbers = np.fromstring(numbers, dtype=float, sep=",")
-    return numbers
+    return np.fromstring(numbers, dtype=float, sep=",")
 
 
 def select_part_in_parenthesis(line: str) -> str:
@@ -162,7 +165,7 @@ def select_part_in_parenthesis(line: str) -> str:
 
 
 def parse_us_date(string: str) -> dt.datetime:
-    return dt.datetime.strptime(string, "%m/%d/%y %H:%M:%S")
+    return dt.datetime.strptime(string, "%m/%d/%y %H:%M:%S").replace(tzinfo=datetime.timezone.utc)
 
 
 def extract_date(line: str) -> dt.datetime:
