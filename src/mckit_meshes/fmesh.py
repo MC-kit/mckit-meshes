@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 
     from mckit_meshes.wgtmesh import GeometrySpec
 
-__LOG = logging.getLogger(__name__)
+__LOG = logging.getLogger("mckit_meshes.fmesh")
 
 
 def _expand_args(args):
@@ -1076,9 +1076,11 @@ def _iterate_bins(stream, _n):
     """
     for _ in range(_n):
         __line = next(stream).strip()
-        _line = __line[-24:]  # 11 chars - value, space, 11 chars error
-        _value, _error = (float(x) for x in _line.split())
-        if _value < 0.0:
+        _line = __line[-24:]  # space of minus, 11 chars - value, space or minus, 11 chars error
+        _value = float(_line[:-12])
+        _error = float(_line[-12:])
+        if _value < 0.0 or _error < 0.0:
+            __LOG.warning("Negative values in mesh, line: %s", __line)
             _value = _error = 0.0
         yield _value
         yield _error
@@ -1382,6 +1384,14 @@ def m_2_npz(
             t.jbins[-1],
             t.kbins[0],
             t.kbins[-1],
+        )
+        __LOG.info("Total bins: %g", t.data.size)
+        __LOG.info("Max.value: %g", t.data.max())
+        non_zero_count = np.count_nonzero(t.data)
+        __LOG.info(
+            "Nonzero values count: %g, ratio: %.2g%%",
+            non_zero_count,
+            100.0 * non_zero_count / t.data.size,
         )
         t.save_2_npz(prefix / (str(t.name) + suffix), check_existing_file_strategy)
         total += 1

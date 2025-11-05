@@ -169,14 +169,16 @@ def revise_files(ext: str, *files: Path) -> tuple[Path, ...]:
 
     Returns
     -------
-        Specified, if available, otherwise found.
+    Specified, if available, otherwise found.
     """
-    if not files:
-        with start_action(action_type="look for meshtally files") as logger:
-            cwd = Path.cwd()
-            files = tuple(cwd.glob(f"*.{ext}"))
-            if not files:
-                cwd = cwd.absolute()
-                logger.log(message_type="WARNING", reason=f"No .{ext}-files found", directory=cwd)
-                __LOG.warning("nothing to do: no .%s-files in %s", ext, cwd)
-    return files
+    if files:
+        return files
+
+    with start_action(action_type="look for meshtally files") as logger:
+        cwd = Path.cwd()
+        files = tuple(cwd.glob(f"*.{ext}"))
+        if not files:
+            cwd = cwd.absolute()
+            logger.log(message_type="WARNING", reason=f"No .{ext}-files found", directory=cwd)
+            __LOG.warning("nothing to do: no .%s-files in %s", ext, cwd)
+        return files

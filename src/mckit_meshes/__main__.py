@@ -60,6 +60,7 @@ def mesh2npz(*mesh_tallies: types.ResolvedExistingFile, common: Common | None = 
     """Convert mesh files to npz files.
 
     By default output folder (prefix) is "npz".
+    If there are many input meshtally files, than meshtally stem is added to prefix.
 
     Parameters
     ----------

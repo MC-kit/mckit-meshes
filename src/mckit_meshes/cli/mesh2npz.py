@@ -4,12 +4,17 @@
 from __future__ import annotations
 
 
+from logging import getLogger, FileHandler
 from pathlib import Path
+
 
 from eliot import start_action
 
 from mckit_meshes import fmesh
 from mckit_meshes.utils import get_override_strategy, revise_files
+
+
+__LOG = getLogger("mckit_meshes.fmesh")
 
 
 def mesh2npz(
@@ -18,11 +23,13 @@ def mesh2npz(
     override: bool = False,
 ) -> None:
     """Convert MCNP meshtal file to a number of npz files, one for each mesh tally."""
+    __LOG.addHandler(FileHandler("meshes.log", encoding="utf8"))
     mesh_tallies = revise_files("m", *mesh_tallies)
     single_input = len(mesh_tallies) == 1
     prefix = Path(prefix)
     for m in mesh_tallies:
-        with start_action(action_type="processing .m-file", meshtally_file=m):
+        with start_action(action_type="processing .m-file"):
+            __LOG.info("meshtally_file: %s", m)
             p = prefix if single_input else prefix / m.stem
             p.mkdir(parents=True, exist_ok=True)
             with m.open() as stream:
