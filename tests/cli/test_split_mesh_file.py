@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import sys
 
-from importlib.resources import files
 from pathlib import Path
 from time import sleep
 
@@ -14,8 +13,8 @@ from mckit_meshes import m_file_iterator
 
 
 @pytest.fixture
-def source():
-    res = files("tests").joinpath("data/2.m")
+def source(data: Path) -> Path:
+    res = data / "2.m"
     assert res.exists()
     return res
 
