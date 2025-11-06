@@ -6,7 +6,7 @@ import numpy as np
 
 from numpy.testing import assert_almost_equal, assert_array_almost_equal
 
-import notebooks.plotting.read_plotm_file as rpf
+import mckit_meshes.plot.read_plotm_file as rpf
 import pytest
 
 from mckit_meshes.utils.testing import a
@@ -20,7 +20,7 @@ def test_file(data):
 
 
 @pytest.mark.parametrize(
-    ["path", "pages"],
+    "path,pages",
     [
         ("ng-2.3.5.ps", 1),
         ("plotm-1.ps", 2),
