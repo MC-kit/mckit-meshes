@@ -56,9 +56,8 @@ class Page:
             self.lines = res
 
     def convert_to_meters(self) -> Page:
-        lines = self.lines * 0.01
         return Page(
-            lines=lines,
+            lines=self.lines * 0.01,
             basis=self.basis,
             origin=self.origin * 0.01,
             extent=self.extent * 0.01,
@@ -75,7 +74,9 @@ class Page:
             return self.origin[0:3:2]
         if self.basis is YZ:
             return self.origin[1:]
-        msg = "Only XY, XZ and YZ bases are supported for now"
+        if np.all(self.origin == 0.0):
+            return np.array([0.0, 0.0])
+        msg = "Only XY, XZ and YZ bases or all-zero origin are supported for now"
         raise RuntimeError(msg)
 
 
