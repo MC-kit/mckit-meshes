@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, TextIO
 
-import datetime
 import datetime as dt
 import re
 
@@ -165,7 +164,7 @@ def select_part_in_parenthesis(line: str) -> str:
 
 
 def parse_us_date(string: str) -> dt.datetime:
-    return dt.datetime.strptime(string, "%m/%d/%y %H:%M:%S").replace(tzinfo=datetime.timezone.utc)
+    return dt.datetime.strptime(string, "%m/%d/%y %H:%M:%S").replace(tzinfo=dt.UTC)
 
 
 def extract_date(line: str) -> dt.datetime:

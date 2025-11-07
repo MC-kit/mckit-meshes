@@ -2,27 +2,72 @@ from __future__ import annotations
 
 from typing import Any, Final
 
-import warnings
-
 from collections.abc import Callable
 
-import matplotlib
 import numpy as np
 
-from matplotlib import collections, colors, patches
+from matplotlib import collections, colors, patches, colormaps as cm
 from matplotlib import pyplot as plt
 from matplotlib.path import Path as PlotPath
 
-from triniti_ne.mcnp import read_plotm_file as rpf
-from triniti_ne.ploting import BriefTicksAroundOneTicker
+import mckit_meshes.plot.read_plotm_file as rpf
+from mckit_meshes.plot.brief_ticks_around_one_ticker import BriefTicksAroundOneTicker
 
 SetupAxesStrategyType = Callable[[plt.Axes], None]
+
+
+def default_setup_access_strategy(
+    basis: np.ndarray,
+    extent: np.ndarray,
+    origin: np.ndarray,
+) -> SetupAxesStrategyType:
+    """Create axis configuring method based on plotm page parameters.
+
+    Parameters
+    ----------
+    basis
+        plotm page basis
+    extent
+        ... extent
+    origin
+        ... origin
+
+    Returns
+    -------
+    Callable[[plt.Axes], None]
+        method to setup axis scale and labels
+
+
+    """
+
+    def _call(axes: plt.Axes) -> None:
+        axes.set_aspect("equal")
+        if basis is rpf.XZ:
+            axes.set_xlabel("X, cm")
+            axes.set_ylabel("Z, cm")
+            axes.set_xlim(origin[0] - extent[0], origin[0] + extent[0])
+            axes.set_ylim(origin[2] - extent[1], origin[2] + extent[1])
+        elif basis is rpf.YZ:
+            axes.set_xlabel("Y, cm")
+            axes.set_ylabel("Z, cm")
+            axes.set_xlim(origin[1] - extent[0], origin[1] + extent[0])
+            axes.set_ylim(origin[2] - extent[1], origin[2] + extent[1])
+        elif basis is rpf.XY:
+            axes.set_xlabel("X, cm")
+            axes.set_ylabel("Y, cm")
+            axes.set_xlim(origin[0] - extent[0], origin[0] + extent[0])
+            axes.set_ylim(origin[1] - extent[1], origin[1] + extent[1])
+        else:
+            raise ValueError(f"Basis {basis} is not supported")
+
+    return _call
 
 
 def plot_ps_page(
     axes: plt.Axes,
     page: rpf.Page,
-    setup_axes_strategy: bool | SetupAxesStrategyType | None = None,
+    *,
+    setup_axes_strategy: SetupAxesStrategyType | None = None,
 ) -> None:
     coll = collections.LineCollection(
         page.lines,
@@ -34,55 +79,7 @@ def plot_ps_page(
     coll.set_rasterized(True)
     axes.add_collection(coll)
     if setup_axes_strategy:
-        if isinstance(setup_axes_strategy, Callable):
-            setup_axes_strategy(axes)
-        else:
-            warnings.warn("Usage of bool instead of setup_axes_strategy is deprecated")
-            basis, origin, extent = page.basis, page.origin, page.extent
-            default_setup_access_strategy(axes, basis, extent, origin)
-
-
-def default_setup_access_strategy(
-    axes: plt.Axes,
-    basis: np.ndarray,
-    extent: np.ndarray,
-    origin: np.ndarray,
-) -> None:
-    """Use this for setup axes strategy, when there was True parameter in the old code.
-
-        plot_ps_page(
-            axes,
-            page,
-            lambda ax:
-        )
-    Parameters
-    ----------
-    axes
-    basis
-    extent
-    origin
-
-    Returns:
-    -------
-    """
-    axes.set_aspect("equal")
-    if basis is rpf.XZ:
-        axes.set_xlabel("X, cm")
-        axes.set_ylabel("Z, cm")
-        axes.set_xlim(origin[0] - extent[0], origin[0] + extent[0])
-        axes.set_ylim(origin[2] - extent[1], origin[2] + extent[1])
-    elif basis is rpf.YZ:
-        axes.set_xlabel("Y, cm")
-        axes.set_ylabel("Z, cm")
-        axes.set_xlim(origin[1] - extent[0], origin[1] + extent[0])
-        axes.set_ylim(origin[2] - extent[1], origin[2] + extent[1])
-    elif basis is rpf.XY:
-        axes.set_xlabel("X, cm")
-        axes.set_ylabel("Y, cm")
-        axes.set_xlim(origin[0] - extent[0], origin[0] + extent[0])
-        axes.set_ylim(origin[1] - extent[1], origin[1] + extent[1])
-    else:
-        raise ValueError(f"Basis {basis} is not supported")
+        setup_axes_strategy(axes)
 
 
 _INDICES: Final = [
@@ -141,7 +138,7 @@ def plot_2d_distribution(
     vmin = data.min()  # max(min_max_log_ratio * vmax, 10.0**min_log_power)
     # min_log_power = int(np.log10(vmin)) + 1
     norm = colors.Normalize(vmin=vmin, vmax=vmax)
-    cmap = matplotlib.cm.get_cmap("hot")
+    cmap = cm.get_cmap("hot")
     pcm = ax.pcolormesh(
         x,
         y,
@@ -175,7 +172,7 @@ def plot_2d_distribution(
     # zc = contours.collections[index_10_in_13]
     # plt.setp(zc, linewidth=3)
     levels = contours.levels
-    print(f"levels:{levels}")
+    # print(f"levels:{levels}")
     contour_labeled_levels = levels
     for ii in contour_labeled_levels:
         assert ii in levels, f"{ii} is not levels"

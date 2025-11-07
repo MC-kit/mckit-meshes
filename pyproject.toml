@@ -38,6 +38,12 @@ Changelog = "https://github.com/MC-kit/mckit-meshes/releases"
 [project.scripts]
 mckit-meshes = "mckit_meshes.__main__:main"
 
+[project.optional-dependencies]
+plot = [
+    "jupyterlab>=4.4.10",
+    "matplotlib>=3.10.7",
+]
+
 [dependency-groups]
 dev = [
     { include-group = "style" },

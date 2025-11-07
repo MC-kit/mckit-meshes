@@ -74,6 +74,7 @@ ignore = [
 "benchmarks/*" = ["S101"]
 "tests/*" = ["ANN", "D100", "D101", "D102", "D103", "D104", "PLR2004", "S101"]
 "tools/*" = ["T201", "INP001", "S603", "S607"]
+"src/mckit_meshes/plot/*" = ["ARG", "E", "ERA"]
 
 [lint.mccabe]
 # Unlike Flake8, default to a complexity level of 10.
