@@ -67,10 +67,3 @@ for i, (stem, p) in enumerate(pages.items()):
     plt.show()
 
 # %%
-from jupytext.config import global_jupytext_configuration_directories,find_jupytext_configuration_file
-list(global_jupytext_configuration_directories())
-
-# %%
-find_jupytext_configuration_file(".")
-
-# %%
