@@ -124,16 +124,11 @@ data.shape
 x, y = neutron_flux_mesh.ibins, neutron_flux_mesh.jbins
 X, Y = np.meshgrid(x, y)
 
-# %%
-fig, ax = plt.subplots()
-ax.pcolormesh(x, y, data, shading="flat")
-plt.show()
-
 
 # %%
 def plot_2d_distribution(x, y, data, fig, ax,
     *,
-    color_bar_title=r"$\frac{n} {cm^{2} \cdot s}$",
+    color_bar_title=r"$\frac{1} {cm^{2} \cdot s}$",
     max_log_power=None,
     min_max_log_ratio=1e-4,
     transform=None,
@@ -144,7 +139,7 @@ def plot_2d_distribution(x, y, data, fig, ax,
     vmin = data.min()
     min_log_power = int(np.log10(vmin)) + 1
     vmin = max(min_max_log_ratio * vmax, 10.0**min_log_power)
-    norm = colors.Normalize(vmin=vmin, vmax=vmax)
+    norm = colors.LogNorm(vmin=vmin, vmax=vmax)
     cmap = cm.get_cmap("hot")
     pcm = ax.pcolormesh(
         x,
@@ -174,7 +169,25 @@ axes.set_xlim(x[0], x[-1])
 axes.set_ylim(y[0], y[-1])
 plot_ps_page(axes, p)
 plot_2d_distribution(x, y, data, fig, axes)
-# plt.savefig((NPZ_DIR / "total-neutron-flux-pz=50").with_suffix(".png"), dpi=1200)
+plt.savefig((NPZ_DIR / "total-neutron-flux-pz=50").with_suffix(".png"), dpi=1200)
+plt.show()
+
+# %%
+photon_flux_mesh = FMesh.load_npz(NPZ_DIR / "1304.npz")
+
+# %%
+photon_data = photon_flux_mesh.totals[:,:, eq_mid_height_idx - 1]
+
+# %%
+p = pages["pz=50"]
+fig = plt.figure(dpi=150)
+axes = fig.add_subplot(111)
+axes.set_aspect("equal")
+axes.set_xlim(x[0], x[-1])
+axes.set_ylim(y[0], y[-1])
+plot_ps_page(axes, p)
+plot_2d_distribution(x, y, photon_data, fig, axes)
+plt.savefig((NPZ_DIR / "total-photon-flux-pz=50").with_suffix(".png"), dpi=1200)
 plt.show()
 
 # %%
