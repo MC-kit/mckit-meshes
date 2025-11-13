@@ -41,6 +41,7 @@ mckit-meshes = "mckit_meshes.__main__:main"
 [project.optional-dependencies]
 plot = [
     "jupyterlab>=4.4.10",
+    "jupytext>=1.18.1",
     "matplotlib>=3.10.7",
 ]
 
