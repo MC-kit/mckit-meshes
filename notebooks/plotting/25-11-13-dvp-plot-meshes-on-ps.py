@@ -186,7 +186,7 @@ def plot_2d_distribution(x, y, data, fig, ax,
         levels = contours.levels
         contour_labeled_levels = levels
         fmt = ticker.LogFormatterMathtext()
-        fmt.set_axis(ax)
+        fmt.create_dummy_axis()
         ax.clabel(
             contours,
             contour_labeled_levels,
