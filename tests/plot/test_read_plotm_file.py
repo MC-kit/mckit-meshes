@@ -8,13 +8,22 @@ import numpy as np
 
 from numpy.testing import assert_almost_equal, assert_array_almost_equal
 
-import mckit_meshes.plot.read_plotm_file as rpf
+
 import pytest
+
+from  mckit_meshes.plot import MATPLOTLIB_AVAILABLE
 
 from mckit_meshes.utils.testing import a
 
 if TYPE_CHECKING:
     from matplotlib.path import Path
+
+if MATPLOTLIB_AVAILABLE:
+    import mckit_meshes.plot.read_plotm_file as rpf
+else:
+    pytest.mark.skip(
+        reason="optional package matplotlib is not installed, run `uv pip install -e \".[plot]\"'"
+    )
 
 
 @pytest.fixture(scope="module")
