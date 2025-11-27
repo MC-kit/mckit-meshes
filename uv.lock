@@ -1779,6 +1779,7 @@ source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "typing-extensions" },
 ]
+sdist = { url = "https://files.pythonhosted.org/packages/71/70/23b021c950c2addd24ec408e9ab05d59b035b39d97cdc1130e1bce647bb6/pydantic_core-2.41.5.tar.gz", hash = "sha256:08daa51ea16ad373ffd5e7606252cc32f07bc72b28284b6bc9c6df804816476e", size = 460952, upload-time = "2025-11-04T13:43:49.098Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e8/72/74a989dd9f2084b3d9530b0915fdda64ac48831c30dbf7c72a41a5232db8/pydantic_core-2.41.5-cp311-cp311-macosx_10_12_x86_64.whl", hash = "sha256:a3a52f6156e73e7ccb0f8cced536adccb7042be67cb45f9562e12b319c119da6", size = 2105873, upload-time = "2025-11-04T13:39:31.373Z" },
     { url = "https://files.pythonhosted.org/packages/12/44/37e403fd9455708b3b942949e1d7febc02167662bf1a7da5b78ee1ea2842/pydantic_core-2.41.5-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:7f3bf998340c6d4b0c9a2f02d6a400e51f123b59565d74dc60d252ce888c260b", size = 1899826, upload-time = "2025-11-04T13:39:32.897Z" },
@@ -1904,14 +1905,14 @@ wheels = [
 
 [[package]]
 name = "pylint-per-file-ignores"
-version = "3.1.0"
+version = "3.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pylint" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/6a/dc/4588e9affbb7bbac3f14d11a7617db8e3f31669f319da03271f7f0332b09/pylint_per_file_ignores-3.1.0.tar.gz", hash = "sha256:a11db907f74cfbd8956365c36b0d453daa20448e2aaada1033c52ba6f621c7d7", size = 6616, upload-time = "2025-10-13T08:21:51.403Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/64/b2/cf916c3c8127282f60927a3fd382ef8e477e6ef090b3d1f1fedd62bff916/pylint_per_file_ignores-3.2.0.tar.gz", hash = "sha256:5eb30b2b64c49ca616b8940346b8b5b4973eeaa15700840c8b81a4b8ba565a02", size = 63854, upload-time = "2025-11-25T14:13:14.577Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9d/16/c1054ad8f355749eef83a2b176fc545cc27b08b5dc2bf21420174325676e/pylint_per_file_ignores-3.1.0-py3-none-any.whl", hash = "sha256:57cde138807a28a98f33edf85e687d88df3660d37c8d5d5d46de1f1e6fcc665d", size = 5666, upload-time = "2025-10-13T08:21:50.42Z" },
+    { url = "https://files.pythonhosted.org/packages/cb/6a/09cbda0032e1040eea8c7daec3994e6d32b3edc26a81d226fd643537886b/pylint_per_file_ignores-3.2.0-py3-none-any.whl", hash = "sha256:8b995b7486f6652f942cf5721e24c29b72735fa911b6d22b65b2f87bad323590", size = 5576, upload-time = "2025-11-25T14:13:13.208Z" },
 ]
 
 [[package]]
