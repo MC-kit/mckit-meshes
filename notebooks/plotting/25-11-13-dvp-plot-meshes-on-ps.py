@@ -15,11 +15,17 @@
 
 # %% [markdown]
 # # Визуализация мешей на фоне TRT postscript сечений
+#
+# Используем меши с максимальным nps на 2025-11-26, nps ~ 1.4e10
 
 # %%
+import os
 import sys
 
-sys.version, sys.prefix
+print(sys.version, "at", sys.prefix)
+
+# %%
+from enum import IntEnum
 
 # %%
 from pathlib import Path
@@ -42,6 +48,19 @@ from matplotlib import ticker
 # plt.style.available
 
 # %%
+DEBUG_PLOT = True
+
+class PlotTarget(IntEnum):
+    paper = 0,
+    presentation = 1,
+    jupyter = 2
+    
+
+PLOT_TARGET: PlotTarget = PlotTarget.paper
+
+
+
+# %%
 # mpl.use("Qt5agg")
 font = {
     "weight": "normal",
@@ -49,16 +68,47 @@ font = {
 }
 plt.rc("font", **font)
 plt.rcParams["mathtext.default"] = "regular"
-INCH = 2.54
-FIG_WIDTH = int(
-    10.6 / INCH
-)  # Optimal for full page witdh graphs, for 1 column graph in 2 column publications use 8cm.
-FIG_HEIGHT = FIG_WIDTH
+PUBLICATION_DPI = 1200 #300  # default resolution for publications images
+A4_WIDTH = 21  # cm
+A4_HEIGHT = 29.7
+A4_WIDTH_WITHOUT_MARGIN = A4_WIDTH - 4
+INCH = 2.54  # cm
+FIG_WIDTH = 16 / INCH
+FIG_HEIGHT = FIG_WIDTH / 1.33
+# FIG_WIDTH = int(
+#     10.6 / INCH
+# )  # Optimal for full page witdh graphs, for 1 column graph in 2 column publications use 8cm.
+# FIG_HEIGHT = FIG_WIDTH
 plt.rcParams["figure.figsize"] = (FIG_WIDTH, FIG_HEIGHT)
-plt.style.use("petroff10")
+# plt.style.use("petroff10")
 # plt.rc("grid", color="gray", linestyle="solid")
 # plt.rc("xtick", direction="out", color="gray")
 # plt.rc("ytick", direction="out", color="gray")
+plt.style.use(
+    [
+        "fivethirtyeight"
+    ]
+)
+background = '#f0f0f0' # - default for fivethirtyeight style
+# this will plot gray background in Jupyter
+# on saving img to png file the background is transparent
+
+my_params = {
+    'figure.dpi': int(os.getenv("JUPYTER_DPI", 88)),  # 88 - optimal for ViewSonic 32" screen, WYSWYG for 16 cm figure width
+    "mathtext.default": "regular",
+    "figure.figsize": (FIG_WIDTH, FIG_HEIGHT),
+    'axes.edgecolor': background,
+    'axes.facecolor': background,
+    "figure.facecolor": background,
+    "savefig.dpi": PUBLICATION_DPI,
+    "savefig.transparent": True,
+    "savefig.bbox": "tight",
+}
+plt.rcParams.update(my_params)
+
+markers = "sov^*d"
+linestyles = ["-", "--", ":", "-."]
+
 
 # %%
 from mckit_meshes.plot import load_plotm_file, Page, plot_ps_page, BriefTicksAroundOneTicker, plot_2d_distribution
@@ -88,7 +138,7 @@ pages = { p.stem: load_plotm_file(p)[0] for p in ps_files }
 len(pages)
 
 # %%
-# !ls {PROTOTYPE_DIR}/results/heat-3/npz/heat-3-5.7e09
+# !ls {PROTOTYPE_DIR}/results/heat-3/npz/heat-3-1.4e10
 
 # %% [markdown]
 # ## Survey tallies
@@ -107,7 +157,7 @@ len(pages)
 # ## neutron total flux
 
 # %%
-NPZ_DIR = PROTOTYPE_DIR / "results/heat-3/npz/heat-3-5.7e09"
+NPZ_DIR = PROTOTYPE_DIR / "results/heat-3/npz/heat-3-1.4e10"
 assert NPZ_DIR.is_dir()
 
 # %%
@@ -135,8 +185,7 @@ def mids(x):
 
 
 # %%
-set(cm.keys())
-
+# set(cm.keys())
 
 # %%
 def plot_2d_distribution(x, y, data, fig, ax,
@@ -167,7 +216,7 @@ def plot_2d_distribution(x, y, data, fig, ax,
         # transform=transform,
     )
     color_bar = fig.colorbar(pcm, ax=ax, shrink=0.8)
-    color_bar.ax.set_title(color_bar_title, fontsize=12)
+    color_bar.ax.set_title(color_bar_title, pad=20, fontsize=12)
     tick_formatter = BriefTicksAroundOneTicker()
     color_bar.ax.yaxis.set_major_formatter(tick_formatter)
     color_bar.outline.set_edgecolor("white")
@@ -201,14 +250,14 @@ def plot_2d_distribution(x, y, data, fig, ax,
 
 # %%
 p = pages["pz=50"]
-fig = plt.figure(dpi=150)
+fig = plt.figure()
 axes = fig.add_subplot(111)
 axes.set_aspect("equal")
 axes.set_xlim(x[0], x[-1])
 axes.set_ylim(y[0], y[-1])
 plot_ps_page(axes, p)
 plot_2d_distribution(x, y, data, fig, axes, levels = np.pow(10, np.array([8,9,10,11])))
-plt.savefig((NPZ_DIR / "total-neutron-flux-pz=50").with_suffix(".png"), dpi=1200)
+plt.savefig((NPZ_DIR / "total-neutron-flux-pz=50").with_suffix(".png"), dpi=PUBLICATION_DPI, bbox_inches="tight", transparent=True, metadata={"Title": "Total neutron flux at PZ=50"})
 plt.show()
 
 # %%
@@ -219,14 +268,41 @@ photon_data = photon_flux_mesh.totals[:,:, eq_mid_height_idx - 1]
 
 # %%
 p = pages["pz=50"]
-fig = plt.figure(dpi=150)
+fig = plt.figure()
 axes = fig.add_subplot(111)
 axes.set_aspect("equal")
 axes.set_xlim(x[0], x[-1])
 axes.set_ylim(y[0], y[-1])
 plot_ps_page(axes, p)
 plot_2d_distribution(x, y, photon_data, fig, axes, levels = np.pow(10, np.array([7, 8, 9, 10])))
-plt.savefig((NPZ_DIR / "total-photon-flux-pz=50").with_suffix(".png"), dpi=1200, bbox_inches="tight", transparent=True, metadata={"Title": "Total photon flux at PZ=50"})
+plt.savefig((NPZ_DIR / "total-photon-flux-pz=50").with_suffix(".png"), dpi=PUBLICATION_DPI, bbox_inches="tight", transparent=True, metadata={"Title": "Total photon flux at PZ=50"})
 plt.show()
+
+# %%
+neutron_dose_mesh = FMesh.load_npz(NPZ_DIR / "1284.npz")
+
+# %%
+neutron_dose_mesh.data.shape
+
+# %%
+neutron_dose_data = neutron_dose_mesh.data[0,:, :, eq_mid_height_idx - 1]
+
+# %%
+p = pages["pz=50"]
+fig = plt.figure()
+axes = fig.add_subplot(111)
+axes.set_aspect("equal")
+axes.set_xlim(x[0], x[-1])
+axes.set_ylim(y[0], y[-1])
+plot_ps_page(axes, p)
+plot_2d_distribution(x, y, neutron_dose_data/1e6, fig, axes,
+    color_bar_title=r"$\frac{Зв} {ч}$",
+    levels = np.pow(10, np.array([2, 3, 4]))
+)
+plt.savefig((NPZ_DIR / "neutron-dose-pz=50").with_suffix(".png"), dpi=PUBLICATION_DPI, bbox_inches="tight", transparent=True, metadata={"Title": "Neutron dose rate at PZ=50"})
+plt.show()
+
+# %% [markdown]
+# Несусветные дозы, на ITER (Mode-0 Radiation Maps) дают макс 0.1 Зв/ч вокруг установки, а тут порядка 100-1000. нужно разобраться с нормировками.
 
 # %%
