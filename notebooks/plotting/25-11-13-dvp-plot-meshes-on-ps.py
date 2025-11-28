@@ -175,6 +175,9 @@ data = neutron_flux_mesh.totals[:,:, eq_mid_height_idx - 1]
 data.shape
 
 # %%
+print(f"{data.max():.3g}")
+
+# %%
 x, y = neutron_flux_mesh.ibins, neutron_flux_mesh.jbins
 X, Y = np.meshgrid(x, y)
 
@@ -249,13 +252,13 @@ def plot_2d_distribution(x, y, data, fig, ax,
 
 
 # %%
-p = pages["pz=50"]
+# p = pages["pz=50"]
 fig = plt.figure()
 axes = fig.add_subplot(111)
 axes.set_aspect("equal")
 axes.set_xlim(x[0], x[-1])
 axes.set_ylim(y[0], y[-1])
-plot_ps_page(axes, p)
+# plot_ps_page(axes, p)
 plot_2d_distribution(x, y, data, fig, axes, levels = np.pow(10, np.array([8,9,10,11])))
 plt.savefig((NPZ_DIR / "total-neutron-flux-pz=50").with_suffix(".png"), dpi=PUBLICATION_DPI, bbox_inches="tight", transparent=True, metadata={"Title": "Total neutron flux at PZ=50"})
 plt.show()
@@ -267,13 +270,13 @@ photon_flux_mesh = FMesh.load_npz(NPZ_DIR / "1304.npz")
 photon_data = photon_flux_mesh.totals[:,:, eq_mid_height_idx - 1]
 
 # %%
-p = pages["pz=50"]
+# p = pages["pz=50"]
 fig = plt.figure()
 axes = fig.add_subplot(111)
 axes.set_aspect("equal")
 axes.set_xlim(x[0], x[-1])
 axes.set_ylim(y[0], y[-1])
-plot_ps_page(axes, p)
+# plot_ps_page(axes, p)
 plot_2d_distribution(x, y, photon_data, fig, axes, levels = np.pow(10, np.array([7, 8, 9, 10])))
 plt.savefig((NPZ_DIR / "total-photon-flux-pz=50").with_suffix(".png"), dpi=PUBLICATION_DPI, bbox_inches="tight", transparent=True, metadata={"Title": "Total photon flux at PZ=50"})
 plt.show()
@@ -288,13 +291,13 @@ neutron_dose_mesh.data.shape
 neutron_dose_data = neutron_dose_mesh.data[0,:, :, eq_mid_height_idx - 1]
 
 # %%
-p = pages["pz=50"]
+# p = pages["pz=50"]
 fig = plt.figure()
 axes = fig.add_subplot(111)
 axes.set_aspect("equal")
 axes.set_xlim(x[0], x[-1])
 axes.set_ylim(y[0], y[-1])
-plot_ps_page(axes, p)
+# plot_ps_page(axes, p)
 plot_2d_distribution(x, y, neutron_dose_data/1e6, fig, axes,
     color_bar_title=r"$\frac{Зв} {ч}$",
     levels = np.pow(10, np.array([2, 3, 4]))
@@ -304,5 +307,44 @@ plt.show()
 
 # %% [markdown]
 # Несусветные дозы, на ITER (Mode-0 Radiation Maps) дают макс 0.1 Зв/ч вокруг установки, а тут порядка 100-1000. нужно разобраться с нормировками.
+# Нормировка в fmesh1284 (heat-3.i), похоже, правильная: $pSv/n/cm^{2}\ -> \ \mu Sv/h \ => \ 10^{17} n/cm^{2}s \cdot 3600 s/h \cdot 10^{-6} uSv/pSv = 3.6e14 \mu Sv/h$
+
+# %% [markdown]
+# Проверим для сравнения дозу полученную в neutron-4.0 
+#
+# На домашнем компе ps=50 недосупно, так что без него.
+
+# %%
+old_dose_path = TRT_ROOT / "results/4.0/heat+neutron-4.0/dose.npz"
+assert old_dose_path.is_file()
+
+# %%
+old_dose_mesh = FMesh.load_npz(old_dose_path)
+
+# %%
+old_dose_mesh.data.shape
+
+# %%
+old_dose_data = old_dose_mesh.data[0,:, :, eq_mid_height_idx - 1]
+
+# %%
+# p = pages["pz=50"]
+fig = plt.figure()
+axes = fig.add_subplot(111)
+axes.set_aspect("equal")
+axes.set_xlim(x[0], x[-1])
+axes.set_ylim(y[0], y[-1])
+# plot_ps_page(axes, p)
+plot_2d_distribution(x, y, old_dose_data/1e6, fig, axes,
+    color_bar_title=r"$\frac{Зв} {ч}$",
+    levels = np.pow(10, np.array([2, 3, 4]))
+)
+plt.savefig((NPZ_DIR / "old-dose-pz=50").with_suffix(".png"), dpi=PUBLICATION_DPI, bbox_inches="tight", transparent=True, metadata={"Title": "Old dose rate at PZ=50"})
+plt.show()
+
+# %% [markdown]
+# Те же значения. И если прикинуть по функции конверсии (из Recomendations IDM#29PJCT),
+# to для потока $10^8н/cm^{2}c$ где-то близко значение.
+# Потоки слишком большие, похоже. А с этим непонятно, что делать. Похоже, что это из-за того, что установка компактная и прозрачная.
 
 # %%
