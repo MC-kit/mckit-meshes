@@ -16,7 +16,7 @@ from mckit_meshes.plot.brief_ticks_around_one_ticker import BriefTicksAroundOneT
 SetupAxesStrategyType = Callable[[plt.Axes], None]
 
 
-def default_setup_access_strategy(
+def default_setup_axes_strategy(
     basis: np.ndarray,
     extent: np.ndarray,
     origin: np.ndarray,

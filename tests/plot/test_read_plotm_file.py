@@ -11,7 +11,7 @@ from numpy.testing import assert_almost_equal, assert_array_almost_equal
 
 import pytest
 
-from  mckit_meshes.plot import MATPLOTLIB_AVAILABLE
+from mckit_meshes.plot import MATPLOTLIB_AVAILABLE
 
 from mckit_meshes.utils.testing import a
 
@@ -22,8 +22,13 @@ if MATPLOTLIB_AVAILABLE:
     import mckit_meshes.plot.read_plotm_file as rpf
 else:
     pytest.mark.skip(
-        reason="optional package matplotlib is not installed, run `uv pip install -e \".[plot]\"'"
+        reason='optional package matplotlib is not installed, run `uv pip install -e ".[plot]"\''
     )
+
+
+def test_is_x_plane():
+    assert rpf.is_x_plane(rpf.YZ)
+    assert not rpf.is_x_plane(rpf.XY)
 
 
 @pytest.fixture(scope="module")
@@ -44,14 +49,14 @@ def test_reads_two_pages_from_contour_file(data: Path, path: str, pages: int) ->
     path = data / path
     with path.open() as fid:
         total_pages = 0
-        for _ in rpf.read(fid):
+        for _ in rpf.scan_pages(fid):
             total_pages += 1
         assert total_pages == pages
 
 
 def test_first_page_from_contour_file_has_3_lines(test_file: Path) -> None:
     with test_file.open() as fid:
-        page = next(rpf.read(fid))
+        page = next(rpf.scan_pages(fid))
         lines = page.lines
         assert lines.size == 12
         assert len(lines) == 3
@@ -64,7 +69,7 @@ def test_first_page_from_contour_file_has_3_lines(test_file: Path) -> None:
 
 def test_first_page_from_contour_file_meta_info_is_complete(test_file: Path) -> None:
     with test_file.open() as fid:
-        iterator = enumerate(rpf.read(fid))
+        iterator = enumerate(rpf.scan_pages(fid))
         i, page = next(iterator)
         assert i == 0
         expected_date = dt.datetime(2018, 8, 24, 19, 4, 46, tzinfo=dt.UTC)
@@ -86,27 +91,63 @@ def test_first_page_from_contour_file_meta_info_is_complete(test_file: Path) -> 
             next(iterator)
 
 
+_DEFAULT_PROBID = dt.datetime(2025, 1, 1, tzinfo=dt.UTC)
+_DEFAULT_DATE = _DEFAULT_PROBID + dt.timedelta(minutes=5)
+
+
 @pytest.mark.parametrize(
-    "msg,lines,expected,x,y,scale",
+    "msg,lines,basis,origin,expected,scale",
     [
         (
             "# bottom -> origin ",
             a(1875, 188, 1875, 1125).reshape(1, 2, 2),
+            rpf.XZ,
+            a(0, 0, 0),
             a(0, -100, 0, 0).reshape(1, 2, 2),
-            0.0,
-            0.0,
+            a(100, 100),
+        ),
+        (
+            "# PX=50 ",
+            a(1875, 188, 1875, 1125).reshape(1, 2, 2),
+            rpf.YZ,
+            a(50.0, 0.0, 0.0),  # <-- x = 50
+            a(0, -100, 0, 0).reshape(1, 2, 2),
+            a(100, 100),
+        ),
+        (
+            "# PY=50 ",
+            a(1875, 188, 1875, 1125).reshape(1, 2, 2),
+            rpf.XZ,
+            a(0.0, 50.0, 0.0),  # <-- y = 50
+            a(0, -100, 0, 0).reshape(1, 2, 2),
+            a(100, 100),
+        ),
+        (
+            "# PZ=50 ",
+            a(1875, 188, 1875, 1125).reshape(1, 2, 2),
+            rpf.XY,
+            a(0.0, 0.0, 50.0),  # <-- z = 50
+            a(0, -100, 0, 0).reshape(1, 2, 2),
             a(100, 100),
         ),
     ],
 )
-def test_convert_to_real_coordinates(
-    msg: str, lines: np.ndarray, expected: np.ndarray, x: float, y: float, scale: np.ndarray
+def test_convert_to_real_coordinates_with_arbitrary_basis_and_origin(
+    msg: str,
+    lines: np.ndarray,
+    basis: np.ndarray,
+    origin: np.ndarray,
+    expected: np.ndarray,
+    scale: np.ndarray,
 ) -> None:
     page = rpf.Page(
         lines=lines,
-        basis=rpf.XZ,
-        origin=a(x, 0.0, y),
+        basis=basis,
+        origin=origin,
         extent=scale,
+        date=_DEFAULT_DATE,
+        title="xxx",
+        probid=_DEFAULT_PROBID,
     )
     actual = page.lines
     norm = np.abs(actual).max()

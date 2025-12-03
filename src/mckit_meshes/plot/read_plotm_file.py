@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TextIO
+from enum import IntEnum
+from typing import TYPE_CHECKING, Final, TextIO
 
 import datetime as dt
 import re
@@ -13,28 +14,118 @@ if TYPE_CHECKING:
     from collections.abc import Iterator
     from pathlib import Path
 
-    from numpy import ndarray as array
+    from numpy.typing import NDArray
 
 X, Y, Z = np.eye(3, dtype=float)
 XY = np.vstack((X, Y))
 XZ = np.vstack((X, Z))
 YZ = np.vstack((Y, Z))
-BASES = [XY, XZ, YZ]
+YX = np.vstack((Y, X))
+ZX = np.vstack((Z, X))
+ZY = np.vstack((Z, Y))
+BASES = [XY, XZ, YZ, YX, ZX, ZY]
 
 FACTOR = 2.0 * 0.0005333332827654369
 PLOTM_ORIGIN = np.array([1875.0, 1125.0], float)
 
 
+class CoordinateNumber(IntEnum):
+    """Coordinate to select from basis."""
+
+    x = 0
+    y = 1
+    z = 2
+
+
+_PLANE_RTOL: Final[float] = 1e-9
+_PLANE_ATOL: Final[float] = 1e-9
+
+
+def is_coordinate_plane(
+    basis: NDArray,
+    coordinate: CoordinateNumber,
+    rtol: float = _PLANE_RTOL,
+    atol: float = _PLANE_ATOL,
+):
+    """Check, if the basis defines a plane perpendicular to one of the axes.
+
+    Parameters
+    ----------
+    basis
+        two vectors defining plotm projection plane.
+    coordinate
+        x, y or z axis
+    rtol
+        relative tolerance for :meth:`np.allclose`
+    atol
+        absolute tolerance for :meth:`np.allclose`
+
+    Returns
+    -------
+    True - if all values for coordinate in basis are close to zero
+
+    Examples
+    --------
+    >>> is_coordinate_plane(XY, CoordinateNumber.z)
+    True
+    """
+    return np.allclose(basis[:, coordinate], 0.0, rtol=rtol, atol=atol)
+
+
+def is_x_plane(basis: NDArray, *, rtol: float = _PLANE_RTOL, atol: float = _PLANE_ATOL):
+    """Check, if the basis defines a plane perpendicular to X-axes.
+
+    Parameters
+    ----------
+    basis
+        two vectors defining plotm projection plane.
+    rtol
+        relative tolerance for :meth:`np.close`
+    atol
+        absolute tolerance for :meth:`np.allclose`
+
+    Returns
+    -------
+    True - if all values for x-coordinate in basis are close to zero
+
+    Examples
+    --------
+    >>> is_coordinate_plane(YZ, CoordinateNumber.x)
+    True
+    """
+    return is_coordinate_plane(basis, CoordinateNumber.x, rtol=rtol, atol=atol)
+
+
+def is_y_plane(basis: NDArray, rtol: float = _PLANE_RTOL, atol: float = _PLANE_ATOL):
+    """Check, if the basis defines a plane perpendicular to Y-axes."""
+    return is_coordinate_plane(basis, CoordinateNumber.y, rtol=rtol, atol=atol)
+
+
+def is_z_plane(basis: NDArray, rtol: float = _PLANE_RTOL, atol: float = _PLANE_ATOL):
+    """Check, if the basis defines a plane perpendicular to Z-axes."""
+    return is_coordinate_plane(basis, CoordinateNumber.z, rtol=rtol, atol=atol)
+
+
 @dataclass
 class Page:
-    lines: array
-    basis: array
-    origin: array
-    extent: array
-    date: dt.datetime = None
-    title: str = None
-    probid: dt.datetime = None
-    rescaled: bool = None
+    """Page of a plotm file."""
+
+    lines: NDArray
+    """Lines to plot"""
+    basis: NDArray
+    """Basis of plotm projection plane."""
+    origin: NDArray
+    """Projection plane center coordinates."""
+    extent: NDArray
+    """Extension of projection plane along basis axes."""
+    date: dt.datetime
+    """Time of the page computation."""
+    title: str
+    """Model title."""
+    probid: dt.datetime
+    """Time of the computation start."""
+    rescaled: bool = False
+    """Skip rescaling on initialization."""
 
     def __post_init__(self):
         assert self.lines.shape[1:] == (
@@ -56,6 +147,7 @@ class Page:
             self.lines = res
 
     def convert_to_meters(self) -> Page:
+        """Convert measurement units from centimeters to meters."""
         return Page(
             lines=self.lines * 0.01,
             basis=self.basis,
@@ -67,12 +159,35 @@ class Page:
             rescaled=True,
         )
 
+    def is_x_plane(self):
+        """Check, if the Page is in a plane perpendicular to X-axes."""
+        return is_x_plane(self.basis)
+
+    def is_y_plane(self):
+        """Check, if the Page is in a plane perpendicular to Y-axes."""
+        return is_y_plane(self.basis)
+
+    def is_z_plane(self):
+        """Check, if the Page is in a plane perpendicular to Z-axes."""
+        return is_z_plane(self.basis)
+
     def get_2d_origin(self):
-        if self.basis is XY:
+        """Compute the coordinates of origin in projection plane.
+
+        Returns
+        -------
+            coordinates to be base for line points
+
+        Raises
+        ------
+        RuntimeError
+            when cannot compute origin adequately
+        """
+        if self.is_z_plane():
             return self.origin[:2]
-        if self.basis is XZ:
+        if self.is_y_plane():
             return self.origin[0:3:2]
-        if self.basis is YZ:
+        if self.is_x_plane():
             return self.origin[1:]
         if np.all(self.origin == 0.0):
             return np.array([0.0, 0.0])
@@ -80,17 +195,50 @@ class Page:
         raise RuntimeError(msg)
 
 
-def read(input_stream: TextIO) -> Iterator[Page]:
-    for page in load_pages(input_stream):
+def scan_pages(input_stream: TextIO) -> Iterator[Page]:
+    """Iterate over pages defined in input stream.
+
+    Parameters
+    ----------
+    input_stream
+        read content of the plotm file
+
+    Yields
+    ------
+        Pages from plotm file
+    """
+    for page in split_input(input_stream):
         yield transform_page(page)
 
 
-def load(ps_file: Path) -> list[Page]:
+def load_all_pages(ps_file: Path) -> list[Page]:
+    """Load all the pages from a plotm file as a list of Pages.
+
+    Parameters
+    ----------
+    ps_file
+        path to plotm file
+
+    Returns
+    -------
+        list of Pages
+    """
     with ps_file.open() as fid:
-        return list(read(fid))
+        return list(scan_pages(fid))
 
 
-def load_pages(input_stream: TextIO) -> Iterator[list[str]]:
+def split_input(input_stream: TextIO) -> Iterator[list[str]]:
+    """Split input from plotm file to text sections.
+
+    Parameters
+    ----------
+    input_stream
+        Stream with content of a plotm file.
+
+    Yields
+    ------
+        list[str]: portion of input for one page
+    """
     page = []
     for line in input_stream:
         if not line.startswith("%"):
@@ -101,7 +249,7 @@ def load_pages(input_stream: TextIO) -> Iterator[list[str]]:
                 page.append(line)
 
 
-def extract_description_lines(lines: list[str]) -> list[str]:
+def _extract_description_lines(lines: list[str]) -> list[str]:
     description_lines = []
     for line in lines:
         if description_lines or line.startswith("     30   2205"):
@@ -111,22 +259,22 @@ def extract_description_lines(lines: list[str]) -> list[str]:
     return description_lines
 
 
-def parse_description_lines(description_lines):
-    date = extract_date(description_lines[0])
-    title = select_part_in_parenthesis(description_lines[1])
+def _parse_description_lines(description_lines):
+    date = _extract_date(description_lines[0])
+    title = _select_part_in_parenthesis(description_lines[1])
     line_no = 2
     while "probid" not in description_lines[line_no]:
-        add_to_title = select_part_in_parenthesis(description_lines[line_no])
+        add_to_title = _select_part_in_parenthesis(description_lines[line_no])
         title += " " + add_to_title
         line_no += 1
-    probid = parse_us_date(select_part_in_parenthesis(description_lines[line_no])[10:])
+    probid = _parse_us_date(_select_part_in_parenthesis(description_lines[line_no])[10:])
     line_no += 2
-    first_axis, second_axis = map(select_numbers, description_lines[line_no : line_no + 2])
-    basis = internalize_basis(np.vstack((first_axis, second_axis)))
+    first_axis, second_axis = map(_select_numbers, description_lines[line_no : line_no + 2])
+    basis = _internalize_basis(np.vstack((first_axis, second_axis)))
     line_no += 3
-    origin = select_numbers(description_lines[line_no])
+    origin = _select_numbers(description_lines[line_no])
     line_no += 1
-    extent = select_numbers(description_lines[line_no])
+    extent = _select_numbers(description_lines[line_no])
     return date, title, probid, basis, origin, extent
 
 
@@ -134,14 +282,25 @@ def transform_page(
     page: list[str],
 ) -> Page:
     lines = collect_lines(page)
-    description_lines = extract_description_lines(page[-20:])
-    date, title, probid, basis, origin, extent = parse_description_lines(description_lines)
+    description_lines = _extract_description_lines(page[-20:])
+    date, title, probid, basis, origin, extent = _parse_description_lines(description_lines)
     return Page(lines, basis, origin, extent, date, title, probid)
 
 
-def collect_lines(page: list[str]) -> array:
+def collect_lines(section: list[str]) -> NDArray:
+    """Collect lines to plot from a text section.
+
+    Parameters
+    ----------
+    section
+        text lines for a one page from a plotm file
+
+    Returns
+    -------
+        array with (from, to) coordinates
+    """
     lines = []
-    for _line in page[:-9]:
+    for _line in section[:-9]:
         line = _line
         line = line.split()
         if len(line) == 6 and line[2] == "moveto" and line[5] == "lineto":
@@ -151,28 +310,28 @@ def collect_lines(page: list[str]) -> array:
     return np.array(lines, dtype=np.int32)
 
 
-DOUBLE_PARENTHESIS_MATCHER = re.compile(r".*\(.*\\\((?P<numbers>.*)\\\)\).*")
+_DOUBLE_PARENTHESIS_MATCHER = re.compile(r".*\(.*\\\((?P<numbers>.*)\\\)\).*")
 
 
-def select_numbers(line: str) -> array:
-    res = DOUBLE_PARENTHESIS_MATCHER.match(line)
+def _select_numbers(line: str) -> NDArray:
+    res = _DOUBLE_PARENTHESIS_MATCHER.match(line)
     numbers = res.group("numbers")
     return np.fromstring(numbers, dtype=float, sep=",")
 
 
-def select_part_in_parenthesis(line: str) -> str:
+def _select_part_in_parenthesis(line: str) -> str:
     return line.split("(")[1].split(")")[0].strip()
 
 
-def parse_us_date(string: str) -> dt.datetime:
+def _parse_us_date(string: str) -> dt.datetime:
     return dt.datetime.strptime(string, "%m/%d/%y %H:%M:%S").replace(tzinfo=dt.UTC)
 
 
-def extract_date(line: str) -> dt.datetime:
-    return parse_us_date(select_part_in_parenthesis(line))
+def _extract_date(line: str) -> dt.datetime:
+    return _parse_us_date(_select_part_in_parenthesis(line))
 
 
-def internalize_basis(basis: array) -> array:
+def _internalize_basis(basis: NDArray) -> NDArray:
     for b in BASES:
         if np.all(b == basis):
             return b

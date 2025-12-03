@@ -14,11 +14,18 @@ except ImportError:
 
 if MATPLOTLIB_AVAILABLE:
     from .brief_ticks_around_one_ticker import BriefTicksAroundOneTicker
+    from .plot import (
+        default_setup_axes_strategy,
+        plot_ps_page,
+        plot_2d_distribution,
+        rectangle_plotter,
+    )
     from .read_plotm_file import (
         Page,
-        load as load_plotm_file,
-        load_pages,
-        read as read_plotm_file,
+        load_all_pages as load_plotm_file,
+        split_input,
+        scan_pages as read_pages,
+        transform_page,
         X,
         XY,
         XZ,
@@ -26,11 +33,6 @@ if MATPLOTLIB_AVAILABLE:
         YZ,
         Z,
         BASES,
-    )
-    from .plot import (
-        plot_ps_page,
-        plot_2d_distribution,
-        rectangle_plotter,
     )
 
     __all__ = [
@@ -43,11 +45,13 @@ if MATPLOTLIB_AVAILABLE:
         "X",
         "Y",
         "Z",
-        "load_pages",
+        "default_setup_axes_strategy",
         "load_plotm_file",
         "mpl",
         "plot_2d_distribution",
         "plot_ps_page",
-        "read_plotm_file",
+        "read_pages",
         "rectangle_plotter",
+        "split_input",
+        "transform_page",
     ]
