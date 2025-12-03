@@ -130,6 +130,19 @@ _DEFAULT_DATE = _DEFAULT_PROBID + dt.timedelta(minutes=5)
             a(0, -100, 0, 0).reshape(1, 2, 2),
             a(100, 100),
         ),
+        (
+            "# rotated around Z-axis ",
+            a(1875, 188, 1875, 1125).reshape(1, 2, 2),
+            np.array(
+                [
+                    [-0.980785, -0.19509,   0.],
+                    [-0.19509,   0.980785,  0.],
+                ]
+            ),
+            a(0.0, 0.0, 50.0),  # <-- z = 50
+            a(0, -100, 0, 0).reshape(1, 2, 2),
+            a(100, 100),
+        ),
     ],
 )
 def test_convert_to_real_coordinates_with_arbitrary_basis_and_origin(
