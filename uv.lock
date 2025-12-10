@@ -1411,6 +1411,7 @@ source = { editable = "." }
 dependencies = [
     { name = "cyclopts" },
     { name = "eliot" },
+    { name = "matplotlib" },
     { name = "numpy" },
     { name = "pyevtk" },
     { name = "toolz" },
@@ -1504,6 +1505,7 @@ requires-dist = [
     { name = "eliot", specifier = ">=1.17.5" },
     { name = "jupyterlab", marker = "extra == 'plot'", specifier = ">=4.4.10" },
     { name = "jupytext", marker = "extra == 'plot'", specifier = ">=1.18.1" },
+    { name = "matplotlib", specifier = ">=3.10.7" },
     { name = "matplotlib", marker = "extra == 'plot'", specifier = ">=3.10.7" },
     { name = "numpy", specifier = ">=2.3.1" },
     { name = "pyevtk", specifier = ">=1.4.1" },
@@ -1526,7 +1528,7 @@ dev = [
     { name = "pylint" },
     { name = "pylint-per-file-ignores" },
     { name = "pyright", specifier = ">=1.1.406" },
-    { name = "pytest", specifier = ">=8.4.1" },
+    { name = "pytest", specifier = ">=9" },
     { name = "pytest-cov", specifier = ">=7.0.0" },
     { name = "pytest-durations", specifier = ">=1.5.2" },
     { name = "pytest-emoji", specifier = ">=0.2.0" },
@@ -1567,7 +1569,7 @@ style = [
 ]
 test = [
     { name = "coverage", extras = ["toml"], specifier = ">=7.9.2" },
-    { name = "pytest", specifier = ">=8.4.1" },
+    { name = "pytest", specifier = ">=9" },
     { name = "pytest-cov", specifier = ">=7.0.0" },
     { name = "pytest-durations", specifier = ">=1.5.2" },
     { name = "pytest-emoji", specifier = ">=0.2.0" },

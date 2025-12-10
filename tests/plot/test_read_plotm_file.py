@@ -21,8 +21,9 @@ if TYPE_CHECKING:
 if MATPLOTLIB_AVAILABLE:
     import mckit_meshes.plot.read_plotm_file as rpf
 else:
-    pytest.mark.skip(
-        reason='optional package matplotlib is not installed, run `uv pip install -e ".[plot]"\''
+    pytest.skip(
+        reason='optional package matplotlib is not installed, run `uv pip install -e ".[plot]"\'',
+        allow_module_level=True,
     )
 
 
@@ -95,6 +96,10 @@ _DEFAULT_PROBID = dt.datetime(2025, 1, 1, tzinfo=dt.UTC)
 _DEFAULT_DATE = _DEFAULT_PROBID + dt.timedelta(minutes=5)
 
 
+@pytest.mark.skipif(
+    not MATPLOTLIB_AVAILABLE,
+    reason='optional package matplotlib is not installed, run `uv pip install -e ".[plot]"\''
+)
 @pytest.mark.parametrize(
     "msg,lines,basis,origin,expected,scale",
     [
