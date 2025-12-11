@@ -32,7 +32,7 @@ def load_merge_descriptor(merge_descriptor_file: Path) -> Mapping[str, int]:
 def create_working_merge_spec(
     merge_descriptor: Mapping[str, int], wgt_mesh_files: Iterable[Path]
 ) -> Iterable[MergeSpec]:
-    def make_merge_spec(wgt_mesh_file: Path) -> WgtMesh.MergeSpec:
+    def make_merge_spec(wgt_mesh_file: Path) -> MergeSpec:
         with wgt_mesh_file.open("rt", encoding="cp1251") as io:
             wgt_mesh: WgtMesh = WgtMesh.read(io)
             __LOG.info(f"Loaded weight mesh from {wgt_mesh_file}")

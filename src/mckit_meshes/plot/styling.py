@@ -22,11 +22,11 @@ FIG_HEIGHT = FIG_WIDTH / 1.33
 
 plt.style.use(
     [
-        "seaborn",
-        "seaborn-white",
-        "seaborn-ticks",
-        "seaborn-colorblind",
-        "seaborn-paper",
+        "seaborn-v0_8",
+        "seaborn-v0_8-white",
+        "seaborn-v0_8-ticks",
+        "seaborn-v0_8-colorblind",
+        "seaborn-v0_8-paper",
     ]
 )
 
@@ -40,48 +40,47 @@ plt.rcParams["figure.figsize"] = (FIG_WIDTH, FIG_HEIGHT)
 # plt.rc('ytick', direction='out', color='gray')
 
 
-# Tableu colors, see: http://tableaufriction.blogspot.com/2012/11/finally-you-can-use-tableau-data-colors.html
-# These are the "Tableau 20" colors as RGB.
-tableau20 = [
-    (31, 119, 180),
-    (174, 199, 232),
-    (255, 127, 14),
-    (255, 187, 120),
-    (44, 160, 44),
-    (152, 223, 138),
-    (214, 39, 40),
-    (255, 152, 150),
-    (148, 103, 189),
-    (197, 176, 213),
-    (140, 86, 75),
-    (196, 156, 148),
-    (227, 119, 194),
-    (247, 182, 210),
-    (127, 127, 127),
-    (199, 199, 199),
-    (188, 189, 34),
-    (219, 219, 141),
-    (23, 190, 207),
-    (158, 218, 229),
-]
-
+# See https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def
 # See xkcd colors on https://xkcd.com/color/rgb/
 
+# These are the "Tableau 20" colors as RGB.
 
 # Scale the RGB values to the [0, 1] range, which is the format matplotlib accepts.
-for i in range(len(tableau20)):
-    r, g, b = tableau20[i]
-    tableau20[i] = (r / 255.0, g / 255.0, b / 255.0)
+tableau20 = [
+    (r / 255.0, g / 255.0, b / 255.0)
+    for r, g, b in [
+        (31, 119, 180),
+        (174, 199, 232),
+        (255, 127, 14),
+        (255, 187, 120),
+        (44, 160, 44),
+        (152, 223, 138),
+        (214, 39, 40),
+        (255, 152, 150),
+        (148, 103, 189),
+        (197, 176, 213),
+        (140, 86, 75),
+        (196, 156, 148),
+        (227, 119, 194),
+        (247, 182, 210),
+        (127, 127, 127),
+        (199, 199, 199),
+        (188, 189, 34),
+        (219, 219, 141),
+        (23, 190, 207),
+        (158, 218, 229),
+    ]
+]
 
 
 @contextmanager
 def ne_plotting_style(*additional_styles, after_reset=False):
     styles = [
-        "seaborn",
-        "seaborn-white",
-        "seaborn-ticks",
-        "seaborn-colorblind",
-        "seaborn-paper",
+        "seaborn-v0_8",
+        "seaborn-v0_8-white",
+        "seaborn-v0_8-ticks",
+        "seaborn-v0_8-colorblind",
+        "seaborn-v0_8-paper",
         *additional_styles,
     ]
     with plt.style.context(styles, after_reset=after_reset):

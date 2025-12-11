@@ -398,9 +398,9 @@ class FMesh:
     def get_totals(
         self,
         *,
-        x: ArrayLike = None,
-        y: ArrayLike = None,
-        z: ArrayLike = None,
+        x: ArrayLike | None = None,
+        y: ArrayLike | None = None,
+        z: ArrayLike | None = None,
     ) -> tuple[np.ndarray, np.ndarray] | None:
         """Get total values for specified grid points.
 
@@ -421,6 +421,9 @@ class FMesh:
         """
         if self._totals is None:
             return None
+        if self.totals_err is None:
+            msg = "No totals, but totals_err is specified"
+            raise ValueError(msg)
         found_x, found_y, found_z = self.select_indexes(x=x, y=y, z=z)
         totals, rel_error = (
             self._totals[found_x, found_y, found_z],

@@ -239,7 +239,7 @@ def split_input(input_stream: TextIO) -> Iterator[list[str]]:
     ------
         list[str]: portion of input for one page
     """
-    page = []
+    page: list[str] = []
     for line in input_stream:
         if not line.startswith("%"):
             if line.endswith("showpage\n"):
@@ -250,7 +250,7 @@ def split_input(input_stream: TextIO) -> Iterator[list[str]]:
 
 
 def _extract_description_lines(lines: list[str]) -> list[str]:
-    description_lines = []
+    description_lines: list[str] = []
     for line in lines:
         if description_lines or line.startswith("     30   2205"):
             description_lines.append(line)
@@ -299,7 +299,7 @@ def collect_lines(section: list[str]) -> NDArray:
     -------
         array with (from, to) coordinates
     """
-    lines = []
+    lines: list[str] = []
     for _line in section[:-9]:
         line = _line
         line = line.split()
