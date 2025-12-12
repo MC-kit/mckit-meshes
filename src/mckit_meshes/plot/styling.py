@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from contextlib import contextmanager
-
 import matplotlib.pyplot as plt
 
 # You typically want your plot to be ~1.33x wider than tall.
@@ -19,25 +17,10 @@ A4_WIDTH_WITHOUT_MARGIN = A4_WIDTH - 4
 INCH = 2.54  # cm
 FIG_WIDTH = A4_WIDTH_WITHOUT_MARGIN / INCH
 FIG_HEIGHT = FIG_WIDTH / 1.33
+FIG_SIZE = (FIG_WIDTH, FIG_HEIGHT)
 
-plt.style.use(
-    [
-        "seaborn-v0_8",
-        "seaborn-v0_8-white",
-        "seaborn-v0_8-ticks",
-        "seaborn-v0_8-colorblind",
-        "seaborn-v0_8-paper",
-    ]
-)
-
-
+plt.rcParams["figure.figsize"] = FIG_SIZE
 plt.rcParams["mathtext.default"] = "regular"
-plt.rcParams["figure.figsize"] = (FIG_WIDTH, FIG_HEIGHT)
-# plt.rcParams['ytick.right'] = True
-# plt.rcParams['xtick.top'] = True
-# plt.rc('grid', color='gray', linestyle='solid')
-# plt.rc('xtick', direction='out', color='gray')
-# plt.rc('ytick', direction='out', color='gray')
 
 
 # See https://matplotlib.org/stable/users/explain/colors/colors.html#colors-def
@@ -71,17 +54,4 @@ tableau20 = [
         (158, 218, 229),
     ]
 ]
-
-
-@contextmanager
-def ne_plotting_style(*additional_styles, after_reset=False):
-    styles = [
-        "seaborn-v0_8",
-        "seaborn-v0_8-white",
-        "seaborn-v0_8-ticks",
-        "seaborn-v0_8-colorblind",
-        "seaborn-v0_8-paper",
-        *additional_styles,
-    ]
-    with plt.style.context(styles, after_reset=after_reset):
-        yield
+"""Twenty distinguishable colors in Tableu style"""

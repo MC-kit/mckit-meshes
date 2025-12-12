@@ -299,10 +299,9 @@ def collect_lines(section: list[str]) -> NDArray:
     -------
         array with (from, to) coordinates
     """
-    lines: list[str] = []
+    lines: list[list[list[int]]] = []
     for _line in section[:-9]:
-        line = _line
-        line = line.split()
+        line = _line.split()
         if len(line) == 6 and line[2] == "moveto" and line[5] == "lineto":
             from_x, from_y = map(int, line[0:2])
             to_x, to_y = map(int, line[3:5])
@@ -315,6 +314,9 @@ _DOUBLE_PARENTHESIS_MATCHER = re.compile(r".*\(.*\\\((?P<numbers>.*)\\\)\).*")
 
 def _select_numbers(line: str) -> NDArray:
     res = _DOUBLE_PARENTHESIS_MATCHER.match(line)
+    if res is None:
+        msg = f"Cannot find number in line {line}"
+        raise ValueError(msg)
     numbers = res.group("numbers")
     return np.fromstring(numbers, dtype=float, sep=",")
 
