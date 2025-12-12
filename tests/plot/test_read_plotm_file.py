@@ -98,7 +98,7 @@ _DEFAULT_DATE = _DEFAULT_PROBID + dt.timedelta(minutes=5)
 
 @pytest.mark.skipif(
     not MATPLOTLIB_AVAILABLE,
-    reason='optional package matplotlib is not installed, run `uv pip install -e ".[plot]"\''
+    reason='optional package matplotlib is not installed, run `uv pip install -e ".[plot]"\'',
 )
 @pytest.mark.parametrize(
     "msg,lines,basis,origin,expected,scale",
