@@ -75,7 +75,6 @@ pyright = [
 ]
 test = [
     "pytest>=9",
-    "pytest-cov>=7.0.0",
     "pytest-mock>=3.14.0",
     "pytest-durations>=1.5.2",
     "pytest-emoji>=0.2.0",
@@ -95,7 +94,6 @@ docs = [
 ]
 analyze = ["jupyterlab>=4.2.5", "jupytext>=1.16.4"]
 
-
 [tool.xdoctest]
 quiet = true
 options = ""
@@ -107,6 +105,7 @@ source = ["src", ".nox/*/site-packages"]
 branch = true
 source = ["src"]
 omit = ["*_tab.py", "**/__init__.py", "tools/*.py"]
+parallel = true
 
 [tool.coverage.report]
 show_missing = true
@@ -202,4 +201,4 @@ sections = ["project.dependencies"]
 
 [tool.rstcheck]
 report_level = "ERROR"
-ignore_messages = '(Unknown directive type "(todo|todolist|automodule)"\.$)'
+ignore_messages = "(Unknown directive type \"(todo.*|automodule)\".$)"
