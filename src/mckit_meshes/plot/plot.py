@@ -8,6 +8,7 @@ import numpy as np
 
 from matplotlib import collections, colors, patches, colormaps as cm
 from matplotlib import pyplot as plt
+from matplotlib import ticker
 from matplotlib.path import Path as PlotPath
 
 import mckit_meshes.plot.read_plotm_file as rpf
@@ -120,23 +121,30 @@ def rectangle_plotter(axs: plt.Axes) -> Callable[[Any], None]:
     return _call
 
 
+def mids(x):
+    return 0.5 * (x[1:] + x[:-1])
+
+
 def plot_2d_distribution(
-    x: np.ndarray,
-    y: np.ndarray,
-    data: np.ndarray,
-    fig: plt.Figure,
-    ax: plt.Axes,
+    x,
+    y,
+    data,
+    fig,
+    ax,
     *,
-    color_bar_title=r"$\frac{n} {cm^{2} \cdot s}$",
+    color_bar_title=r"$\frac{1} {cm^{2} \cdot s}$",
     max_log_power=None,
     min_max_log_ratio=1e-4,
     transform=None,
+    levels=None,
 ):
     if max_log_power is None:
         max_log_power = int(np.log10(data.max()))
-    vmax = data.max()
+    vmax = 10.0**max_log_power
     vmin = data.min()
-    norm = colors.Normalize(vmin=vmin, vmax=vmax)
+    min_log_power = int(np.log10(vmin)) + 1
+    vmin = max(min_max_log_ratio * vmax, 10.0**min_log_power)
+    norm = colors.LogNorm(vmin=vmin, vmax=vmax)
     cmap = cm.get_cmap("hot")
     pcm = ax.pcolormesh(
         x,
@@ -144,34 +152,38 @@ def plot_2d_distribution(
         data,
         norm=norm,
         cmap=cmap,
-        antialiased=True,
-        shading="gouraud",
-        transform=transform,
+        # antialiased=True,
+        # shading="gouraud",
+        shading="flat",
+        # transform=transform,
     )
     color_bar = fig.colorbar(pcm, ax=ax, shrink=0.8)
-    color_bar.ax.set_title(color_bar_title, fontsize=8)
+    color_bar.ax.set_title(color_bar_title, pad=20, fontsize=12)
     tick_formatter = BriefTicksAroundOneTicker()
     color_bar.ax.yaxis.set_major_formatter(tick_formatter)
     color_bar.outline.set_edgecolor("white")
-    contours = ax.contour(
-        x,
-        y,
-        data,
-        norm=norm,
-        levels=1,  # levels,
-        colors="white",
-        linewidths=1.0,
-        alpha=0.5,
-    )
-    levels = contours.levels
-    contour_labeled_levels = levels
-    for ii in contour_labeled_levels:
-        assert ii in levels, f"{ii} is not levels"
-    ax.clabel(
-        contours,
-        contour_labeled_levels,
-        inline=1.0,
-        fmt=BriefTicksAroundOneTicker(),
-        colors="xkcd:steel blue",
-        fontsize=9,
-    )
+    if levels is not None:
+        _colors = "k"  # cm.get("Wistia_r")(norm(np.array(levels)))
+        contours = ax.contour(
+            mids(x),
+            mids(y),
+            data,
+            norm=norm,
+            levels=levels,
+            colors=_colors,
+            linewidths=1.0,
+            # alpha=0.5,
+        )
+        levels = contours.levels
+        contour_labeled_levels = levels
+        fmt = ticker.LogFormatterMathtext()
+        fmt.create_dummy_axis()
+        ax.clabel(
+            contours,
+            contour_labeled_levels,
+            inline=1.0,
+            # fmt="%.1g",
+            fmt=fmt,
+            # colors="k",
+            fontsize=9,
+        )
