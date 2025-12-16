@@ -1499,15 +1499,15 @@ typeguard = [
 
 [package.metadata]
 requires-dist = [
-    { name = "cyclopts", specifier = ">=3.24.0" },
+    { name = "cyclopts", specifier = ">=3.24" },
     { name = "eliot", specifier = ">=1.17.5" },
     { name = "jupyterlab", marker = "extra == 'plot'", specifier = ">=4.4.10" },
     { name = "jupytext", marker = "extra == 'plot'", specifier = ">=1.18.1" },
     { name = "matplotlib", specifier = ">=3.10.7" },
     { name = "matplotlib", marker = "extra == 'plot'", specifier = ">=3.10.7" },
-    { name = "numpy", specifier = ">=2.3.1" },
-    { name = "pyevtk", specifier = ">=1.4.1" },
-    { name = "toolz", specifier = ">=0.11.2" },
+    { name = "numpy", specifier = ">=2.3" },
+    { name = "pyevtk", specifier = ">=1.4" },
+    { name = "toolz", specifier = ">=0.11" },
 ]
 provides-extras = ["plot"]
 
@@ -1519,27 +1519,27 @@ analyze = [
 coverage = [{ name = "coverage", extras = ["toml"], specifier = ">=7.9.2" }]
 dev = [
     { name = "coverage", extras = ["toml"], specifier = ">=7.9.2" },
-    { name = "eliot-tree", specifier = ">=24.0.0" },
-    { name = "mypy", specifier = ">=1.2.0" },
+    { name = "eliot-tree", specifier = ">=24" },
+    { name = "mypy", specifier = ">=1.2" },
     { name = "pep8-naming", specifier = ">=0.12.1" },
-    { name = "pre-commit", specifier = ">=4.3.0" },
+    { name = "pre-commit", specifier = ">=4.3" },
     { name = "pylint" },
     { name = "pylint-per-file-ignores" },
     { name = "pyright", specifier = ">=1.1.406" },
     { name = "pytest", specifier = ">=9" },
     { name = "pytest-durations", specifier = ">=1.5.2" },
-    { name = "pytest-emoji", specifier = ">=0.2.0" },
-    { name = "pytest-mock", specifier = ">=3.14.0" },
+    { name = "pytest-emoji", specifier = ">=0.2" },
+    { name = "pytest-mock", specifier = ">=3.14" },
     { name = "ruff", specifier = ">=0.0.259" },
     { name = "types-setuptools", specifier = ">=80.9.0.20250529" },
-    { name = "xdoctest", specifier = ">=1.2.0" },
+    { name = "xdoctest", specifier = ">=1.2" },
 ]
 docs = [
     { name = "esbonio", specifier = ">=0.16.5" },
-    { name = "rstcheck", extras = ["toml", "sphinx"], specifier = ">=6.2.5" },
+    { name = "rstcheck", extras = ["sphinx", "toml"], specifier = ">=6.2.5" },
     { name = "sphinx", specifier = ">=8.2.3" },
     { name = "sphinx-autobuild", specifier = ">=2025.8.25" },
-    { name = "sphinx-autodoc-typehints", specifier = ">=3.2.0" },
+    { name = "sphinx-autodoc-typehints", specifier = ">=3.2" },
     { name = "sphinx-togglebutton", specifier = ">=0.3.2" },
 ]
 lint = [
@@ -1547,17 +1547,17 @@ lint = [
     { name = "pylint-per-file-ignores" },
 ]
 mypy = [
-    { name = "mypy", specifier = ">=1.2.0" },
+    { name = "mypy", specifier = ">=1.2" },
     { name = "pep8-naming", specifier = ">=0.12.1" },
     { name = "types-setuptools", specifier = ">=80.9.0.20250529" },
 ]
-pre-commit = [{ name = "pre-commit", specifier = ">=4.3.0" }]
+pre-commit = [{ name = "pre-commit", specifier = ">=4.3" }]
 pyright = [{ name = "pyright", specifier = ">=1.1.406" }]
 ruff = [{ name = "ruff", specifier = ">=0.0.259" }]
 style = [
-    { name = "mypy", specifier = ">=1.2.0" },
+    { name = "mypy", specifier = ">=1.2" },
     { name = "pep8-naming", specifier = ">=0.12.1" },
-    { name = "pre-commit", specifier = ">=4.3.0" },
+    { name = "pre-commit", specifier = ">=4.3" },
     { name = "pylint" },
     { name = "pylint-per-file-ignores" },
     { name = "pyright", specifier = ">=1.1.406" },
@@ -1568,9 +1568,9 @@ test = [
     { name = "coverage", extras = ["toml"], specifier = ">=7.9.2" },
     { name = "pytest", specifier = ">=9" },
     { name = "pytest-durations", specifier = ">=1.5.2" },
-    { name = "pytest-emoji", specifier = ">=0.2.0" },
-    { name = "pytest-mock", specifier = ">=3.14.0" },
-    { name = "xdoctest", specifier = ">=1.2.0" },
+    { name = "pytest-emoji", specifier = ">=0.2" },
+    { name = "pytest-mock", specifier = ">=3.14" },
+    { name = "xdoctest", specifier = ">=1.2" },
 ]
 typeguard = [{ name = "typeguard", specifier = ">=4.1.5" }]
 
