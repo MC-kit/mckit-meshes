@@ -36,6 +36,7 @@ optional-dependencies.plot = [
   "jupyterlab>=4.4.10",
   "jupytext>=1.18.1",
   "matplotlib>=3.10.7",
+  "seaborn>=0.13.2",
 ]
 urls.Changelog = "https://github.com/MC-kit/mckit-meshes/releases"
 urls.documentation = "https://mckit-meshes.readthedocs.io"
@@ -90,9 +91,6 @@ coverage = [ "coverage[toml]>=7.9.2" ]
 # environments not in dev
 typeguard = [ "typeguard>=4.1.5" ]
 analyze = [ "jupyterlab>=4.2.5", "jupytext>=1.16.4" ]
-plot = [
-  "seaborn>=0.13.2",
-]
 
 [tool.coverage.paths]
 source = [ "src", ".nox/*/site-packages" ]

@@ -1419,6 +1419,7 @@ plot = [
     { name = "jupyterlab" },
     { name = "jupytext" },
     { name = "matplotlib" },
+    { name = "seaborn" },
 ]
 
 [package.dev-dependencies]
@@ -1463,9 +1464,6 @@ mypy = [
     { name = "pep8-naming" },
     { name = "types-setuptools" },
 ]
-plot = [
-    { name = "seaborn" },
-]
 pre-commit = [
     { name = "pre-commit" },
 ]
@@ -1507,6 +1505,7 @@ requires-dist = [
     { name = "matplotlib", marker = "extra == 'plot'", specifier = ">=3.10.7" },
     { name = "numpy", specifier = ">=2.3" },
     { name = "pyevtk", specifier = ">=1.4" },
+    { name = "seaborn", marker = "extra == 'plot'", specifier = ">=0.13.2" },
     { name = "toolz", specifier = ">=0.11" },
 ]
 provides-extras = ["plot"]
@@ -1551,7 +1550,6 @@ mypy = [
     { name = "pep8-naming", specifier = ">=0.12.1" },
     { name = "types-setuptools", specifier = ">=80.9.0.20250529" },
 ]
-plot = [{ name = "seaborn", specifier = ">=0.13.2" }]
 pre-commit = [{ name = "pre-commit", specifier = ">=4.3" }]
 pyright = [{ name = "pyright", specifier = ">=1.1.406" }]
 ruff = [{ name = "ruff", specifier = ">=0.0.259" }]
