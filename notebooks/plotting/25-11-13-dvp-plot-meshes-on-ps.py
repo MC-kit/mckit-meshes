@@ -26,17 +26,15 @@ print(sys.version, "at", sys.prefix)
 
 # %%
 from enum import IntEnum
-
 # %%
 from pathlib import Path
-
-import numpy as np
 
 # %%
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from matplotlib import colors, colormaps as cm
-from matplotlib import ticker
+import numpy as np
+from matplotlib import colormaps as cm
+from matplotlib import colors, ticker
 
 # %%
 # %matplotlib inline
@@ -111,10 +109,11 @@ linestyles = ["-", "--", ":", "-."]
 
 
 # %%
-from mckit_meshes.plot import load_plotm_file, Page, plot_ps_page, BriefTicksAroundOneTicker, plot_2d_distribution
-
-# %%
 from mckit_meshes.fmesh import FMesh
+# %%
+from mckit_meshes.plot import (BriefTicksAroundOneTicker, Page,
+                               load_plotm_file, plot_2d_distribution,
+                               plot_ps_page)
 
 # %%
 TRT_ROOT = Path("~/dev/mcnp/trt").expanduser()

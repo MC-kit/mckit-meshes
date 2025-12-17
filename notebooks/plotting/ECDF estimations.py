@@ -40,9 +40,9 @@ plt.title('ECDF ваших данных')
 plt.grid(True)
 plt.show()
 
+import matplotlib.pyplot as plt
 # %%
 import numpy as np
-import matplotlib.pyplot as plt
 
 # Пример данных (x от 0 до 1)
 np.random.seed(42)
@@ -85,8 +85,8 @@ plt.show()
 
 # %%
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 # Данные (1 млн точек)
 np.random.seed(42)
@@ -109,8 +109,8 @@ plt.show()
 
 # %%
 import altair as alt
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 np.random.seed(42)
 data = np.random.uniform(0, 1, size=1_000_000)
@@ -146,6 +146,7 @@ chart.display()
 
 # %%
 import sys
+
 sys.version
 
 # %%
