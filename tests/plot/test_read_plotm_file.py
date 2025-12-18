@@ -1,18 +1,13 @@
 from __future__ import annotations
 
+import datetime as dt
 from typing import TYPE_CHECKING
 
-import datetime as dt
-
 import numpy as np
-
+import pytest
 from numpy.testing import assert_almost_equal, assert_array_almost_equal
 
-
-import pytest
-
 from mckit_meshes.plot import MATPLOTLIB_AVAILABLE
-
 from mckit_meshes.utils.testing import a
 
 if TYPE_CHECKING:
@@ -53,6 +48,19 @@ def test_reads_two_pages_from_contour_file(data: Path, path: str, pages: int) ->
         for _ in rpf.scan_pages(fid):
             total_pages += 1
         assert total_pages == pages
+
+
+@pytest.mark.parametrize(
+    "path,lines",
+    [
+        ("plot/cube.ps", 6),
+        ("plot/cube-wv.ps", 6),
+    ],
+)
+def test_reads_simple_ps_files(data: Path, path: str, lines: int) -> None:
+    _path = data / path
+    page = rpf.load_all_pages(_path)[0]
+    assert len(page.lines) == lines, f"PS-file {path} should contain {lines} lines."
 
 
 def test_first_page_from_contour_file_has_3_lines(test_file: Path) -> None:
