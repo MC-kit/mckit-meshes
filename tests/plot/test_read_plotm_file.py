@@ -60,7 +60,7 @@ def test_reads_two_pages_from_contour_file(data: Path, path: str, pages: int) ->
 def test_reads_simple_ps_files(data: Path, path: str, lines: int) -> None:
     _path = data / path
     page = rpf.load_all_pages(_path)[0]
-    assert len(page.lines) == lines, f"PS-file {path} should contain {lines} lines."
+    assert page.lines.shape[0] == lines, f"PS-file {path} should contain {lines} lines."
 
 
 def test_first_page_from_contour_file_has_3_lines(test_file: Path) -> None:
