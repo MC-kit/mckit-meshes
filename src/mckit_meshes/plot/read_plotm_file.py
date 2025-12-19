@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-from enum import IntEnum
-from typing import TYPE_CHECKING, Final, TextIO
-
 import datetime as dt
 import re
-
 from dataclasses import dataclass
+from enum import IntEnum
+from typing import TYPE_CHECKING, Final, TextIO
 
 import numpy as np
 
@@ -287,6 +285,13 @@ def transform_page(
     return Page(lines, basis, origin, extent, date, title, probid)
 
 
+class CollectLinesState(IntEnum):
+    """Enumerator for parsing  lines from a plotm file."""
+
+    wait_line_width = 1
+    reading_segments = 2
+
+
 def collect_lines(section: list[str]) -> NDArray:
     """Collect lines to plot from a text section.
 
@@ -299,14 +304,58 @@ def collect_lines(section: list[str]) -> NDArray:
     -------
         array with (from, to) coordinates
     """
+    red = False
+    state = CollectLinesState.wait_line_width
     lines: list[list[list[int]]] = []
+    segments: list[list[list[int]]] = []
     for _line in section[:-9]:
         line = _line.split()
-        if len(line) == 6 and line[2] == "moveto" and line[5] == "lineto":
-            from_x, from_y = map(int, line[0:2])
-            to_x, to_y = map(int, line[3:5])
-            lines.append([[from_x, from_y], [to_x, to_y]])
+        if line[-1] == "setrgbcolor":
+            state = CollectLinesState.wait_line_width
+            red = line[0] == "0.75"
+        elif state == CollectLinesState.wait_line_width:
+            if line[-1] == "setlinewidth":
+                state = CollectLinesState.reading_segments  # start of new line
+        elif state == CollectLinesState.reading_segments:
+            if line[-1] == "stroke":
+                if red:
+                    segments = _squeeze_red_segments(segments)
+                lines.extend(segments)
+                segments: list[list[list[int]]] = []
+            elif len(line) == 6 and line[2] == "moveto" and line[5] == "lineto":
+                from_x, from_y = map(int, line[0:2])
+                to_x, to_y = map(int, line[3:5])
+                segments.append([[from_x, from_y], [to_x, to_y]])
     return np.array(lines, dtype=np.int32)
+
+
+def _squeeze_red_segments(segments: list[list[list[int]]]) -> list[list[list[int]]]:
+    # fill gaps in dash lines
+    fixed_segments: list[list[list[int]]] = []
+    for segment in segments:
+        if fixed_segments:
+            prev_to = fixed_segments[-1][-1]
+            next_from = segment[0]
+            if prev_to != next_from:
+                fixed_segments.append([prev_to, next_from])
+        fixed_segments.append(segment)
+    if len(fixed_segments) > 1:
+        # reduce straight sections
+        array_1 = np.array(fixed_segments, dtype=np.int32)
+        all_x = array_1[:, :, 0].flatten()
+        if _is_constant(all_x):  # vertical line
+            return [[fixed_segments[0][0], fixed_segments[-1][-1]]]
+        all_y = array_1[:, :, 1].flatten()
+        if _is_constant(all_y):  # horizontal line
+            return [[fixed_segments[0][0], fixed_segments[-1][-1]]]
+        tangents = np.diff(all_y) / np.diff(all_x)
+        if np.allclose(tangents[1:], tangents[0], rtol=1e-4, atol=1e-4):
+            return [[fixed_segments[0][0], fixed_segments[-1][-1]]]
+    return fixed_segments
+
+
+def _is_constant(all_x: NDArray) -> bool:
+    return np.all(all_x[1:] == all_x[0])
 
 
 _DOUBLE_PARENTHESIS_MATCHER = re.compile(r".*\(.*\\\((?P<numbers>.*)\\\)\).*")
