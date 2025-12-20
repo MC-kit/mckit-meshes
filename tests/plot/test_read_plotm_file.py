@@ -57,6 +57,8 @@ def test_reads_two_pages_from_contour_file(data: Path, path: str, pages: int) ->
         ("plot/cube-wv.ps", 6),
         ("plot/cube-tilted.ps", 6),
         ("plot/cube-tilted-wv.ps", 6),
+        ("plot/sphere.ps", 40),
+        ("plot/sphere-wv.ps", 84),
     ],
 )
 def test_reads_simple_ps_files(data: Path, path: str, lines: int) -> None:
