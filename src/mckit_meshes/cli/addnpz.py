@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-
 import logging
 
 from pathlib import Path
 
-from eliot import log_message, start_action
 import numpy as np
+
+from eliot import log_message, start_action
 
 from mckit_meshes import fmesh
 from mckit_meshes.utils import get_override_strategy

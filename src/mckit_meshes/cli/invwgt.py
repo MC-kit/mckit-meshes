@@ -4,8 +4,9 @@ from typing import TYPE_CHECKING
 
 from pathlib import Path
 
-from eliot import start_action
 import numpy as np
+
+from eliot import start_action
 
 from mckit_meshes.wgtmesh import WgtMesh
 

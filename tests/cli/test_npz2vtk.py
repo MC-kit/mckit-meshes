@@ -6,8 +6,9 @@ import shutil
 
 from pathlib import Path
 
-from cyclopts import ValidationError
 import pytest
+
+from cyclopts import ValidationError
 
 from mckit_meshes.__main__ import app as mckit_meshes
 

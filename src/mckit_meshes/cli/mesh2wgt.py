@@ -8,8 +8,8 @@ import numpy as np
 
 from mckit_meshes.fmesh import read_meshtal
 from mckit_meshes.mesh.geometry_spec import CylinderGeometrySpec
-from mckit_meshes.wgtmesh import WgtMesh, make_geometry_spec
 from mckit_meshes.utils import get_override_strategy
+from mckit_meshes.wgtmesh import WgtMesh, make_geometry_spec
 
 if TYPE_CHECKING:
     from mckit_meshes.fmesh import FMesh

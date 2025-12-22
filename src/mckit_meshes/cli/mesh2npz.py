@@ -3,16 +3,13 @@
 
 from __future__ import annotations
 
-
-from logging import getLogger, FileHandler
+from logging import FileHandler, getLogger
 from pathlib import Path
-
 
 from eliot import start_action
 
 from mckit_meshes import fmesh
 from mckit_meshes.utils import get_override_strategy, revise_files
-
 
 __LOG = getLogger("mckit_meshes.fmesh")
 

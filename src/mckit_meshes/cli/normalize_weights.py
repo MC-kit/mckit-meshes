@@ -5,17 +5,19 @@ The weight value at given point and given energy bin is to be of the given value
 
 from __future__ import annotations
 
-
-from eliot import start_action
-import numpy as np
-
-from mckit_meshes.wgtmesh import WgtMesh
-from mckit_meshes.utils import get_override_strategy
 from typing import TYPE_CHECKING
 
+import numpy as np
+
+from eliot import start_action
+
+from mckit_meshes.utils import get_override_strategy
+from mckit_meshes.wgtmesh import WgtMesh
+
 if TYPE_CHECKING:
-    from mckit_meshes.wgtmesh import Point
     from pathlib import Path
+
+    from mckit_meshes.wgtmesh import Point
 
 
 def do_normalize_weights(

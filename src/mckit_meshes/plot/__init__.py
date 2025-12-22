@@ -20,10 +20,9 @@ if MATPLOTLIB_AVAILABLE:
         plot_ps_page,
         rectangle_plotter,
     )
-    from .read_plotm_file import BASES, XY, XZ, YZ, Page, X, Y, Z
+    from .read_plotm_file import BASES, XY, XZ, YZ, Page, X, Y, Z, split_input, transform_page
     from .read_plotm_file import load_all_pages as load_plotm_file
     from .read_plotm_file import scan_pages as read_pages
-    from .read_plotm_file import split_input, transform_page
 
     __all__ = [
         "BASES",

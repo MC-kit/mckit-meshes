@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from cyclopts import MissingArgumentError, ValidationError
 import pytest
 
+from cyclopts import MissingArgumentError, ValidationError
 
 from mckit_meshes.__main__ import __version__, app
 

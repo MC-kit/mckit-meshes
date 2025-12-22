@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
+import textwrap
 
 from pathlib import Path
-
-import textwrap
 
 from eliot import start_action, start_task
 

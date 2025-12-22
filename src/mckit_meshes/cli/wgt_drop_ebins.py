@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from mckit_meshes.wgtmesh import WgtMesh
 from mckit_meshes.utils import get_override_strategy
+from mckit_meshes.wgtmesh import WgtMesh
 
 if TYPE_CHECKING:
     from pathlib import Path

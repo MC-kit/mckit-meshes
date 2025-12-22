@@ -1,31 +1,32 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import Annotated, Final, cast
+
 import logging
 import sys
 
+from dataclasses import dataclass
 from pathlib import Path
 
 import cyclopts
-from cyclopts import App, Parameter, types  # noqa: TC002 - types are used in run time
-from eliot import to_file, start_task, write_traceback
+
+from cyclopts import App, Parameter, types  # noqa: TC002
+from eliot import start_task, to_file, write_traceback
 from eliot.stdlib import EliotHandler
 from rich.console import Console
 from rich.logging import RichHandler
 
-
-from mckit_meshes import __version__, __name__ as pkg_name
-from mckit_meshes.cli.split_mesh_file import split as do_split
+from mckit_meshes import __name__ as pkg_name
+from mckit_meshes import __version__
 from mckit_meshes.cli.addnpz import add as do_add
-from mckit_meshes.cli.mesh2npz import mesh2npz as do_mesh2npz
-from mckit_meshes.cli.npz2vtk import npz2vtk as do_npz2vtk
 from mckit_meshes.cli.invwgt import invwgt as do_invwgt
 from mckit_meshes.cli.merge_weights import merge_weights as do_merge_weights
+from mckit_meshes.cli.mesh2npz import mesh2npz as do_mesh2npz
 from mckit_meshes.cli.mesh2wgt import mesh2wgt as do_mesh2wgt
 from mckit_meshes.cli.normalize_weights import normalize_weights as do_normalize_weights
+from mckit_meshes.cli.npz2vtk import npz2vtk as do_npz2vtk
+from mckit_meshes.cli.split_mesh_file import split as do_split
 from mckit_meshes.cli.wgt_drop_ebins import wgt_drop_ebins as do_wgt_drop_ebins
-
 
 NAME: Final[str] = pkg_name.replace("_", "-")
 PREFIX: Final[Path] = Path(NAME)

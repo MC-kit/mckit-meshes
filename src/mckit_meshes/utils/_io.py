@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
-import logging
 from typing import IO, TYPE_CHECKING, Any
 
+import logging
 import sys
 
+from collections.abc import Iterable
 from pathlib import Path
 
 from eliot import start_action

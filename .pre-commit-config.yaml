@@ -71,14 +71,26 @@ repos:
     hooks:
       - id: uv-lock 
 
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.10
+#  - repo: https://github.com/astral-sh/ruff-pre-commit
+#    rev: v0.14.10
+#    hooks:
+#      - id: ruff-check
+#        exclude: ^notebooks|^extern
+#      - id: ruff-format
+#        exclude: ^notebooks|^extern|ipynb$
+
+  - repo: local
     hooks:
       - id: ruff-check
-        exclude: ^notebooks|^extern
+        name: ruff check
+        entry: ruff check --fix --exit-non-zero-on-fix --force-exclude
+        language: python
+        types_or: [python, pyi, jupyter]
       - id: ruff-format
-        exclude: ^notebooks|^extern|ipynb$
-
+        name: ruff format
+        entry: ruff format --exit-non-zero-on-format --force-exclude
+        language: python
+        types_or: [python, pyi, jupyter]
 
   # Check for common shell mistakes
   - repo: https://github.com/shellcheck-py/shellcheck-py

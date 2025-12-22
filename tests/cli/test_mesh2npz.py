@@ -4,8 +4,9 @@ import shutil
 
 from pathlib import Path
 
-from cyclopts import ValidationError
 import pytest
+
+from cyclopts import ValidationError
 
 from mckit_meshes.__main__ import app
 from mckit_meshes.fmesh import FMesh

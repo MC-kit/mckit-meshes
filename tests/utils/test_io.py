@@ -6,7 +6,7 @@ from io import StringIO
 
 import pytest
 
-from mckit_meshes.utils import print_cols, print_n, get_override_strategy
+from mckit_meshes.utils import get_override_strategy, print_cols, print_n
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
