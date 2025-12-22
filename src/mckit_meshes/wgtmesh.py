@@ -2,17 +2,14 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, NamedTuple, TextIO
-
 import sys
-
 from dataclasses import dataclass
 from enum import IntEnum
+from typing import TYPE_CHECKING, NamedTuple, TextIO
 
 import numpy as np
 
 import mckit_meshes.mesh.geometry_spec as gs
-
 from mckit_meshes.utils import format_floats, print_n
 
 if TYPE_CHECKING:
@@ -612,11 +609,8 @@ def reciprocal(a: np.ndarray, zero_index: np.ndarray | None = None) -> np.ndarra
         zero_index = a == 0.0
     else:
         assert np.array_equal(zero_index, a == 0.0)
-    result: np.ndarray = np.reciprocal(a, where=np.logical_not(zero_index))
-    # this fixes bug in numpy reciprocal: it doesn't pass zero values
-    # note: the bug doesn't show up on debugging
-    result[zero_index] = 0.0
-    return result
+    result = np.zeros_like(a)
+    return np.reciprocal(a, out=result, where=np.logical_not(zero_index))
 
 
 def prepare_probabilities_and_nps(_nps: int, _weights: np.ndarray) -> tuple[np.ndarray, np.ndarray]:

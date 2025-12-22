@@ -1,12 +1,12 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import Any, Final
 
-from collections.abc import Callable
-
 import numpy as np
-
-from matplotlib import collections, colors, patches, colormaps as cm
+from matplotlib import collections
+from matplotlib import colormaps as cm
+from matplotlib import colors, patches
 from matplotlib import pyplot as plt
 from matplotlib import ticker
 from matplotlib.path import Path as PlotPath

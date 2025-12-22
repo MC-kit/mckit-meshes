@@ -28,23 +28,19 @@ print(sys.version, "at", sys.prefix)
 
 # %%
 from enum import IntEnum
-
 # %%
 from pathlib import Path
-
-import numpy as np
 
 # %%
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from matplotlib import colors, colormaps as cm
-from matplotlib import ticker
-
+import numpy as np
 import seaborn as sns
+from matplotlib import colormaps as cm
+from matplotlib import colors, ticker
 
 # %%
-from mckit_meshes.plot import load_plotm_file, Page, plot_ps_page
-
+from mckit_meshes.plot import Page, load_plotm_file, plot_ps_page
 
 # %% jupyter={"source_hidden": true}
 # %matplotlib inline

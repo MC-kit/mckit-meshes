@@ -16,24 +16,14 @@ if MATPLOTLIB_AVAILABLE:
     from .brief_ticks_around_one_ticker import BriefTicksAroundOneTicker
     from .plot import (
         default_setup_axes_strategy,
-        plot_ps_page,
         plot_2d_distribution,
+        plot_ps_page,
         rectangle_plotter,
     )
-    from .read_plotm_file import (
-        Page,
-        load_all_pages as load_plotm_file,
-        split_input,
-        scan_pages as read_pages,
-        transform_page,
-        X,
-        XY,
-        XZ,
-        Y,
-        YZ,
-        Z,
-        BASES,
-    )
+    from .read_plotm_file import BASES, XY, XZ, YZ, Page, X, Y, Z
+    from .read_plotm_file import load_all_pages as load_plotm_file
+    from .read_plotm_file import scan_pages as read_pages
+    from .read_plotm_file import split_input, transform_page
 
     __all__ = [
         "BASES",

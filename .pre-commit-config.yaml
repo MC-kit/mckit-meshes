@@ -29,13 +29,10 @@ repos:
         exclude: notebooks
       - id: check-case-conflict
       - id: check-executables-have-shebangs
-      # - id: check-json
-      #   exclude: notebooks
       - id: check-merge-conflict
         exclude: \.rst$
       - id: check-shebang-scripts-are-executable
         exclude: notebooks  # jupytext creates python scripts with shebangs but without permissions
-      # - id: check-symlinks
       - id: check-toml
       - id: check-yaml
         # exclude: recipe/meta.yaml
@@ -50,9 +47,6 @@ repos:
         args:
           - --pytest-test-first
       - id: mixed-line-ending
-      # - id: pretty-format-json
-      #   args: [--autofix, --no-ensure-ascii, --no-sort-keys]
-      #   exclude: data|\.ipynb$
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
     rev: 0.35.0
@@ -80,10 +74,8 @@ repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.3
     hooks:
-      # linter
       - id: ruff-check
         exclude: ^notebooks|^extern
-      # formatter 
       - id: ruff-format
         exclude: ^notebooks|^extern|ipynb$
 

@@ -29,10 +29,11 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 # %%
-# %matplotlib inline
+from mckit_meshes.plot import Page, load_plotm_file, plot_ps_page
 
 # %%
-from mckit_meshes.plot import load_plotm_file, Page, plot_ps_page
+# %matplotlib inline
+
 
 # %%
 TRT_ROOT = Path("~/dev/mcnp/trt").expanduser()
