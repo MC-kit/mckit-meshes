@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Final, TextIO
+
 import datetime as dt
 import re
+
 from dataclasses import dataclass
 from enum import IntEnum
-from typing import TYPE_CHECKING, Final, TextIO
 
 import numpy as np
 
@@ -348,21 +350,40 @@ def _squeeze_red_segments(segments: list[list[list[int]]]) -> list[list[list[int
         all_y = array_1[:, :, 1].ravel()
         if _is_constant(all_y):  # horizontal line
             return [[fixed_segments[0][0], fixed_segments[-1][-1]]]
-        # Check if a single segment from begin to end fits the points defined with segements
-        all_beg_x = array_1[:, 0, 0]
-        beg_x = all_beg_x[0]
-        end_x = array_1[-1, 1, 0]
-        all_beg_y = array_1[:, 0, 1]
-        beg_y = all_beg_y[0]
-        end_y = array_1[-1, 1, 1]
-        denominator = end_x - beg_x
-        if np.abs(denominator) > 0:
-            nominator = end_y - all_beg_y[0]
-            m = nominator / denominator
-            residuals = np.abs(all_beg_y[1:] - (m * (all_beg_x[1:] - beg_x) + beg_y))
-            estimation = np.max(residuals) / np.hypot(denominator, nominator)
-            if estimation < 1e-2:
+        # Check if a single segment from begin to end (`big` segment) fits the points defined with segments
+        inner_points = array_1[1:, 0, :]
+        r_a = array_1[0, 0, :]  # start of `big` segment
+        r_b = array_1[-1, -1, :]  # end of `big` segment
+        u = np.asarray(r_b - r_a, dtype=float)  # vector along `big` segment
+        u_len = np.linalg.norm(u)
+        u_len2 = (
+            u_len**2
+        )  # 2 = 1 (normalize u) + 1 (to get relative to `big` segment length value of deviation)
+        if u_len2 > 0:
+            u0 = u / u_len2
+
+            def relative_deviation(p):
+                """Compute relative deviation from a point to a `big` segment.
+
+                Uses square of parallelogram defined with `u` and `v` and length of u.
+
+                Parameters
+                ----------
+                p
+                    point to compute relative deviation to
+
+                Returns
+                -------
+                relative_deviation normalized to the `big` segment length.
+                """
+                v = p - r_a
+                return np.abs(u0[0] * v[1] - u0[1] * v[0])
+
+            has_large_deviation = any(relative_deviation(p) >= 1e-2 for p in inner_points)
+
+            if not has_large_deviation:
                 return [[fixed_segments[0][0], fixed_segments[-1][-1]]]
+
     return fixed_segments
 
 

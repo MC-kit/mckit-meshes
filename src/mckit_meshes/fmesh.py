@@ -5,17 +5,21 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, Literal, TextIO, cast
+
 import logging
+
 from multiprocessing import Pool
 from pathlib import Path
 from textwrap import dedent
-from typing import TYPE_CHECKING, Literal, TextIO, cast
 
 import numpy as np
+
 from pyevtk.hl import gridToVTK
 from toolz.itertoolz import concatv
 
 import mckit_meshes.mesh.geometry_spec as gc
+
 from mckit_meshes.particle_kind import ParticleKind as Kind
 from mckit_meshes.utils import raise_error_when_file_exists_strategy, rebin
 

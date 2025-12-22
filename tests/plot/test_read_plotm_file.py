@@ -1,10 +1,12 @@
 from __future__ import annotations
 
-import datetime as dt
 from typing import TYPE_CHECKING
+
+import datetime as dt
 
 import numpy as np
 import pytest
+
 from numpy.testing import assert_almost_equal, assert_array_almost_equal
 
 from mckit_meshes.plot import MATPLOTLIB_AVAILABLE

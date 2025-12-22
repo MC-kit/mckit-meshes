@@ -2,14 +2,17 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING, NamedTuple, TextIO
+
 import sys
+
 from dataclasses import dataclass
 from enum import IntEnum
-from typing import TYPE_CHECKING, NamedTuple, TextIO
 
 import numpy as np
 
 import mckit_meshes.mesh.geometry_spec as gs
+
 from mckit_meshes.utils import format_floats, print_n
 
 if TYPE_CHECKING:
