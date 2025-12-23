@@ -73,7 +73,10 @@ style = [
   { include-group = "pyright" },
   { include-group = "ruff" },
 ]
-pre_commit = [ "pre-commit>=4.3" ]
+pre_commit = [
+  "pre-commit>=4.3",
+  "pre-commit-uv>=4.2",
+]
 ruff = [ "ruff>=0.0.259" ]
 mypy = [
   "mypy>=1.2",
@@ -131,11 +134,11 @@ sort = "Cover"
 [tool.mypy]
 python_version = "3.13"
 cache_dir = ".cache/mypy"
-error_summary = true
-# strict = true     # TODO dvp: uncomment this to get strict control
+disallow_untyped_defs = true
 files = "src/**/*.py"
 follow_imports = "silent"
-# namespace_packages = true
+pretty = true
+# strict = true     # TODO dvp: uncomment this to get strict control
 show_error_codes = true
 show_error_context = true
 warn_redundant_casts = true
@@ -159,7 +162,6 @@ module = [
   "mckit_nuclides.*",
   "msgspec",
   "multipledispatch",
-  "nox",
   "numpy",
   "numpy.testing",
   "pandas",

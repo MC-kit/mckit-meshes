@@ -182,7 +182,3 @@ for i, stem in enumerate(sorted_stems):
         ax.set_title("from dashed red lines")
     plot_page(ax, stem + "-wv", zoom = 0.15)
 plt.show()
-
-# %%
-
-# %%

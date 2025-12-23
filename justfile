@@ -82,7 +82,7 @@ export JUST_LOG := log
 # update dependencies
 [group: 'dev']
 @up:
-  uv sync --upgrade
+  uv sync --upgrade --all-extras
   pre-commit run -a 
   pytest
 

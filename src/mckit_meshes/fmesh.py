@@ -421,7 +421,7 @@ class FMesh:
         """
         if self._totals is None:
             return None
-        if self.totals_err is None:
+        if self._totals_err is None:
             msg = "No totals, but totals_err is specified"
             raise ValueError(msg)
         found_x, found_y, found_z = self.select_indexes(x=x, y=y, z=z)
