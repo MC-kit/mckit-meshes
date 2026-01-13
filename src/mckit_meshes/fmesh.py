@@ -474,6 +474,7 @@ class FMesh:
             kwd["axis"] = np.array(self._geometry_spec.axs)
 
         filename.parent.mkdir(parents=True, exist_ok=True)
+        # TODO @dvp: the following uses pickles to save object, this works, but it's not good
         np.savez_compressed(str(filename), **kwd)
 
     @classmethod
@@ -664,6 +665,8 @@ class FMesh:
                         print(row, file=stream)
 
         if self._totals:
+            if self._totals_err is None:
+                raise ValueError
             for ix in range(x.size):
                 for iy in range(y.size):
                     for iz in range(z.size):
@@ -688,6 +691,8 @@ class FMesh:
         The new FMesh object with only one energy bin.
         """
         e = np.array([self.e[0], self.e[-1]])
+        if self.totals is None or self.totals_err is None:
+            raise ValueError  # TODO @dvp: on absent totals compute them
         data = self.totals[np.newaxis, ...]
         errors = self.totals_err[np.newaxis, ...]
         return FMesh(new_name, self.kind, self._geometry_spec, e, data, errors)
@@ -743,6 +748,8 @@ class FMesh:
 
         assert all(np.array_equal(a, b) for a, b in zip(new_bins_list, _, strict=False))
 
+        if new_bins_list is None:
+            raise ValueError
         new_ebins, new_xbins, new_ybins, new_zbins = new_bins_list
         if self.totals is None:
             new_totals = None

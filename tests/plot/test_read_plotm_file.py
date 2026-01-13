@@ -13,7 +13,7 @@ from mckit_meshes.plot import MATPLOTLIB_AVAILABLE
 from mckit_meshes.utils.testing import a
 
 if TYPE_CHECKING:
-    from matplotlib.path import Path
+    from pathlib import Path
 
 if MATPLOTLIB_AVAILABLE:
     import mckit_meshes.plot.read_plotm_file as rpf
@@ -24,7 +24,7 @@ else:
     )
 
 
-def test_is_x_plane():
+def test_is_x_plane() -> None:
     assert rpf.is_x_plane(rpf.YZ)
     assert not rpf.is_x_plane(rpf.XY)
 
@@ -44,8 +44,8 @@ def test_file(data: Path) -> Path:
     ],
 )
 def test_reads_two_pages_from_contour_file(data: Path, path: str, pages: int) -> None:
-    path = data / path
-    with path.open() as fid:
+    _path = data / path
+    with _path.open() as fid:
         total_pages = 0
         for _ in rpf.scan_pages(fid):
             total_pages += 1
@@ -183,4 +183,4 @@ def test_convert_to_real_coordinates_with_arbitrary_basis_and_origin(
     )
     actual = page.lines
     norm = np.abs(actual).max()
-    assert_array_almost_equal(expected / norm, actual / norm, decimal=3), msg
+    assert_array_almost_equal(expected / norm, actual / norm, decimal=3, err_msg=msg)
