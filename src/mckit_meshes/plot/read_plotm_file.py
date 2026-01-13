@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Final, TextIO
+from typing import TYPE_CHECKING, TextIO
 
 import datetime as dt
 import re
@@ -10,100 +10,17 @@ from enum import IntEnum
 
 import numpy as np
 
+from mckit_meshes.plot.check_coordinate_plane import BASES, is_x_plane, is_y_plane, is_z_plane
+
 if TYPE_CHECKING:
     from collections.abc import Iterator
     from pathlib import Path
 
     from numpy.typing import NDArray
 
-X, Y, Z = np.eye(3, dtype=float)
-XY = np.vstack((X, Y))
-XZ = np.vstack((X, Z))
-YZ = np.vstack((Y, Z))
-YX = np.vstack((Y, X))
-ZX = np.vstack((Z, X))
-ZY = np.vstack((Z, Y))
-BASES = [XY, XZ, YZ, YX, ZX, ZY]
 
 FACTOR = 2.0 * 0.0005333332827654369
 PLOTM_ORIGIN = np.array([1875.0, 1125.0], float)
-
-
-class CoordinateNumber(IntEnum):
-    """Coordinate to select from basis."""
-
-    x = 0
-    y = 1
-    z = 2
-
-
-_PLANE_RTOL: Final[float] = 1e-9
-_PLANE_ATOL: Final[float] = 1e-9
-
-
-def is_coordinate_plane(
-    basis: NDArray,
-    coordinate: CoordinateNumber,
-    rtol: float = _PLANE_RTOL,
-    atol: float = _PLANE_ATOL,
-):
-    """Check, if the basis defines a plane perpendicular to one of the axes.
-
-    Parameters
-    ----------
-    basis
-        two vectors defining plotm projection plane.
-    coordinate
-        x, y or z axis
-    rtol
-        relative tolerance for :meth:`np.allclose`
-    atol
-        absolute tolerance for :meth:`np.allclose`
-
-    Returns
-    -------
-    True - if all values for coordinate in basis are close to zero
-
-    Examples
-    --------
-    >>> is_coordinate_plane(XY, CoordinateNumber.z)
-    True
-    """
-    return np.allclose(basis[:, coordinate], 0.0, rtol=rtol, atol=atol)
-
-
-def is_x_plane(basis: NDArray, *, rtol: float = _PLANE_RTOL, atol: float = _PLANE_ATOL):
-    """Check, if the basis defines a plane perpendicular to X-axes.
-
-    Parameters
-    ----------
-    basis
-        two vectors defining plotm projection plane.
-    rtol
-        relative tolerance for :meth:`np.close`
-    atol
-        absolute tolerance for :meth:`np.allclose`
-
-    Returns
-    -------
-    True - if all values for x-coordinate in basis are close to zero
-
-    Examples
-    --------
-    >>> is_coordinate_plane(YZ, CoordinateNumber.x)
-    True
-    """
-    return is_coordinate_plane(basis, CoordinateNumber.x, rtol=rtol, atol=atol)
-
-
-def is_y_plane(basis: NDArray, rtol: float = _PLANE_RTOL, atol: float = _PLANE_ATOL):
-    """Check, if the basis defines a plane perpendicular to Y-axes."""
-    return is_coordinate_plane(basis, CoordinateNumber.y, rtol=rtol, atol=atol)
-
-
-def is_z_plane(basis: NDArray, rtol: float = _PLANE_RTOL, atol: float = _PLANE_ATOL):
-    """Check, if the basis defines a plane perpendicular to Z-axes."""
-    return is_coordinate_plane(basis, CoordinateNumber.z, rtol=rtol, atol=atol)
 
 
 @dataclass
@@ -134,6 +51,7 @@ class Page:
         ), "Expecting array of pairs representing start and end points for a line"
         if not self.rescaled:
             res = np.asarray(self.lines, dtype=float)
+            self.normalize_basis()
             origin = self.get_2d_origin()
             extent = FACTOR * self.extent
 
@@ -171,17 +89,27 @@ class Page:
         """Check, if the Page is in a plane perpendicular to Z-axes."""
         return is_z_plane(self.basis)
 
-    def get_2d_origin(self):
+    def normalize_basis(self) -> None:
+        x_norm, y_norm = map(np.linalg.vector_norm, self.basis)
+        if np.isclose(x_norm, 0.0) or np.isclose(y_norm, 0.0):
+            raise ValueError
+        if not np.isclose(x_norm, 1.0) and np.isclose(y_norm, 1.0):
+            x_axis, y_axis = self.basis
+            self.basis[0] = x_axis / x_norm
+            self.basis[1] = y_axis / y_norm
+
+    def get_2d_origin(self) -> NDArray:
         """Compute the coordinates of origin in projection plane.
+
+        If the basis correspondes to one of coordinate planes or
+        origin iz zero uses original numbers. Otherwise computes
+        projection of `origin` to basis axes.
+        This provides meaningful `x`, `y` coordinates on plots,
+        corresponding to values in global coordinates.
 
         Returns
         -------
             coordinates to be base for line points
-
-        Raises
-        ------
-        RuntimeError
-            when cannot compute origin adequately
         """
         if self.is_z_plane():
             return self.origin[:2]
@@ -191,8 +119,9 @@ class Page:
             return self.origin[1:]
         if np.all(self.origin == 0.0):
             return np.array([0.0, 0.0])
-        msg = "Only XY, XZ and YZ bases or all-zero origin are supported for now"
-        raise RuntimeError(msg)
+        x0 = np.dot(self.origin, self.basis[0])
+        y0 = np.dot(self.origin, self.basis[1])
+        return np.array([x0, y0])
 
 
 def scan_pages(input_stream: TextIO) -> Iterator[Page]:

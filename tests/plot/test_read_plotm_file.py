@@ -9,24 +9,13 @@ import pytest
 
 from numpy.testing import assert_almost_equal, assert_array_almost_equal
 
-from mckit_meshes.plot import MATPLOTLIB_AVAILABLE
+import mckit_meshes.plot.check_coordinate_plane as ccp
+import mckit_meshes.plot.read_plotm_file as rpf
+
 from mckit_meshes.utils.testing import a
 
 if TYPE_CHECKING:
     from pathlib import Path
-
-if MATPLOTLIB_AVAILABLE:
-    import mckit_meshes.plot.read_plotm_file as rpf
-else:
-    pytest.skip(
-        reason='optional package matplotlib is not installed, run `uv pip install -e ".[plot]"\'',
-        allow_module_level=True,
-    )
-
-
-def test_is_x_plane() -> None:
-    assert rpf.is_x_plane(rpf.YZ)
-    assert not rpf.is_x_plane(rpf.XY)
 
 
 @pytest.fixture(scope="module")
@@ -92,7 +81,7 @@ def test_first_page_from_contour_file_meta_info_is_complete(test_file: Path) -> 
         assert page.title == "hfs-reflectometer"
         expected_probid = dt.datetime(2018, 8, 24, 18, 20, 19, tzinfo=dt.UTC)
         assert expected_probid == page.probid
-        expected_basis = rpf.YZ
+        expected_basis = ccp.YZ
         assert_array_almost_equal(expected_basis, page.basis)
         expected_origin = np.array([0, 0, 0], dtype=float)
         assert_array_almost_equal(expected_origin, page.origin)
@@ -110,17 +99,13 @@ _DEFAULT_PROBID = dt.datetime(2025, 1, 1, tzinfo=dt.UTC)
 _DEFAULT_DATE = _DEFAULT_PROBID + dt.timedelta(minutes=5)
 
 
-@pytest.mark.skipif(
-    not MATPLOTLIB_AVAILABLE,
-    reason='optional package matplotlib is not installed, run `uv pip install -e ".[plot]"\'',
-)
 @pytest.mark.parametrize(
     "msg,lines,basis,origin,expected,scale",
     [
         (
             "# bottom -> origin ",
             a(1875, 188, 1875, 1125).reshape(1, 2, 2),
-            rpf.XZ,
+            ccp.XZ,
             a(0, 0, 0),
             a(0, -100, 0, 0).reshape(1, 2, 2),
             a(100, 100),
@@ -128,7 +113,7 @@ _DEFAULT_DATE = _DEFAULT_PROBID + dt.timedelta(minutes=5)
         (
             "# PX=50 ",
             a(1875, 188, 1875, 1125).reshape(1, 2, 2),
-            rpf.YZ,
+            ccp.YZ,
             a(50.0, 0.0, 0.0),  # <-- x = 50
             a(0, -100, 0, 0).reshape(1, 2, 2),
             a(100, 100),
@@ -136,7 +121,7 @@ _DEFAULT_DATE = _DEFAULT_PROBID + dt.timedelta(minutes=5)
         (
             "# PY=50 ",
             a(1875, 188, 1875, 1125).reshape(1, 2, 2),
-            rpf.XZ,
+            ccp.XZ,
             a(0.0, 50.0, 0.0),  # <-- y = 50
             a(0, -100, 0, 0).reshape(1, 2, 2),
             a(100, 100),
@@ -144,7 +129,7 @@ _DEFAULT_DATE = _DEFAULT_PROBID + dt.timedelta(minutes=5)
         (
             "# PZ=50 ",
             a(1875, 188, 1875, 1125).reshape(1, 2, 2),
-            rpf.XY,
+            ccp.XY,
             a(0.0, 0.0, 50.0),  # <-- z = 50
             a(0, -100, 0, 0).reshape(1, 2, 2),
             a(100, 100),
