@@ -1440,6 +1440,8 @@ def meshes_to_vtk(
 ) -> None:
     """Export FMesh objects to VTK files.
 
+    Compute file names for different meshes from their properties: name, kind etc.
+
     Parameters
     ----------
     meshes
@@ -1447,7 +1449,7 @@ def meshes_to_vtk(
     out_dir
         path to output directory
     get_mesh_description_strategy
-        strategy to create a mesh description
+        strategy to create a mesh description from a mesh object
     """
     if out_dir:
         out_dir.mkdir(parents=True, exist_ok=True)
