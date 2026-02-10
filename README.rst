@@ -69,7 +69,7 @@ References
 
 .. todo::
 
-   dvp: add references to iww-gvr, mckit and used libraries:  poetry, xarray etc
+   dvp: add references to f4enix, mckit, etc
 
 .. Links
 
