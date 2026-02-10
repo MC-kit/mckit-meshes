@@ -67,10 +67,6 @@ Then merge devel to master (via Pull Request) and if all the checks are passed c
 References
 ----------
 
-.. todo::
-
-   dvp: add references to f4enix, mckit, etc
-
 .. Links
 
 .. _documentation: https://mckit-meshes.readthedocs.io/en/latest

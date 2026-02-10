@@ -23,6 +23,11 @@ export JUST_LOG := log
 @build: venv
   uv build
 
+# check distribution with twine
+[group: 'dev']
+@check-dist: build
+  uvx twine check dist/*
+
 # clean reproducible files
 [group: 'dev']
 @clean:
