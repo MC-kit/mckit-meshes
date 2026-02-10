@@ -38,7 +38,7 @@ def split(
         overide=override,
     ):
         meshtally_file_path = Path(meshtally_file)
-        prefix_path = prefix if prefix else Path.cwd()
+        prefix_path = prefix or Path.cwd()
         prefix_path.mkdir(parents=True, exist_ok=True)
         with (
             start_action(action_type="loading mesh file", mesh_file=meshtally_file),

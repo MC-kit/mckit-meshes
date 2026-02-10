@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 def cartesian_product(
     *arrays: Collection,
-    aggregator: Callable = lambda x: np.array(x),
+    aggregator: Callable = np.array,
     **kw: Any,  # noqa: ANN401
 ) -> NDArray:
     """Compute transformations of cartesian product of all the elements in arrays.

@@ -15,7 +15,7 @@ __LOG = logging.getLogger("mckit_meshes.merge_weights")
 
 def load_merge_descriptor(merge_descriptor_file: Path) -> Mapping[str, int]:
     def convert(line: str) -> tuple[str, int]:
-        _id, _nps = line.split("#")[0].split()[:2]
+        _id, _nps = line.split("#", maxsplit=1)[0].split()[:2]
         return _id, int(_nps)
 
     with merge_descriptor_file.open() as io:

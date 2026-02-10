@@ -353,8 +353,8 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
     """
 
     origin: Bins
-    axs: np.ndarray = field(default_factory=lambda: DEFAULT_AXIS.copy())
-    vec: np.ndarray = field(default_factory=lambda: DEFAULT_VEC.copy())
+    axs: np.ndarray = field(default_factory=DEFAULT_AXIS.copy)
+    vec: np.ndarray = field(default_factory=DEFAULT_VEC.copy)
 
     def __post_init__(self):
         super().__post_init__()

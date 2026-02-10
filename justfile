@@ -93,7 +93,7 @@ export JUST_LOG := log
 
 # run pyupgrade
 [group: 'dev']
-@pyupgrade *args="--py313-plus":  # this check python version on moving to the python-3.14
+@pyupgrade *args="--py314-plus":  # this check python version on moving to the python-3.14
   uvx pyupgrade {{args}}  # presumably, code is updated by ruff, just to check sometimes
 
 # test up to the first fail

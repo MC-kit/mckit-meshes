@@ -100,7 +100,7 @@ def add(
             errors,
             totals,
             tot_errors,
-            comment if comment else _sum.comment,
+            comment or _sum.comment,
         )
 
         with start_action(action_type="save mesh") as logger:
