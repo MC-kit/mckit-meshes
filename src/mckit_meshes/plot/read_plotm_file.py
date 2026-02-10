@@ -252,7 +252,7 @@ def collect_lines(section: list[str]) -> NDArray:
                 if red:
                     segments = _squeeze_red_segments(segments)
                 lines.extend(segments)
-                segments: list[list[list[int]]] = []
+                segments = []
             elif len(line) == 6 and line[2] == "moveto" and line[5] == "lineto":
                 from_x, from_y = map(int, line[0:2])
                 to_x, to_y = map(int, line[3:5])
@@ -349,7 +349,7 @@ def _squeeze_red_segments(segments: list[list[list[int]]]) -> list[list[list[int
 
 
 def _is_constant(all_x: NDArray) -> bool:
-    return np.all(all_x[1:] == all_x[0])
+    return bool(np.all(all_x[1:] == all_x[0]))
 
 
 _DOUBLE_PARENTHESIS_MATCHER = re.compile(r".*\(.*\\\((?P<numbers>.*)\\\)\).*")

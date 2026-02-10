@@ -5,11 +5,24 @@ from __future__ import annotations
 from importlib import metadata as _meta
 from importlib.metadata import PackageNotFoundError, version
 
+<<<<<<< Updated upstream
 if __package__ is not None:
     try:
         __version__ = version(__package__)
     except PackageNotFoundError:  # pragma: no cover
         __version__ = "unknown"
+||||||| Stash base
+try:
+    __version__ = version(__package__)
+except PackageNotFoundError:  # pragma: no cover
+    __version__ = "unknown"
+=======
+if __package__:
+    try:
+        __version__ = version(__package__)
+    except PackageNotFoundError:  # pragma: no cover
+        __version__ = "unknown"
+>>>>>>> Stashed changes
 
     __distribution__ = _meta.distribution(__package__)
     __meta_data__ = __distribution__.metadata
