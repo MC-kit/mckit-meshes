@@ -279,6 +279,7 @@ def _squeeze_red_segments(segments: list[list[list[int]]]) -> list[list[list[int
         all_y = array_1[:, :, 1].ravel()
         if _is_constant(all_y):  # horizontal line
             return [[fixed_segments[0][0], fixed_segments[-1][-1]]]
+<<<<<<< HEAD
         # Check if a single segment from begin to end (`big` segment) fits the points defined with segments
         inner_points = array_1[1:, 0, :]
         r_a = array_1[0, 0, :]  # start of `big` segment
@@ -311,6 +312,37 @@ def _squeeze_red_segments(segments: list[list[list[int]]]) -> list[list[list[int
             has_large_deviation = any(relative_deviation(p) >= 1e-2 for p in inner_points)
 
             if not has_large_deviation:
+||||||| parent of 92f43d8 (fix: UserWarning in numpy 2.4.0)
+        # Check if a single segment from begin to end fits the points defined with segements 
+        all_beg_x = array_1[:,0,0]
+        beg_x = all_beg_x[0]
+        end_x = array_1[-1,1,0]
+        all_beg_y = array_1[:,0,1]
+        beg_y = all_beg_y[0]
+        end_y = array_1[-1,1,1]
+        denominator = end_x - beg_x
+        if np.abs(denominator) > 0:
+            nominator = end_y - all_beg_y[0]
+            m = nominator/denominator
+            residuals = np.abs(all_beg_y[1:] - (m*(all_beg_x[1:]-beg_x) + beg_y))
+            estimation = np.max(residuals)/np.hypot(denominator, nominator)
+            if estimation < 1e-2:
+=======
+        # Check if a single segment from begin to end fits the points defined with segements
+        all_beg_x = array_1[:, 0, 0]
+        beg_x = all_beg_x[0]
+        end_x = array_1[-1, 1, 0]
+        all_beg_y = array_1[:, 0, 1]
+        beg_y = all_beg_y[0]
+        end_y = array_1[-1, 1, 1]
+        denominator = end_x - beg_x
+        if np.abs(denominator) > 0:
+            nominator = end_y - all_beg_y[0]
+            m = nominator / denominator
+            residuals = np.abs(all_beg_y[1:] - (m * (all_beg_x[1:] - beg_x) + beg_y))
+            estimation = np.max(residuals) / np.hypot(denominator, nominator)
+            if estimation < 1e-2:
+>>>>>>> 92f43d8 (fix: UserWarning in numpy 2.4.0)
                 return [[fixed_segments[0][0], fixed_segments[-1][-1]]]
 
     return fixed_segments

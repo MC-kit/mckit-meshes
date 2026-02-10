@@ -607,8 +607,19 @@ def reciprocal(a: np.ndarray, zero_index: np.ndarray | None = None) -> np.ndarra
         zero_index = a == 0.0
     else:
         assert np.array_equal(zero_index, a == 0.0)
+<<<<<<< HEAD
     result = np.zeros_like(a)
     return np.reciprocal(a, out=result, where=np.logical_not(zero_index))
+||||||| parent of 92f43d8 (fix: UserWarning in numpy 2.4.0)
+    result: np.ndarray = np.reciprocal(a, where=np.logical_not(zero_index))
+    # this fixes bug in numpy reciprocal: it doesn't pass zero values
+    # note: the bug doesn't show up on debugging
+    result[zero_index] = 0.0
+    return result
+=======
+    out = np.zeros_like(a)
+    return np.reciprocal(a, out=out, where=np.logical_not(zero_index))
+>>>>>>> 92f43d8 (fix: UserWarning in numpy 2.4.0)
 
 
 def prepare_probabilities_and_nps(_nps: int, _weights: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
