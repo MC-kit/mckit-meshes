@@ -57,7 +57,7 @@ def test_get_override_strategy(tmp_path, exists, override):
             actual = strategy(out)
             assert actual.exists()
         else:
-            with pytest.raises(FileExistsError, match=str(out)):
+            with pytest.raises(FileExistsError, match=out.stem):
                 strategy(out)
     else:
         strategy = get_override_strategy(override=override)
