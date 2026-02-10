@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, TextIO
+from typing import TYPE_CHECKING, Literal, TextIO, cast
 
 import logging
 
@@ -26,19 +26,24 @@ from mckit_meshes.utils import raise_error_when_file_exists_strategy, rebin
 if TYPE_CHECKING:
     from collections.abc import Callable, Generator, Iterable
 
-    from numpy.typing import ArrayLike
+    from numpy.typing import ArrayLike, NDArray
 
-__LOG = logging.getLogger(__name__)
+    from mckit_meshes.wgtmesh import GeometrySpec
+
+__LOG = logging.getLogger("mckit_meshes.fmesh")
 
 
 def _expand_args(args):
     """Adapter to invoke rebin.
 
-    Args:
-        args: what to rebin and how
+    Parameters
+    ----------
+    args
+        what to rebin and how
 
-    Returns:
-        Rebinned result
+    Returns
+    -------
+    Rebinned result
     """
     return rebin.rebin_nd(*args)
 
@@ -48,15 +53,13 @@ class FMesh:
 
     Class to load MCNP FMESH output file, process and write in various formats.
     Processing includes normalization, merging and conversion to weights mesh.
-
-    Attrs:
-        NPZ_MARK: Signature to be stored in the of meta entry in a npz file.
-            This is used to check that the file is for FMesh object.
-        NPZ_FORMAT: Identifies version of format of data stored in npz file.
     """
 
     NPZ_MARK = np.int16(5445)
+    """Signature to be stored in the of meta entry in a npz file."""
+
     NPZ_FORMAT = np.int16(4)
+    """Identifies version of format of data stored in npz file."""
 
     class FMeshError(RuntimeError):
         """FMesh class specific exception."""
@@ -75,23 +78,32 @@ class FMesh:
     ) -> None:
         """Construct FMesh instance object.
 
-        Args:
-            name: FMESH tally number
-            kind: neutron, photon or generic number if not a particle kind
-            geometry_spec: mesh geometry specification
-            ebins: Energy bin boundaries.
-            data: Data values at centers of mesh cells.
-                  Shape (Ne-1)x(Nx-1)x(Ny-1)x(Nz-1), where Ne, Nx, Ny and Nz - the number
-                  of corresponding bin boundaries.
-            errors:
-                Relative errors of corresponding data values.
+        Parameters
+        ----------
+        name
+            FMESH tally number
+        kind
+            neutron, photon or generic number if not a particle kind
+        geometry_spec
+            mesh geometry specification
+        ebins
+            Energy bin boundaries.
+        data
+            Data values at centers of mesh cells.
                 Shape (Ne-1)x(Nx-1)x(Ny-1)x(Nz-1), where Ne, Nx, Ny and Nz - the number
                 of corresponding bin boundaries.
-            totals: Can be provided with 'Total' data from mesh file,
-                    if there are more than 1 energy bin, optional.
-            totals_err: Can be provided with data from mesh file,
-                    if there are more than 1 energy bin, optional.
-            comment: Comment from a meshtal file (content of FC card in MCNP model).
+        errors
+            Relative errors of corresponding data values.
+            Shape (Ne-1)x(Nx-1)x(Ny-1)x(Nz-1), where Ne, Nx, Ny and Nz - the number
+            of corresponding bin boundaries.
+        totals
+            Can be provided with 'Total' data from mesh file,
+            if there are more than 1 energy bin, optional.
+        totals_err
+            Can be provided with data from mesh file,
+            if there are more than 1 energy bin, optional.
+        comment
+            Comment from a meshtal file (content of FC card in MCNP model).
         """
         self.name = int(name)
         self.kind = Kind(kind)  # may be not a particle kind, when this is a sum of heating
@@ -104,15 +116,17 @@ class FMesh:
         self.bins["Y"] = self._y = geometry_spec.jbins
         self.bins["Z"] = self._z = geometry_spec.kbins
         self.bins["E"] = self._e = np.asarray(ebins)
-        self.data = np.asarray(data)
-        self.errors = np.asarray(errors)
+        self.data = np.asarray(data, dtype=float)
+        self.errors = np.asarray(errors, dtype=float)
         if self._e.size > 2:
             if totals is None:
                 if totals_err is not None:
                     raise ValueError("totals are omitted but totals_err are provided")
-                self._totals = np.sum(self.data, axis=0)
+                self._totals: NDArray[np.floating] | None = np.sum(self.data, axis=0)
                 non_zero = self._totals > 0.0
-                self._totals_err = np.zeros_like(self._totals)
+                self._totals_err: NDArray[np.floating] | None = np.zeros_like(
+                    self._totals, dtype=float
+                )
                 self._totals_err[non_zero] = (
                     np.sqrt(np.sum((self.errors * self.data) ** 2, axis=0))[non_zero]
                     / self._totals[non_zero]
@@ -139,7 +153,8 @@ class FMesh:
 
         If True, then totals and totals err should present.
 
-        Returns:
+        Returns
+        -------
             True if there are more than one energy bins.
         """
         return self.e.size > 2
@@ -153,8 +168,9 @@ class FMesh:
     def jbins(self) -> np.ndarray:
         """Synonym to geometry jbins (y or Z).
 
-        Returns:
-            jbins from the geometry spec
+        Returns
+        -------
+        jbins from the geometry spec
         """
         return self._geometry_spec.jbins
 
@@ -162,18 +178,19 @@ class FMesh:
     def kbins(self) -> np.ndarray:
         """Synonym to geometry kbins (z or Theta).
 
-        Returns:
-            kbins from the geometry spec
+        Returns
+        -------
+        kbins from the geometry spec
         """
         return self._geometry_spec.kbins
 
     @property
-    def totals(self) -> np.ndarray | None:
+    def totals(self) -> NDArray | None:
         """Total values over energy."""
         return self._totals
 
     @property
-    def totals_err(self) -> np.ndarray | None:
+    def totals_err(self) -> NDArray | None:
         """Relative errors of total values over energy."""
         return self._totals_err
 
@@ -183,30 +200,38 @@ class FMesh:
         return self._comment
 
     @property
-    def origin(self) -> np.ndarray:
+    def origin(self) -> NDArray:
         """Get origin for cylinder mesh."""
-        return self._geometry_spec.origin
+        if isinstance(self._geometry_spec, gc.CylinderGeometrySpec):
+            return self._geometry_spec.origin
+        raise TypeError
 
     @property
-    def axis(self) -> np.ndarray:
+    def axis(self) -> NDArray:
         """Get axis of a cylinder mesh."""
-        return self._geometry_spec.axs
+        if isinstance(self._geometry_spec, gc.CylinderGeometrySpec):
+            return self._geometry_spec.axs
+        raise TypeError
 
     @property
     def vec(self) -> np.ndarray:
         """Get Theta reference direction for cylinder mesh."""
-        return self._geometry_spec.vec
+        if isinstance(self._geometry_spec, gc.CylinderGeometrySpec):
+            return self._geometry_spec.vec
+        raise TypeError
 
     @property
     def is_cylinder(self) -> bool:
-        """Is this mesh cylinder?
+        """Check, if this mesh is cylinder.
 
-        Note:
-            MCNP uses `origin` on mesh tally specification, both rectilinear and cylinder,
-            but outputs origin only for cylinder mesh.
+        Note
+        ----
+        MCNP uses `origin` on mesh tally specification, both rectilinear and cylinder,
+        but outputs origin only for cylinder mesh.
 
-        Returns:
-            True if this is a cylinder mesh.
+        Returns
+        -------
+        True: if this is a cylinder mesh.
         """
         return self._geometry_spec.cylinder
 
@@ -220,13 +245,14 @@ class FMesh:
     def total_precision(self) -> float:
         """Get total precision of this mesh.
 
-        Returns:
-            total precision from totals or errors, if there are no totals.
+        Returns
+        -------
+        total precision from totals or errors, if there are no totals.
         """
-        if self.has_multiple_energy_bins:
-            return self.totals_err[
-                -1
-            ]  # TODO dvp: assumes max energy bin is most representative, check usage
+        if self.has_multiple_energy_bins and self.totals_err is not None:
+            return cast(
+                "float", self.totals_err[-1]
+            )  # TODO dvp: assumes max energy bin is most representative, check usage
         return self.errors[0, 0, 0, 0].item()
 
     def check_attributes(self) -> None:
@@ -244,22 +270,28 @@ class FMesh:
     def is_equal_by_geometry(self, other: FMesh) -> bool:
         """Check if the meshes are equivalent by geometry.
 
-        Args:
-          other: mesh to compare to
+        Parameters
+        ----------
+        other
+            mesh to compare to
 
-        Returns:
-            True, if this mesh is equal to other by geometry, otherwise False
+        Returns
+        -------
+        True, if this mesh is equal to other by geometry, otherwise False
         """
         return self._geometry_spec == other._geometry_spec
 
     def is_equal_by_mesh(self, other: FMesh) -> bool:
         """Check if the meshes are equivalent by kind and geometry.
 
-        Args:
-          other: "FMesh":
+        Parameters
+        ----------
+        other
+            "FMesh" to compare to
 
-        Returns:
-            True, if this mesh is equal to other by kind and geometry, otherwise False
+        Returns
+        -------
+        True, if this mesh is equal to other by kind and geometry, otherwise False
         """
         return (
             self.kind == other.kind
@@ -270,11 +302,14 @@ class FMesh:
     def has_better_precision_than(self, other: FMesh) -> bool:
         """Compare precision achieved for the meshes.
 
-        Args:
-            other: mesh
+        Parameters
+        ----------
+        other
+            mesh
 
-        Returns:
-            True if this mesh is more precise than other one.
+        Returns
+        -------
+        True if this mesh is more precise than other one.
         """
         assert self.is_equal_by_mesh(other), "Incompatible meshes for precision comparison."
         return self.total_precision < other.total_precision
@@ -282,14 +317,19 @@ class FMesh:
     def surrounds_point(self, x: float, y: float, z: float, *, local: bool = True) -> bool:
         """Check if a point x,y,z is within the mesh spatial grid.
 
-        Args:
-            x: point's coordinate x
-            y: ... y
-            z: ... z
-            local: if True the point coordinates are local for the mesh
+        Parameters
+        ----------
+        x
+            point's coordinate x
+        y
+            ... y
+        z
+            ... z
+        local: if True the point coordinates are local for the mesh
 
-        Returns:
-            True if point is within the mesh's grid.
+        Returns
+        -------
+        True, if the point is within the mesh's grid.
         """
         return self._geometry_spec.surrounds_point(x, y, z, local=local)
 
@@ -299,17 +339,22 @@ class FMesh:
         y: float,
         z: float,
     ) -> tuple[ArrayLike, ArrayLike, ArrayLike] | None:
-        """Gets energy spectrum at the specified point.
+        """Get energy spectrum at the specified point.
 
-        Args:
-            x: X, Y and Z coordinate of the point where energy spectrum is
+        Parameters
+        ----------
+        x
+            X, Y and Z coordinate of the point where energy spectrum is
                 required. If point is located outside the mesh, zeros are returned.
-            y: ...
-            z: ...
+        y
+            ...
+        z
+            ...
 
-        Returns:
-            ebins, data, err or None
-                Energy bin boundaries, group energy spectrum and relative errors.
+        Returns
+        -------
+        ebins, data, err or None
+            Energy bin boundaries, group energy spectrum and relative errors.
         """
         key_index: dict[int, Literal["X", "Y", "Z"]] = {0: "X", 1: "Y", 2: "Z"}
         values = [x, y, z]
@@ -335,37 +380,50 @@ class FMesh:
 
         If coordinate is not specified, then return all the points along this coordinate.
 
-        Args:
-            x:  (Default value = None)
-            y:  (Default value = None)
-            z:  (Default value = None)
+        Parameters
+        ----------
+        x
+            (Default value = None)
+        y
+            (Default value = None)
+        z
+            (Default value = None)
 
-        Returns:
-            tuple of indexes along the coordinates
+        Returns
+        -------
+        tuple of indexes along the coordinates
         """
         return self._geometry_spec.select_indexes(i_values=x, j_values=y, k_values=z)
 
     def get_totals(
         self,
         *,
-        x: ArrayLike = None,
-        y: ArrayLike = None,
-        z: ArrayLike = None,
+        x: ArrayLike | None = None,
+        y: ArrayLike | None = None,
+        z: ArrayLike | None = None,
     ) -> tuple[np.ndarray, np.ndarray] | None:
         """Get total values for specified grid points.
 
         If a coordinate is not specified, then all the points along this coordinate.
 
-        Args:
-            x:  (Default value = None)
-            y:  (Default value = None)
-            z:  (Default value = None)
+        Parameters
+        ----------
+        x
+            (Default value = None)
+        y
+            (Default value = None)
+        z
+            (Default value = None)
 
-        Returns:
-            totals, total_err for the specified coordinates
+        Returns
+        -------
+        totals, total_err for the specified coordinates
         """
         if self._totals is None:
             return None
+        if self._totals_err is None:
+            msg = "No totals, but totals_err is specified"
+            raise ValueError(msg)
         found_x, found_y, found_z = self.select_indexes(x=x, y=y, z=z)
         totals, rel_error = (
             self._totals[found_x, found_y, found_z],
@@ -378,14 +436,17 @@ class FMesh:
         filename: Path,
         check_existing_file_strategy=raise_error_when_file_exists_strategy,
     ) -> None:
-        """Writes this object to numpy npz file.
+        """Write this object to numpy npz file.
 
-        Args:
-            filename: Filename to which the object is saved. If file is a
-                file-object, then the filename is unchanged. If file is a string,
-                a .npz extension will be appended to the file name if it does not
-                already have one. By default, the name of file is the tally name.
-            check_existing_file_strategy: what to do if an output file already exists
+        Parameters
+        ----------
+        filename
+            Filename to which the object is saved. If file is a
+            file-object, then the filename is unchanged. If file is a string,
+            a .npz extension will be appended to the file name if it does not
+            already have one. By default, the name of file is the tally name.
+        check_existing_file_strategy
+            what to do if an output file already exists
         """
         if filename.suffix != ".npz":
             filename = filename.with_suffix(".npz")
@@ -413,17 +474,21 @@ class FMesh:
             kwd["axis"] = np.array(self._geometry_spec.axs)
 
         filename.parent.mkdir(parents=True, exist_ok=True)
+        # TODO @dvp: the following uses pickles to save object, this works, but it's not good
         np.savez_compressed(str(filename), **kwd)
 
     @classmethod
     def load_npz(cls, _file: str | Path) -> FMesh:
-        """Loads Fmesh object from the binary file.
+        """Load Fmesh object from the binary file.
 
-        Args:
-          _file: npz-file to load from.
+        Parameters
+        ----------
+        _file
+            npz-file to load from.
 
-        Returns:
-            The loaded FMesh object.
+        Returns
+        -------
+        The loaded FMesh object.
         """
         if isinstance(_file, Path):
             _file = str(_file)
@@ -472,6 +537,8 @@ class FMesh:
                 if origin is None:
                     geometry_spec = gc.CartesianGeometrySpec(x, y, z)
                 else:
+                    if axis is None:
+                        raise ValueError
                     geometry_spec = gc.CylinderGeometrySpec(x, y, z, origin=origin, axs=axis)
                 return cls(
                     name,
@@ -487,19 +554,23 @@ class FMesh:
             raise FMesh.FMeshError(f"Invalid version {version} for FMesh file")
 
     def save2vtk(self, filename: str | None = None, data_name: str | None = None) -> str:
-        """Saves this fmesh data to vtk file.
+        """Save this fmesh data to vtk file.
 
         Data is saved for every energy bin and, if there are multiple energy bins,
         for total values (sum across energy axis).
 
-        Args:
-            filename: Name of file to which this object is stored. A .vtk extension will
-                be appended. By default, the name of file is the tally name.
-            data_name: Name of data which will appear in vtk file. If None, tally name
-                and type will be used.
+        Parameters
+        ----------
+        filename
+            Name of file to which this object is stored. A .vtk extension will
+            be appended. By default, the name of file is the tally name.
+        data_name
+            Name of data which will appear in vtk file. If None, tally name
+            and type will be used.
 
-        Returns:
-            Full path to saved VTK file.
+        Returns
+        -------
+        Full path to saved VTK file.
         """
         assert not self.is_cylinder, "Not implemented for cylinder geometry"
         # TODO dvp: implement for cylinder geometry (see iwwgvr or F4Enix projects for example).
@@ -518,12 +589,13 @@ class FMesh:
             cell_data[name] = np.sum(self.data, axis=0)
         return gridToVTK(filename, self.ibins, self.jbins, self.kbins, cellData=cell_data)
 
-    # noinspection PyUnresolvedReferences,PyTypeChecker
     def save_2_mcnp_mesh(self, stream: TextIO) -> None:
-        """Saves the mesh in a file in a format similar to mcnp mesh tally textual representation.
+        """Save this mesh in a file in a format of mcnp mesh tally textual representation.
 
-        Args:
-            stream: stream to store the mesh.
+        Parameters
+        ----------
+        stream
+            stream to store the mesh.
         """
 
         def format_comment(a: FMesh) -> str:
@@ -593,6 +665,8 @@ class FMesh:
                         print(row, file=stream)
 
         if self._totals:
+            if self._totals_err is None:
+                raise ValueError
             for ix in range(x.size):
                 for iy in range(y.size):
                     for iz in range(z.size):
@@ -607,15 +681,24 @@ class FMesh:
     def total_by_energy(self, new_name: int = 0) -> FMesh:
         """Integrate over energy bins.
 
-        Args:
-            new_name: name for new `FMesh`  (Default value = 0)
+        Parameters
+        ----------
+        new_name
+            name for new `FMesh`  (Default value = 0)
 
-        Returns:
-            The new FMesh object with only one energy bin.
+        Returns
+        -------
+        The new FMesh object with only one energy bin.
         """
         e = np.array([self.e[0], self.e[-1]])
-        data = self.totals[np.newaxis, ...]
-        errors = self.totals_err[np.newaxis, ...]
+        if self._totals:
+            if not self._totals_err:
+                raise ValueError
+            data = self._totals[np.newaxis, ...]
+            errors = self._totals_err[np.newaxis, ...]
+        else:
+            data = self.data.sum(axis=0)
+            errors = np.sqrt(np.pow(self.data * self.errors, 2).sum(axis=0))
         return FMesh(new_name, self.kind, self._geometry_spec, e, data, errors)
 
     def shrink(
@@ -632,19 +715,30 @@ class FMesh:
     ) -> FMesh:
         """Select subset of e-voxels within given geometry and energy limits.
 
-        Args:
-            emin:  limits for new bins
-            emax:  (Default value = None)
-            xmin:  (Default value = None)
-            xmax:  (Default value = None)
-            ymin:  (Default value = None)
-            ymax:  (Default value = None)
-            zmin:  (Default value = None)
-            zmax:  (Default value = None)
-            new_name: name for mesh to be created, default -1.
+        Parameters
+        ----------
+        emin
+            min energy
+        emax
+            max enegry
+        xmin
+            (Default value = None)
+        xmax
+            (Default value = None)
+        ymin
+            (Default value = None)
+        ymax
+            (Default value = None)
+        zmin
+            (Default value = None)
+        zmax
+            (Default value = None)
+        new_name
+            name for mesh to be created, default -1.
 
-        Returns:
-            A new FMesh with reduced bins.
+        Returns
+        -------
+        A new FMesh with reduced bins.
         """
         trim_spec = list(
             rebin.trim_spec_composer(
@@ -657,6 +751,9 @@ class FMesh:
         _, new_errors = rebin.shrink_nd(self.errors, iter(trim_spec), assume_sorted=True)
 
         assert all(np.array_equal(a, b) for a, b in zip(new_bins_list, _, strict=False))
+
+        if new_bins_list is None:
+            raise ValueError
 
         new_ebins, new_xbins, new_ybins, new_zbins = new_bins_list
         if self.totals is None:
@@ -698,15 +795,22 @@ class FMesh:
     ) -> FMesh:
         """Extract data for a new spatial grid.
 
-        Args:
-            new_x: A new binning over X axis.
-            new_y: A new binning over Y axis.
-            new_z: A new binning over Z axis.
-            new_name: A name for the rebinned mesh to be created. (Default value = -1)
-            extra_process_threshold:  At which size of data use multiple Python processes
+        Parameters
+        ----------
+        new_x
+            A new binning over X axis.
+        new_y
+            A new binning over Y axis.
+        new_z
+            A new binning over Z axis.
+        new_name
+            A name for the rebinned mesh to be created. (Default value = -1)
+        extra_process_threshold
+            At which size of data use multiple Python processes
 
-        Returns:
-            New FMesh object with the rebinned data.
+        Returns
+        -------
+        New FMesh object with the rebinned data.
         """
         assert not self.is_cylinder, "Not implemented for cylinder meshes"
 
@@ -763,14 +867,20 @@ class FMesh:
     ) -> FMesh:
         """Create FMesh object corresponding to this one by fluxes, but over new mesh.
 
-        Ags:
-            new_x: A new binning over X axis.
-            new_y: A new binning over Y axis.
-            new_z: A new binning over Z axis.
-            new_name: name for the rebinned mesh to be created.
+        Parameters
+        ----------
+        new_x
+            A new binning over X axis.
+        new_y
+            A new binning over Y axis.
+        new_z
+            A new binning over Z axis.
+        new_name
+            name for the rebinned mesh to be created.
 
-        Returns:
-            New FMesh object with the rebinned data.
+        Returns
+        -------
+        New FMesh object with the rebinned data.
         """
         assert not self.is_cylinder, "Not implemented for cylinder meshes"
 
@@ -815,6 +925,8 @@ class FMesh:
     def format_cylinder_origin_and_axis_label(self) -> str:
         """Format the first string for cylinder mesh."""
         if self.is_cylinder:
+            if not isinstance(self._geometry_spec, gc.CylinderGeometrySpec):
+                raise TypeError
             return (
                 f"\n  Cylinder origin at {' '.join(self._geometry_spec.origin)}, "
                 f"axis in {' '.join(self._geometry_spec.axs)} direction\n"
@@ -824,16 +936,22 @@ class FMesh:
     def __eq__(self, other) -> bool:
         if not isinstance(other, FMesh):
             return False
-        res = (
+        res: bool = (
             self.name == other.name
             and self.is_equal_by_mesh(other)
             and np.array_equal(self.data, other.data)
             and np.array_equal(self.errors, other.errors)
             and self.comment == other.comment
         )
-        if res and self._totals:
-            res = np.all(np.isclose(self.totals, other.totals)) and np.all(
-                np.isclose(self.totals_err, other.totals_err),
+        if res and self.totals and other.totals:
+            if self.totals_err is None or other.totals_err is None:
+                raise ValueError
+            res = cast(
+                "bool",
+                np.all(np.isclose(self.totals, other.totals))
+                and np.all(
+                    np.isclose(self.totals_err, other.totals_err),
+                ),
             )
         return res
 
@@ -876,23 +994,28 @@ def merge_tallies(
     *tally_weight: tuple[FMesh, float],
     comment: str | None = None,
 ) -> FMesh:
-    """Makes superposition of tallies with specific weights.
+    """Make superposition of tallies with specific weights.
 
-    Args:
-        name: Name of new fmesh tally.
-        kind: Type of new fmesh tally. It can be -1 (or any arbitrary integer).
-        tally_weight: List of tally-weight pairs (tuples). tally is FMesh instance. weight
-                    is float.
-        comment: A comment to assign to the new mesh tally
+    Parameters
+    ----------
+    name
+        Name of new fmesh tally.
+    kind
+        Type of new fmesh tally. It can be -1 (or any arbitrary integer).
+    tally_weight
+        List of tally-weight pairs (tuples). tally is FMesh instance. weight is float.
+    comment
+        A comment to assign to the new mesh tally
 
-    Returns:
-        The merged FMesh.
+    Returns
+    -------
+    The merged FMesh.
     """
     result_data = None
     errors = None
     geometry_spec = None
     ebins = None
-    for t, w in tally_weight:  # type: FMesh, float
+    for t, w in tally_weight:
         if result_data is None:
             result_data = t.data * w
             errors = (t.errors * t.data * w) ** 2
@@ -902,10 +1025,15 @@ def merge_tallies(
             result_data += t.data * w
             errors += (t.errors * t.data * w) ** 2
             assert geometry_spec == t._geometry_spec
+            if ebins is None:
+                raise ValueError
             assert np.array_equal(
                 ebins.size,
                 t.e.size,
-            )  # allow merging neutron and photon heating meshes
+            )
+    if result_data is None or errors is None or geometry_spec is None or ebins is None:
+        raise ValueError
+
     nonzero_idx = np.logical_and(result_data > 0.0, errors > 0.0)
     result_error = np.zeros_like(result_data)
     result_error[nonzero_idx] = np.sqrt(errors[nonzero_idx]) / result_data[nonzero_idx]
@@ -921,15 +1049,20 @@ def merge_tallies(
 
 
 def read_meshtal(stream: TextIO, select=None, mesh_file_info=None) -> list[FMesh]:
-    """Reads fmesh tallies from a stream.
+    """Read fmesh tallies from a stream.
 
-    Args:
-        stream: The text stream to read.
-        select: Selects the meshes actually to process (Default value = None)
-        mesh_file_info: object to collect information from m-file header (Default value = None)
+    Parameters
+    ----------
+    stream
+        The text stream to read.
+    select
+        Selects the meshes actually to process (Default value = None)
+    mesh_file_info
+        object to collect information from m-file header (Default value = None)
 
-    Returns:
-        The list of individual fmesh tally.
+    Returns
+    -------
+    The list of individual fmesh tally.
     """
     next(stream)  # TODO dvp check if we need to store problem time stamp
     next(stream)  # TODO dvp check if we need to store problem title
@@ -940,23 +1073,29 @@ def read_meshtal(stream: TextIO, select=None, mesh_file_info=None) -> list[FMesh
     return list(iter_meshtal(stream, select))
 
 
-def _iterate_bins(stream, _n, _with_ebins):
+def _iterate_bins(stream, _n):
     """Parse line with mesh values.
 
-    Args:
-        stream: stream of strings
-        _n: number of items
-        _with_ebins: are ebins specified
+    Parameters
+    ----------
+    stream
+        stream of strings
+    _n
+        number of items
+    _with_ebins
+        are ebins specified
 
-    Yields:
-        pairs value - error
+    Yields
+    ------
+    pairs value - error
     """
-    value_start, value_end = (39, 51) if _with_ebins else (30, 42)
     for _ in range(_n):
-        _line = next(stream).lstrip()
-        _value = float(_line[value_start:value_end])
-        _error = float(_line[value_end:])
-        if _value < 0.0:
+        __line = next(stream).strip()
+        _line = __line[-24:]  # space of minus, 11 chars - value, space or minus, 11 chars error
+        _value = float(_line[:-12])
+        _error = float(_line[-12:])
+        if _value < 0.0 or _error < 0.0:
+            __LOG.warning("Negative values in mesh, line: %s", __line)
             _value = _error = 0.0
         yield _value
         yield _error
@@ -968,17 +1107,21 @@ def iter_meshtal(
     name_select: Callable[[int], bool] | None = None,
     tally_select: Callable[[FMesh], bool] | None = None,
 ) -> Generator[FMesh]:
-    """Iterates fmesh tallies from fid.
+    """Iterate fmesh tallies from stream.
 
-    Args:
-        fid: A stream to read meshes from.
-        name_select: A function returning True,
-            if tally name is acceptable, otherwise skips tally reading and parsing
-        tally_select: A function returning True,
-            if total tally content is acceptable
+    Parameters
+    ----------
+    fid
+        A stream to read meshes from.
+    name_select
+        A function returning True, if tally name is acceptable,
+        otherwise skips tally reading and parsing
+    tally_select
+        A function returning True, if total tally content is acceptable
 
-    Yields:
-        Mesh tallies filtered.
+    Yields
+    ------
+    Mesh tallies filtered.
     """
     try:
         while True:
@@ -1026,7 +1169,7 @@ def iter_meshtal(
                         ],
                     )
 
-                    geometry_spec = gc.CylinderGeometrySpec(
+                    geometry_spec: GeometrySpec = gc.CylinderGeometrySpec(
                         ibins,
                         jbins,
                         kbins,
@@ -1037,7 +1180,7 @@ def iter_meshtal(
                     ebins = np.array(
                         [float(w) for w in _find_words_after(fid, "Energy", "bin", "boundaries:")],
                     )
-                    with_ebins = check_ebins(
+                    _with_ebins = check_ebins(
                         fid,
                         ["Energy", "R", "Z", "Th", "Result", "Rel", "Error"],
                     )
@@ -1058,7 +1201,7 @@ def iter_meshtal(
                     ebins = np.array(
                         [float(w) for w in _find_words_after(fid, "Energy", "bin", "boundaries:")],
                     )
-                    with_ebins = check_ebins(
+                    _with_ebins = check_ebins(
                         fid,
                         ["Energy", "X", "Y", "Z", "Result", "Rel", "Error"],
                     )
@@ -1066,19 +1209,23 @@ def iter_meshtal(
                 spatial_bins_size = geometry_spec.bins_size
                 bins_size = spatial_bins_size * (ebins.size - 1)
 
-                data_items = np.fromiter(_iterate_bins(fid, bins_size, with_ebins), dtype=float)
+                data_items = np.fromiter(_iterate_bins(fid, bins_size), dtype=float)
                 data_items = data_items.reshape(bins_size, 2)
                 shape = (ebins.size - 1, *geometry_spec.bins_shape)
                 data, error = data_items[:, 0].reshape(shape), data_items[:, 1].reshape(shape)
 
                 def _iterate_totals(stream, totals_number):
-                    """Reading totals.
+                    """Read totals.
 
-                    Args:
-                        stream: sequence or stream of strings
-                        totals_number: number of items to read
+                    Parameters
+                    ----------
+                    stream
+                        sequence or stream of strings
+                    totals_number
+                        number of items to read
 
-                    Yields:
+                    Yields
+                    ------
                         total values and errors
                     """
                     for _ in range(totals_number):
@@ -1091,9 +1238,9 @@ def iter_meshtal(
                 if ebins.size > 2:  # Totals are not output if there's only one bin in energy domain
                     totals_items = np.fromiter(_iterate_totals(fid, spatial_bins_size), dtype=float)
                     totals_items = totals_items.reshape(spatial_bins_size, 2)
-                    shape = geometry_spec.bins_shape
-                    totals = totals_items[:, 0].reshape(shape)
-                    totals_err = totals_items[:, 1].reshape(shape)
+                    totals_shape = geometry_spec.bins_shape
+                    totals = totals_items[:, 0].reshape(totals_shape)
+                    totals_err = totals_items[:, 1].reshape(totals_shape)
                 else:
                     totals = None
                     totals_err = None
@@ -1122,17 +1269,20 @@ def check_ebins(fid: Iterable[str], keys: list[str]) -> bool:
     If next nonempty line starts with a word keys[0] (i.e. "Energy"), then the energy bins present.
     Also check that the remaining keys correspond to the nonempty line.
 
-    Args:
-        fid: text rows to scan, including prepending empty rows
-        keys: sequence of words to check
-        fid: Iterable[str]:
-        keys: List[str]:
+    Parameters
+    ----------
+    fid
+        text rows to scan, including prepending empty rows
+    keys
+        sequence of words to check
 
-    Returns:
-        True if energy bins are present, False otherwise.
+    Returns
+    -------
+    True if energy bins are present, False otherwise.
 
-    Raises:
-        ValueError: if keys don't correspond to the nonempty line.
+    Raises
+    ------
+    ValueError: if keys don't correspond to the nonempty line.
     """
     title_line = _next_not_empty_line(fid)
     if title_line is None:
@@ -1150,11 +1300,14 @@ def check_ebins(fid: Iterable[str], keys: list[str]) -> bool:
 def _next_not_empty_line(f: Iterable[str]) -> list[str] | None:
     """Skip empty lines from a string sequence.
 
-    Args:
-        f: sequence or stream of strings
+    Parameters
+    ----------
+    f
+        sequence or stream of strings
 
-    Returns:
-        The first not empty line.
+    Returns
+    -------
+    The first not empty line.
     """
     for line in f:
         words = line.split()
@@ -1164,18 +1317,22 @@ def _next_not_empty_line(f: Iterable[str]) -> list[str] | None:
 
 
 def _find_words_after(f: TextIO, *keywords: str) -> list[str]:
-    """Searches for words that follow keywords.
+    """Search for words that follow keywords.
 
     The line from file f is read. Then it is split into words (by spaces).
     If its first words are the same as keywords, then remaining words (up to
     newline character) are returned. Otherwise, new line is read.
 
-    Args:
-        f: File in which words are searched.
-        keywords: List of keywords after which right words are. The order is important.
+    Parameters
+    ----------
+    f
+        File in which words are searched.
+    keywords
+        List of keywords after which right words are. The order is important.
 
-    Returns:
-        The list of words that follow keywords.
+    Returns
+    -------
+    The list of words that follow keywords.
     """
     for line in f:
         words: list[str] = line.split()
@@ -1199,26 +1356,28 @@ def m_2_npz(
     mesh_file_info=None,
     check_existing_file_strategy=raise_error_when_file_exists_strategy,
 ) -> int:
-    """Splits the tallies from the mesh file into separate npz files.
+    """Split the tallies from the mesh file into separate npz files.
 
-    Args:
-        stream: File with MCNP mesh tallies to read
-        prefix: Prefix for separate mesh files names
-        name_select:
-            Filter fmesh by names (default: no filter)
-        tally_select: function(FMesh)->bool
-            Filter fmesh by content. (default: no filter)
-        suffix:
-            Prefix for separate mesh files names
-        mesh_file_info: structure to store meshtal file header info: nps.
-        check_existing_file_strategy:
-            what to do if an output file already exists
-        stream: TextIO:
-        prefix: Path:
-        suffix: str:  (Default value = "")
+    Parameters
+    ----------
+    stream
+        File with MCNP mesh tallies to read
+    prefix
+        Prefix for separate mesh files names
+    name_select
+        Filter fmesh by names (default: no filter)
+    tally_select : function(FMesh)->bool
+        Filter fmesh by content. (default: no filter)
+    suffix
+        Prefix for separate mesh files names
+    mesh_file_info
+        structure to store meshtal file header info: nps.
+    check_existing_file_strategy
+        what to do if an output file already exists
 
-    Returns:
-        Total number of files created
+    Returns
+    -------
+    Total number of files created
     """
     next(stream)  # TODO dvp check if we need to store problem time stamp
     next(stream)  # TODO dvp check if we need to store problem title
@@ -1229,6 +1388,7 @@ def m_2_npz(
         mesh_file_info.nps = nps
     total = 0  # : ignore[SIM113]
     for t in iter_meshtal(stream, name_select=name_select, tally_select=tally_select):
+        __LOG.info("Tally: %s", t.name)
         if t.comment:
             __LOG.info("Comment: %s", t.comment)
         __LOG.info(
@@ -1239,6 +1399,14 @@ def m_2_npz(
             t.jbins[-1],
             t.kbins[0],
             t.kbins[-1],
+        )
+        __LOG.info("Total bins: %g", t.data.size)
+        __LOG.info("Max.value: %g", t.data.max())
+        non_zero_count = np.count_nonzero(t.data)
+        __LOG.info(
+            "Nonzero values count: %g, ratio: %.2g%%",
+            non_zero_count,
+            100.0 * non_zero_count / t.data.size,
         )
         t.save_2_npz(prefix / (str(t.name) + suffix), check_existing_file_strategy)
         total += 1
@@ -1252,12 +1420,16 @@ def fix_mesh_comment(mesh_no: int, comment: str) -> str:
     MCNP error: prints digits in front of comment when the tally
     number takes more than 3 digits.
 
-    Args:
-        mesh_no: mesh tally number
-        comment: ... comment
+    Parameters
+    ----------
+    mesh_no
+        mesh tally number
+    comment
+        - comment
 
-    Returns:
-        corrected comment
+    Returns
+    -------
+    corrected comment
     """
     str_mesh_no = f"{mesh_no}"
     chars_to_remove = len(str_mesh_no) - 3
@@ -1273,10 +1445,16 @@ def meshes_to_vtk(
 ) -> None:
     """Export FMesh objects to VTK files.
 
-    Args:
-        meshes: one or more meshes to output
-        out_dir: path to output directory
-        get_mesh_description_strategy: strategy to create a mesh description
+    Compute file names for different meshes from their properties: name, kind etc.
+
+    Parameters
+    ----------
+    meshes
+        one or more meshes to output
+    out_dir
+        path to output directory
+    get_mesh_description_strategy
+        strategy to create a mesh description from a mesh object
     """
     if out_dir:
         out_dir.mkdir(parents=True, exist_ok=True)

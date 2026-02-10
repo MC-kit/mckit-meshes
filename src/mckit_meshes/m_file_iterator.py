@@ -7,6 +7,17 @@ if TYPE_CHECKING:
 
 
 def m_file_iterator(stream: TextIO) -> Generator[list[str]]:
+    """Scan header and meshtallies from file.
+
+    Parameters
+    ----------
+    stream
+        ... to read from
+
+    Yields
+    ------
+    Header (the first 3 rows), then sequence of meshtallies (by list of strings)
+    """
     header: list[str] = []
     for _line in stream:
         if len(header) < 3:

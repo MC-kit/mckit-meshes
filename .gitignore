@@ -136,3 +136,4 @@ wrk/
 # local poetry config
 poetry.toml
 
+.vscode/

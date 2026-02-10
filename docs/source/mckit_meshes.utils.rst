@@ -11,22 +11,16 @@ mckit\_meshes.utils.cartesian\_product module
    :members:
    :undoc-members:
    :show-inheritance:
+   :no-index:
 
-mckit\_meshes.utils.io module
------------------------------
+mckit\_meshes.utils._io module
+------------------------------
 
-.. automodule:: mckit_meshes.utils.io
+.. automodule:: mckit_meshes.utils._io
    :members:
    :undoc-members:
    :show-inheritance:
 
-mckit\_meshes.utils.no\_daemon\_process module
-----------------------------------------------
-
-.. automodule:: mckit_meshes.utils.no_daemon_process
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 mckit\_meshes.utils.rebin module
 --------------------------------
@@ -36,13 +30,6 @@ mckit\_meshes.utils.rebin module
    :undoc-members:
    :show-inheritance:
 
-mckit\_meshes.utils.resource module
------------------------------------
-
-.. automodule:: mckit_meshes.utils.resource
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 mckit\_meshes.utils.testing module
 ----------------------------------
@@ -52,13 +39,6 @@ mckit\_meshes.utils.testing module
    :undoc-members:
    :show-inheritance:
 
-mckit\_meshes.utils.utils module
---------------------------------
-
-.. automodule:: mckit_meshes.utils.utils
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 Module contents
 ---------------

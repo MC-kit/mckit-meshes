@@ -1,0 +1,10 @@
+[src]
+include = ["src"]
+
+[terminal]
+output-format = "concise"
+
+[rules]
+unresolved-attribute = "ignore"  # ty doesn't see Path.open
+unresolved-import = "ignore"
+unsupported-operator = "ignore"  # ... Path / "xxx"

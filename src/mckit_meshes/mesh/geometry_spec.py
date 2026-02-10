@@ -44,10 +44,11 @@ import numpy.typing as npt
 from numpy import linalg
 
 from mckit_meshes.utils import cartesian_product, print_n
+from mckit_meshes.utils._io import format_floats
 
 if TYPE_CHECKING:
     # noinspection PyCompatibility
-    from collections.abc import Generator, Iterable, Sequence
+    from collections.abc import Iterable, Sequence
 
     import numpy.typing as npt
 
@@ -72,14 +73,18 @@ ZERO_ORIGIN: Final[Bins] = np.zeros((3,), dtype=float)
 def as_float_array(array: npt.ArrayLike) -> Bins:
     """Convert any sequence of numbers to numpy array of floats.
 
-    Note:
-        We rely on unified representation all the 'floats' with Python float.
+    Note
+    ----
+    We rely on unified representation all the 'floats' with Python float.
 
-    Args:
-        array: Anything that can be converted to numpy ndarray.
+    Parameters
+    ----------
+    array
+        Anything that can be converted to numpy ndarray.
 
-    Returns:
-        np.ndarray:  either original or conversion.
+    Returns
+    -------
+    either original or conversion.
     """
     return np.asarray(array, dtype=float)
 
@@ -90,17 +95,18 @@ class AbstractGeometrySpecData:
 
     Provides reusable data fields.
 
-    Notes:
-        The meaning of `origin` is different for cartesian and cylindrical meshes
+    Notes
+    -----
+    The meaning of `origin` is different for cartesian and cylindrical meshes
 
-        In cartesian mesh `origin` means most negative coordinates, all the coordinates
-        (ibins, jbins, kbins) are absolute
-        (or in coordinate system given with transformation).
+    In cartesian mesh `origin` means most negative coordinates, all the coordinates
+    (ibins, jbins, kbins) are absolute
+    (or in coordinate system given with transformation).
 
-        In cylindrical mesh `origin` is a center of a cylinder bottom,
-        the coordinates are relative to the coordinate system given
-        with `origin`, `axs` and `vec`.
-        Plus, if specified, in coordinate system given with transformation.
+    In cylindrical mesh `origin` is a center of a cylinder bottom,
+    the coordinates are relative to the coordinate system given
+    with `origin`, `axs` and `vec`.
+    Plus, if specified, in coordinate system given with transformation.
     """
 
     ibins: Bins
@@ -110,8 +116,9 @@ class AbstractGeometrySpecData:
     def __post_init__(self) -> None:
         """Force a caller provided data as numpy arrays.
 
-        Raises:
-            TypeError: if any of the fields is not a numpy array.
+        Raises
+        ------
+        TypeError: if any of the fields is not a numpy array.
         """
         for b in self.bins:
             if not isinstance(b, np.ndarray):  # pragma: no cover
@@ -130,8 +137,9 @@ class AbstractGeometrySpecData:
     def bins(self) -> tuple[Bins, ...]:
         """Pack the fields to tuple.
 
-        Returns:
-            tuple of bins.
+        Returns
+        -------
+        tuple of bins.
         """
         return self.ibins, self.jbins, self.kbins
 
@@ -143,7 +151,7 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
     @property
     @abc.abstractmethod
     def cylinder(self) -> bool:
-        """Is this an instance of a cylinder mesh specification?"""
+        """Check, if this is an instance of a cylinder mesh specification."""
 
     @abc.abstractmethod
     def get_origin(self) -> Bins:
@@ -153,16 +161,20 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
     def local_coordinates(self, points: Bins) -> Bins:
         """Convert points coordinates to local system.
 
-        Args:
-            points: ... with global coordinates
+        Parameters
+        ----------
+        points
+            ... with global coordinates
         """
 
     @abc.abstractmethod
     def get_mean_square_distance_weights(self, point: Bins) -> Bins:
         """Estimate weights as a voxel mean square distance from the point.
 
-        Args:
-            point: ... from where to compute distance
+        Parameters
+        ----------
+        point
+            ... from where to compute distance
         """
 
     @abc.abstractmethod
@@ -173,9 +185,12 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
     def print_geom(self, io: TextIO, indent: str) -> None:
         """Print geometry specification.
 
-        Args:
-            io: stream to print to
-            indent: indent to insert before lines
+        Parameters
+        ----------
+        io
+            stream to print to
+        indent
+            indent to insert before lines
         """
 
     # Generic methods
@@ -184,8 +199,9 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
     def bins_shape(self) -> tuple[int, int, int]:
         """Shape of data corresponding to spatial bins.
 
-        Returns:
-            Tuple with the data shape.
+        Returns
+        -------
+        Tuple with the data shape.
         """
         return (self.ibins.size - 1), (self.jbins.size - 1), (self.kbins.size - 1)
 
@@ -193,8 +209,9 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
     def bins_size(self) -> int:
         """Size of data corresponding to spatial bins.
 
-        Returns:
-            int: number of voxels
+        Returns
+        -------
+        int: number of voxels
         """
         return (self.ibins.size - 1) * (self.jbins.size - 1) * (self.kbins.size - 1)
 
@@ -234,13 +251,18 @@ class AbstractGeometrySpec(AbstractGeometrySpecData, abc.ABC):
     ) -> tuple[int | slice | npt.NDArray, int | slice | npt.NDArray, int | slice | npt.NDArray]:
         """Select indices for data corresponding to given spatial values.
 
-        Args:
-            i_values: indices along i (X or R) dimension
-            j_values: ... along j (Y or Z)
-            k_values: ... along k (Z or Theta)
+        Parameters
+        ----------
+        i_values
+            indices along i (X or R) dimension
+        j_values
+            ... along j (Y or Z)
+        k_values
+            ... along k (Z or Theta)
 
-        Returns:
-            see :func:`select_indexes()`
+        Returns
+        -------
+        see :func:`select_indexes()`
         """
         return (
             select_indexes(self.ibins, i_values),
@@ -322,14 +344,17 @@ class CartesianGeometrySpec(AbstractGeometrySpec):
 class CylinderGeometrySpec(AbstractGeometrySpec):
     """Cylinder spec.
 
-    Attributes:
-        axs: cylinder axis
-        vec: vector to measure angle (theta) from
+    Attributes
+    ----------
+    axs
+        cylinder axis
+    vec
+        vector to measure angle (theta) from
     """
 
     origin: Bins
-    axs: np.ndarray = field(default_factory=lambda: DEFAULT_AXIS.copy())
-    vec: np.ndarray = field(default_factory=lambda: DEFAULT_VEC.copy())
+    axs: np.ndarray = field(default_factory=DEFAULT_AXIS.copy)
+    vec: np.ndarray = field(default_factory=DEFAULT_VEC.copy)
 
     def __post_init__(self):
         super().__post_init__()
@@ -374,13 +399,13 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
 
     def local_coordinates(self, points: np.ndarray) -> np.ndarray:
         assert points.shape[-1] == 3, "Expected cartesian point array or single point"
-        assert np.array_equal(
-            self.axs,
-            DEFAULT_AXIS,
-        ), "Tilted cylinder meshes are not implemented yet"
-        assert (
-            np.array_equal(self.vec, DEFAULT_VEC) or self.vec[1] == 0.0  # vec is in xz plane
-        ), "Tilted cylinder meshes are not implemented yet"
+        # assert np.array_equal(
+        #     self.axs,
+        #     DEFAULT_AXIS,
+        # ), "Tilted cylinder meshes are not implemented yet"
+
+        # self.axs should be parallel to DEFAULT_AXIS, i.e. Z-axis
+        assert self._axis_is_z_aligned(), "Tilted cylinder meshes are not implemented yet"
         # TODO dvp: implement tilted cylinder meshes
         local_points: np.ndarray = points - self.origin
         local_points[..., :] = (
@@ -390,6 +415,9 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
             * _1_TO_2PI,  # theta in rotations
         )
         return local_points
+
+    def _axis_is_z_aligned(self):
+        return self.axs[0] == 0.0 and self.axs[1] == 0.0
 
     # TODO dvp: add opposite method global_coordinates
 
@@ -488,10 +516,9 @@ class CylinderGeometrySpec(AbstractGeometrySpec):
             - `self.vec` is in PY=0 plane
             - `self.axs` is vertical
 
-        Returns:
+        Returns
         -------
-        gs:
-            new CylinderGeometrySpec with adjusted `axs` and `vec` attributes.
+        new CylinderGeometrySpec with adjusted `axs` and `vec` attributes.
         """
         # TODO dvp: fix for arbitrary axs and vec
         axs = self.origin + DEFAULT_AXIS * self.z[-1]
@@ -529,47 +556,52 @@ def select_indexes(
 
     Assumes that `a` is sorted.
 
-    Examples:
-        >>> r = np.arange(5)
-        >>> r
-        array([0, 1, 2, 3, 4])
+    Examples
+    --------
+    >>> r = np.arange(5)
+    >>> r
+    array([0, 1, 2, 3, 4])
 
-        For x is None return slice over all `a` indexes.
+    For x is None return slice over all `a` indexes.
 
-        >>> select_indexes(r, None)
-        slice(0, 5, None)
+    >>> select_indexes(r, None)
+    slice(0, 5, None)
 
-        For none specified x, if input array represents just one bin,
-        then return index 0 to squeeze results.
-        >>> select_indexes(np.array([10, 20]), None)
-        0
+    For none specified x, if input array represents just one bin,
+    then return index 0 to squeeze results.
+    >>> select_indexes(np.array([10, 20]), None)
+    0
 
-        For x = 1.5, we have 1 < 1.5 < 2, so the bin index is to be 1
-        >>> select_indexes(r, 1.5)
-        1
+    For x = 1.5, we have 1 < 1.5 < 2, so the bin index is to be 1
+    >>> select_indexes(r, 1.5)
+    1
 
-        For x = 0, it's the first bin, and index is to be 0
-        >>> select_indexes(r, 0)
-        0
+    For x = 0, it's the first bin, and index is to be 0
+    >>> select_indexes(r, 0)
+    0
 
-        For coordinates below r[0] return -1.
-        >>> select_indexes(r, -1)
-        -1
+    For coordinates below r[0] return -1.
+    >>> select_indexes(r, -1)
+    -1
 
-        For coordinates above  r[-1] return a.size-1.
-        >>> select_indexes(r, 5)
-        4
+    For coordinates above  r[-1] return a.size-1.
+    >>> select_indexes(r, 5)
+    4
 
-        And for array of coordinates
-        >>> select_indexes(r, np.array([1.5, 0, -1, 5]))
-        array([ 1,  0, -1,  4])
+    And for array of coordinates
+    >>> select_indexes(r, np.array([1.5, 0, -1, 5]))
+    array([ 1,  0, -1,  4])
 
-    Args:
-        a:  bin boundaries
-        x: one or more coordinates along `a`-boundaries
+    Parameters
+    ----------
+    a
+        bin boundaries
+    x
+        one or more coordinates along `a`-boundaries
 
-    Returns:
-        index or indices for each given coordinate
+    Returns
+    -------
+    index or indices for each given coordinate
     """
     assert a.size > 1, "Parameter a doesn't represent binning"
 
@@ -593,20 +625,14 @@ def select_indexes(
     return i
 
 
-def format_floats(floats: Iterable[float], _format: str = "{:.6g}") -> Generator[str]:
-    def _fmt(item: float) -> str:
-        return _format.format(item)
-
-    yield from map(_fmt, floats)
-
-
 def compute_intervals_and_coarse_bins(
     arr: Sequence[float],
     tolerance: float = 1.0e-4,
 ) -> tuple[list[int], Sequence[float]]:
     """Compute fine intervals and coarse binning.
 
-    Examples:
+    Examples
+    --------
     Find equidistant bins and report as intervals
     >>> arry = np.array([1, 2, 3, 4], dtype=float)
     >>> arry
@@ -632,12 +658,16 @@ def compute_intervals_and_coarse_bins(
     >>> coarse is arry
     True
 
-    Args:
-        arr: actual bins
-        tolerance: precision to distinguish intervals with
+    Parameters
+    ----------
+    arr
+        actual bins
+    tolerance
+        precision to distinguish intervals with
 
-    Returns:
-        Tuple: numbers of fine intervals between coarse bins, coarse binning
+    Returns
+    -------
+    Tuple: numbers of fine intervals between coarse bins, coarse binning
     """
     if tolerance <= 0.0:
         return [1] * (len(arr) - 1), arr

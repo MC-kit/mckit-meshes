@@ -6,10 +6,9 @@ from io import StringIO
 
 import pytest
 
-from mckit_meshes.utils import print_cols, print_n
+from mckit_meshes.utils import get_override_strategy, print_cols, print_n
 
 if TYPE_CHECKING:
-    # noinspection PyCompatibility
     from collections.abc import Iterable
 
 
@@ -45,3 +44,22 @@ def test_print_n(seq: Iterable[Any], indent: str, columns: int, expected: str, m
     print_n(seq, buf, indent, columns)
     actual = buf.getvalue()
     assert actual == expected, "Text: " + msg
+
+
+@pytest.mark.parametrize("exists", [True, False])
+@pytest.mark.parametrize("override", [True, False])
+def test_get_override_strategy(tmp_path, exists, override):
+    out = tmp_path / "test_get_override_strategy.txt"
+    if exists:
+        out.touch()
+        strategy = get_override_strategy(override=override)
+        if override:
+            actual = strategy(out)
+            assert actual.exists()
+        else:
+            with pytest.raises(FileExistsError, match=out.stem):
+                strategy(out)
+    else:
+        strategy = get_override_strategy(override=override)
+        actual = strategy(out)
+        assert not actual.exists()

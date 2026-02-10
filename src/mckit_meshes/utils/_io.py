@@ -2,67 +2,109 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import IO, TYPE_CHECKING, Any
 
+import logging
 import sys
 
+from collections.abc import Iterable
 from pathlib import Path
 
+from eliot import start_action
+
 if TYPE_CHECKING:
-    # noinspection PyCompatibility
+    from collections.abc import Generator
+
+
+def format_floats(floats: Iterable[float], _format: str = "{:.6g}") -> Generator[str]:
+    def _fmt(item: float) -> str:
+        return _format.format(item)
+
+    yield from map(_fmt, floats)
+
+
+__LOG = logging.getLogger("mckit_meshes.utils._io")
+
+if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
 
-    from _typeshed import SupportsWrite
+
+def ignore_existing_file_strategy(path: Path) -> Path:
+    """Do nothing if file exists.
+
+    Parameters
+    ----------
+    path
+        a path to check
+
+    Returns
+    -------
+    ``path`` regardless if it exists or not (for chaining calls)
+    """
+    return path
 
 
-def ignore_existing_file_strategy(_: str | Path) -> None:
-    """Do nothing if file exists."""
-
-
-def raise_error_when_file_exists_strategy(path: str | Path) -> None:
+def raise_error_when_file_exists_strategy(path: Path) -> Path:
     """Strategy to use when file exists.
 
-    Args:
-        path: path to check
+    Parameters
+    ----------
+    path
+        a path to check
 
-    Raises:
-        FileExistsError: if `path` exits.
+    Raises
+    ------
+        FileExistsError: if a `path` exits.
+
+    Returns
+    -------
+    `path` if it does not exist (for chaining calls)
     """
-    path = Path(path)
     if path.exists():
         errmsg = f"""\
 Cannot override existing file \"{path}\".
 Please remove the file or specify --override option"""
         raise FileExistsError(errmsg)
+    return path
 
 
-def check_if_path_exists(*, override: bool) -> Callable[[str | Path], None]:
+def get_override_strategy(*, override: bool) -> Callable[[Path], Path]:
     """Select strategy to handle existing files, depending on option `override`.
 
-    Args:
-        override: if True ignore the case if file exists, otherwise rise Error
+    Parameters
+    ----------
+    override
+        if ``True`` ignore the case if file exists, otherwise rise :class:`FileExistsError`
 
-    Returns:
-        The selected strategy.
+    Returns
+    -------
+    :py:meth:`ignore_existing_file_strategy` if ovrride,
+    otherwise - :py:meth:`raise_error_when_file_exists_strategy`".
     """
     return ignore_existing_file_strategy if override else raise_error_when_file_exists_strategy
 
 
 def print_cols(
     seq: Iterable[Any],
-    fid: SupportsWrite[str] = sys.stdout,
+    fid: IO[str] = sys.stdout,
     max_columns: int = 6,
     fmt: str = "{}",
 ) -> int:
     """Print sequence in columns.
 
-    Args:
-        seq: sequence to print
-        fid: output
-        max_columns: max columns in a line
-        fmt: format string
+    Parameters
+    ----------
+    seq
+        sequence to print
+    fid
+        output
+    max_columns
+        max columns in a line
+    fmt
+        format string
 
-    Returns:
+    Returns
+    -------
         int: the number of the last column printed on the last row
     """
     i = 0
@@ -80,7 +122,7 @@ def print_cols(
 
 def print_n(
     words: Iterable,
-    io: SupportsWrite[str] = sys.stdout,
+    io: IO[str] = sys.stdout,
     indent: str = "",
     max_columns: int = 5,
 ) -> None:
@@ -88,11 +130,16 @@ def print_n(
 
     If anything was printed, add a newline.
 
-    Args:
-        words: sequence ot items to print
-        io: where to print
-        indent: indent to apply starting the second row
-        max_columns: max number of columns in row
+    Parameters
+    ----------
+    words
+        sequence ot items to print
+    io
+        where to print
+    indent
+        indent to apply starting the second row
+    max_columns
+        max number of columns in row
     """
     column = 0
     for w in words:
@@ -108,3 +155,30 @@ def print_n(
         print(to_print, end="", file=io)
     if column > 0:
         print(file=io)
+
+
+def revise_files(ext: str, *files: Path) -> tuple[Path, ...]:
+    """Find files by extension, if files are not specified.
+
+    Log warning if files are neither specified nor found.
+
+    Parameters
+    ----------
+    ext
+        Extension to search for.
+
+    Returns
+    -------
+    Specified, if available, otherwise found.
+    """
+    if files:
+        return files
+
+    with start_action(action_type="look for meshtally files") as logger:
+        cwd = Path.cwd()
+        files = tuple(cwd.glob(f"*.{ext}"))
+        if not files:
+            cwd = cwd.absolute()
+            logger.log(message_type="WARNING", reason=f"No .{ext}-files found", directory=cwd)
+            __LOG.warning("nothing to do: no .%s-files in %s", ext, cwd)
+        return files

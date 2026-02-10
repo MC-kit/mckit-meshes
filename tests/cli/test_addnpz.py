@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import numpy as np
 import pytest
 
-from mckit_meshes.cli.runner import mckit_meshes
+from mckit_meshes.__main__ import app as mckit_meshes
 from mckit_meshes.fmesh import FMesh
 
 
@@ -12,23 +14,20 @@ def source(data):
     return data / "1.m"
 
 
-def test_help(runner):
-    result = runner.invoke(mckit_meshes, args=["add", "--help"], catch_exceptions=False)
-    assert result.exit_code == 0
-    assert "Usage: " in result.output
+def test_help(cyclopts_runner):
+    out = cyclopts_runner(mckit_meshes, ["add", "--help"])
+    assert "Usage: " in out
 
 
-def test_add_with_out_specified(runner, cd_tmpdir, data):
-    out = cd_tmpdir / "1+2.npz"
+def test_add_with_out_specified(cyclopts_runner, data):
+    out = Path.cwd() / "1+2.npz"
     m1 = data / "1004.npz"  # the two meshes differ only by name
     m2 = data / "2004.npz"
-    result = runner.invoke(
+    cyclopts_runner(
         mckit_meshes,
-        args=["add", "-o", str(out), str(m1), str(m2)],
-        catch_exceptions=False,
+        ["add", "-o", str(out), str(m1), str(m2)],
     )
-    assert result.exit_code == 0
-    assert out.exists()
+    assert out.exists(), f"Should create output file {out}"
     mesh_out = FMesh.load_npz(out)
     mesh1 = FMesh.load_npz(m1)
     mesh2 = FMesh.load_npz(m2)
@@ -37,14 +36,25 @@ def test_add_with_out_specified(runner, cd_tmpdir, data):
     assert mesh1.errors[idx] / np.sqrt(2) == pytest.approx(mesh_out.errors[idx])
 
 
-def test_add_with_out_not_specified(runner, cd_tmpdir, data):
-    out = cd_tmpdir / "1004+2004.npz"
+def test_add_with_out_not_specified(cyclopts_runner, data):
+    out = Path.cwd() / "1004+2004.npz"
     m1 = data / "1004.npz"  # the two meshes differ only by name
     m2 = data / "2004.npz"
-    result = runner.invoke(
+    cyclopts_runner(
         mckit_meshes,
-        args=["add", str(m1), str(m2)],
-        catch_exceptions=False,
+        ["add", str(m1), str(m2)],
     )
-    assert result.exit_code == 0
     assert out.exists()
+
+
+def test_add_with_override_specified(cyclopts_runner, data):
+    out = Path.cwd() / "1004+2004.npz"
+    m1 = data / "1004.npz"  # the two meshes differ only by name
+    m2 = data / "2004.npz"
+    out.touch()
+    assert out.stat().st_size == 0
+    cyclopts_runner(
+        mckit_meshes,
+        ["add", "--override", str(m1), str(m2)],
+    )
+    assert out.stat().st_size > 0

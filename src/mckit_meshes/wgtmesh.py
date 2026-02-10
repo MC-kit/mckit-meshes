@@ -7,13 +7,13 @@ from typing import TYPE_CHECKING, NamedTuple, TextIO
 import sys
 
 from dataclasses import dataclass
-from enum import IntEnum
 
 import numpy as np
 
 import mckit_meshes.mesh.geometry_spec as gs
 
-from mckit_meshes.utils import print_n
+from mckit_meshes.particle_kind import ParticleKind
+from mckit_meshes.utils import format_floats, print_n
 
 if TYPE_CHECKING:
     # noinspection PyCompatibility
@@ -29,18 +29,13 @@ def ensure_float_arrays(*arrays: ArrayLike) -> Generator[np.ndarray]:
     yield from (np.asarray(x, dtype=float) for x in arrays)
 
 
-class Particles(IntEnum):
-    """Particle kind enum."""
-
-    neutron = 0
-    photon = 1
-    n = 0
-    p = 1
+class MergeSpec(NamedTuple):
+    wm: WgtMesh
+    nps: int
 
 
-# noinspection GrazieInspection,PyUnresolvedReferences
 class WgtMesh:
-    """Class to work with MCNP weight window files."""
+    """Class represent information from MCNP weight window files."""
 
     def __init__(
         self,
@@ -61,7 +56,7 @@ class WgtMesh:
         print("wwge:n", end=" ", file=io)
         second_indent = " " * 15
         print_n(
-            gs.format_floats(self.energies[0][1:]),
+            format_floats(self.energies[0][1:]),
             io=io,
             indent=second_indent,
             max_columns=columns,
@@ -69,7 +64,7 @@ class WgtMesh:
         if len(self.energies) > 1:
             print("wwge:p", end=" ", file=io)
             print_n(
-                gs.format_floats(self.energies[1][1:]),
+                format_floats(self.energies[1][1:]),
                 io=io,
                 indent=second_indent,
                 max_columns=columns,
@@ -91,7 +86,7 @@ class WgtMesh:
         print(indent, "emesh=", sep="", end="", file=io)
         second_indent = indent + " " * 6
         print_n(
-            gs.format_floats(self.energies[0][1:]),
+            format_floats(self.energies[0][1:]),
             io=io,
             indent=second_indent,
             max_columns=columns,
@@ -103,7 +98,7 @@ class WgtMesh:
             print(indent, "emesh=", sep="", end="", file=io)
             # TODO dvp: try to use do_print_bins here
             print_n(
-                gs.format_floats(self.energies[1][1:]),
+                format_floats(self.energies[1][1:]),
                 io=io,
                 indent=second_indent,
                 max_columns=columns,
@@ -132,23 +127,23 @@ class WgtMesh:
                 raise ValueError(msg)
 
     @property
-    def energies(self) -> list[ArrayLike]:
+    def energies(self) -> list[np.ndarray]:
         return self._energies
 
     @property
-    def origin(self) -> ArrayLike:
+    def origin(self) -> np.ndarray:
         return self._geometry_spec.origin
 
     @property
-    def ibins(self) -> ArrayLike:
+    def ibins(self) -> np.ndarray:
         return self._geometry_spec.ibins
 
     @property
-    def jbins(self) -> ArrayLike:
+    def jbins(self) -> np.ndarray:
         return self._geometry_spec.jbins
 
     @property
-    def kbins(self) -> ArrayLike:
+    def kbins(self) -> np.ndarray:
         return self._geometry_spec.kbins
 
     @property
@@ -172,20 +167,30 @@ class WgtMesh:
     def is_cylinder(self) -> bool:
         return self._geometry_spec.cylinder
 
+    def _ensure_is_cylinder_mesh(self) -> gs.CylinderGeometrySpec:
+        if not isinstance(self._geometry_spec, gs.CylinderGeometrySpec):
+            msg = "Only applicable to CylinderGeometrySpec"
+            raise TypeError(msg)
+        return self._geometry_spec
+
     @property
     def axs(self) -> np.ndarray | None:
-        return self._geometry_spec.axs
+        return self._ensure_is_cylinder_mesh().axs
 
     @property
     def vec(self) -> np.ndarray | None:
-        return self._geometry_spec.vec
+        return self._ensure_is_cylinder_mesh().vec
 
     @property
     def count_parts(self) -> int:
         return len(self.weights)
 
-    def part(self, particle: Particles) -> tuple[np.ndarray, np.ndarray]:
-        return self.energies[particle], self.weights[particle]
+    def part(self, particle: ParticleKind) -> tuple[np.ndarray, np.ndarray]:
+        if particle not in (ParticleKind.neutron, ParticleKind.photon):
+            msg = "Weight particle is to be either 'neutron' or 'photon'"
+            raise ValueError(msg)
+        idx = particle.value - 1
+        return self.energies[idx], self.weights[idx]
 
     def __hash__(self):
         return hash(
@@ -196,7 +201,9 @@ class WgtMesh:
             ),
         )
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, WgtMesh):
+            return False
         if not self.bins_are_equal(other):
             return False
         for p in range(len(self.weights)):
@@ -205,9 +212,6 @@ class WgtMesh:
         return True
 
     def bins_are_equal(self, other: WgtMesh) -> bool:
-        if not isinstance(other, WgtMesh):
-            msg = f"Invalid class of object to compare: {other.__class__}"
-            raise TypeError(msg)
         if self._geometry_spec == other.geometry_spec:
             le = len(self.energies)
             if le == len(other.energies):
@@ -247,7 +251,7 @@ class WgtMesh:
 
     # noinspection SpellCheckingInspection
     def write(self, stream: TextIO) -> None:
-        """Writes the mesh to stream.
+        """Write the mesh to stream.
 
         See WWINP format, MCNP User Manual, Appendix J, Table J.1
 
@@ -339,11 +343,14 @@ class WgtMesh:
 
         See format description at MCNP User Manual, Version 5 (p.489 or Appendix J, p. J-1)
 
-        Args:
-            f: Input file in WWINP format
+        Parameters
+        ----------
+        f
+            Input file in WWINP format
 
-        Returns:
-            WgtMesh: loaded mesh.
+        Returns
+        -------
+        loaded mesh.
         """
         _if, _iv, number_of_particles, number_of_parameters = (
             int(s) for s in f.readline().split()[:4]
@@ -361,10 +368,13 @@ class WgtMesh:
         # coarse bins along axes
         _ncx, _ncy, _ncz = reader.get_ints_written_as_floats(3)
         if number_of_parameters == 16:
+            # origin
+            origin = np.array([_x0, _y0, _z0], dtype=float)
             _xmax, _ymax, _zmax, _xr, _yr, _zr = reader.get_floats(6)
             axs = np.array([_xmax, _ymax, _zmax], dtype=float)
             vec = np.array([_xr, _yr, _zr], dtype=float)
         else:
+            origin = None
             axs = None
             vec = None
 
@@ -401,7 +411,7 @@ class WgtMesh:
                 assert np.all(
                     np.transpose(_wp_data.reshape((nep, _nfz, _nfy, _nfx)), (0, 3, 2, 1)) == _wp,
                 )
-        geometry_spec = make_geometry_spec(_x, _y, _z, [_x0, _y0, _z0], axs=axs, vec=vec)
+        geometry_spec = make_geometry_spec(_x, _y, _z, origin=origin, axs=axs, vec=vec)
         return cls(geometry_spec, _e, _w)
 
     def get_mean_square_distance_weights(self, point) -> WgtMesh:
@@ -418,54 +428,54 @@ class WgtMesh:
             _w,
         )
 
-    class MergeSpec(NamedTuple):
-        wm: WgtMesh
-        nps: int
-
     @classmethod
     def merge(cls, *merge_specs: MergeSpec | tuple[WgtMesh, int]) -> MergeSpec:
         r"""Combine weight meshes produced from different runs with weighting factor.
 
-        Note:
-            Importance of a mesh voxel `i` is $1/w_i$ and is proportional
-            to average portion $p_i$ of passing particle weight W to a tally,
-            for which the weight mesh is computed.
-            To obtain combined weight on merging two meshes,
-            we will combine the probabilities using weighting factors and
-            use reciprocal of a result as a resulting weight of mesh voxel.
-            The weighting factors are usually NPS (Number particles sampled)
-            from a run on which a mesh was produced.
+        Note
+        ----
 
-            The combined probability in resulting voxel `i` is:
+        Importance of a mesh voxel `i` is :math:`1/w_i` and is proportional
+        to average portion :math:`p_i` of passing particle weight `W` to a tally,
+        for which the weight mesh is computed.
+        To obtain combined weight on merging two meshes,
+        we will combine the probabilities using weighting factors and
+        use reciprocal of a result as a resulting weight of mesh voxel.
+        The weighting factors are usually NPS (Number of Particles Sampled)
+        from a run on which a mesh was produced.
 
-            .. math::
+        The combined probability in resulting voxel `i` is:
 
-                w_ij - weight in voxel i of mesh j
-                n_j -  nps - weighting factor on combining of mesh j
+        .. math::
 
-                p_ij = 1/w_ij - probability for voxel i of mesh j
+            w_ij - weight in voxel i of mesh j
 
-                p_i = \frac{ \sum_j{n_j*p_ij} { \sum_j{n_j} }
+            n_j -  nps - weighting factor on combining of mesh j
 
-            So, the resulting voxel `i` weight level is:
+            p_ij = 1/w_ij - probability for voxel i of mesh j
 
-            .. math::
-                w_i = \frac{1} {p_i}
+            p_i = \frac{ \sum_j{n_j*p_ij} { \sum_j{n_j} }
 
+        So, the resulting voxel `i` weight level is:
 
-        Args:
-            merge_specs: iterable of pairs (WgtMesh, nps), where `nps` is weighting factor
+        .. math::
 
-        Returns:
-            MergeSpec: merged weights and total nps (or sum of weighting factors)
+            w_i = \frac{1} {p_i}
 
 
+        Parameters
+        ----------
+        merge_specs
+            iterable of pairs (WgtMesh, nps), where `nps` is weighting factor
 
+        Returns
+        -------
+        MergeSpec: merged weights and total nps (or sum of weighting factors)
         """
         first = merge_specs[0]
 
-        if not isinstance(first, WgtMesh.MergeSpec):
-            first = WgtMesh.MergeSpec(*first)  # convert tuple to MergeSpec
+        if not isinstance(first, MergeSpec):
+            first = MergeSpec(*first)  # convert tuple to MergeSpec
 
         if len(merge_specs) > 1:
             second = WgtMesh.merge(*merge_specs[1:])
@@ -483,7 +493,7 @@ class WgtMesh:
                 ) * reciprocal(nps)
                 merged_weights.append(reciprocal(combined_probabilities))
             wm = first.wm
-            return WgtMesh.MergeSpec(
+            return MergeSpec(
                 cls(
                     wm.geometry_spec,
                     wm.energies,
@@ -499,10 +509,9 @@ class WgtMesh:
 
         To be used for anti-forward method of weight generation.
 
-        Returns:
+        Returns
         -------
-        out:
-            Reciprocal of this weights
+        Reciprocal of this weights
         """
         return WgtMesh(self._geometry_spec, self.energies, list(map(reciprocal, self.weights)))
 
@@ -516,13 +525,18 @@ class WgtMesh:
 
         All other voxels are scaled proportionally.
 
-        Args:
-            normalization_point:  Coordinates of point where the weights should equal `value`.
-            normalized_value: The value which should be at `normalization_point`
-            energy_bin: index of energy bin at which set normalized value, default - the last one.
+        Parameters
+        ----------
+        normalization_point
+            Coordinates of point where the weights should equal `value`.
+        normalized_value
+            The value which should be at `normalization_point`
+        energy_bin
+            index of energy bin at which set normalized value, default - the last one.
 
-        Returns:
-            New normalized weights.
+        Returns
+        -------
+        New normalized weights.
         """
         _gs = self._geometry_spec
         x, y, z = normalization_point
@@ -541,18 +555,23 @@ class WgtMesh:
         return WgtMesh(_gs, self.energies, new_weights)
 
     def invert(self, normalization_point: Point, normalized_value: float = 1.0) -> WgtMesh:
-        """Get reciprocal of self weights and normalize to 1 at given point.
+        """Get reciprocal of self weights and normalize to `normalization_value` at given point.
 
-        Important:
-            A caller specifies normalization_point in local coordinates.
-            See :class:`GeometrySpec.local_coordinates`.
+        Important
+        ---------
+        A caller specifies normalization_point in local coordinates.
+        See :class:`GeometrySpec.local_coordinates`.
 
-        Args:
-            normalization_point: Point at which output weights should be 1
-            normalized_value: value which should be set at `normalization_point`.
+        Parameters
+        ----------
+        normalization_point
+            Point at which output weights should be 1
+        normalized_value
+            value which should be set at `normalization_point`.
 
-        Returns:
-            WgtMesh: Normalized reciprocal of self weights.
+        Returns
+        -------
+        WgtMesh: Normalized reciprocal of self weights.
         """
         return self.reciprocal().normalize(normalization_point, normalized_value)
 
@@ -588,26 +607,26 @@ def reciprocal(a: np.ndarray, zero_index: np.ndarray | None = None) -> np.ndarra
         zero_index = a == 0.0
     else:
         assert np.array_equal(zero_index, a == 0.0)
-    result: np.ndarray = np.reciprocal(a, where=np.logical_not(zero_index))
-    # this fixes bug in numpy reciprocal: it doesn't pass zero values
-    # note: the bug doesn't show up on debugging
-    result[zero_index] = 0.0
-    return result
+    result = np.zeros_like(a)
+    return np.reciprocal(a, out=result, where=np.logical_not(zero_index))
 
 
 def prepare_probabilities_and_nps(_nps: int, _weights: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    """Computes intermediate data for merging procedure.
+    """Compute intermediate data for merging procedure.
 
     The probabilities are reciprocals to weights.
-    Zero weights mean zero probabilities and don't affect the merged result.
+    Zero weights mean missed probabilities and don't affect the merged result.
 
-    Args:
-        _nps:
-            weighting multiplier
-        _weights:
-            weights to convert to probabilities
-    Returns:
-        normalization factors and probabilities
+    Parameters
+    ----------
+    _nps
+        weighting multiplier
+    _weights
+        weights to convert to probabilities
+
+    Returns
+    -------
+    normalization factors and probabilities
     """
     nps_array = np.full_like(_weights, _nps, dtype=int)
     zero_index = _weights == 0.0
@@ -666,6 +685,10 @@ def parse_coordinates(inp: list[str]) -> np.ndarray:
                 yield from res[:-1]
             prev_coordinate = coordinate
             prev_fine_bins = fine_bins
+
+        if prev_coordinate is None:
+            raise ValueError("Invalid mesh spec")
+
         yield prev_coordinate
 
     return np.fromiter(iter_over_fine_mesh(iter_over_coarse_mesh()), dtype=float)
@@ -676,33 +699,38 @@ def make_geometry_spec(ibins, jbins, kbins, origin=None, axs=None, vec=None) -> 
 
     The parameters are converted to numpy arrays.
 
-    Args:
-        ibins:  X or R bins
-        jbins:  Y or Z bins
-        kbins:  Z or Theta bins
-        origin: origin point
-        axs:    Cylinder mesh axis
-        vec:    Cylinder mesh angle reference vector
+    Parameters
+    ----------
+    ibins
+        X or R bins
+    jbins
+        Y or Z bins
+    kbins
+        Z or Theta bins
+    origin
+        origin point
+    axs
+        Cylinder mesh axis
+    vec
+        Cylinder mesh angle reference vector
 
-    Returns:
-        spec - new geometry specification
+    Returns
+    -------
+    new geometry specification
     """
-    origin, ibins, jbins, kbins = (
-        np.asarray(x, dtype=float) for x in (origin, ibins, jbins, kbins)
-    )
+    ibins, jbins, kbins = (np.asarray(x, dtype=float) for x in (ibins, jbins, kbins))
     if axs is None:
         geometry_spec = gs.CartesianGeometrySpec(ibins, jbins, kbins)
         if origin is not None and not np.array_equal(origin, geometry_spec.origin):
             msg = "Incompatible cartesian bins and origin"
             raise ValueError(msg)
-    else:
-        axs, vec = map(np.asarray, [axs, vec])
-        geometry_spec = gs.CylinderGeometrySpec(
-            ibins,
-            jbins,
-            kbins,
-            origin=origin,
-            axs=axs,
-            vec=vec,
-        )
-    return geometry_spec
+        return geometry_spec
+    axs, vec = map(np.asarray, [axs, vec])
+    return gs.CylinderGeometrySpec(
+        ibins,
+        jbins,
+        kbins,
+        origin=origin,
+        axs=axs,
+        vec=vec,
+    )

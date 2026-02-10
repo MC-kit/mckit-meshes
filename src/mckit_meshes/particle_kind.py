@@ -11,16 +11,17 @@ class ParticleKind(IntEnum):
     neutron = 1
     photon = 2
     electron = 3
-    n = 1
-    p = 2
-    e = 3
+    n = neutron
+    p = photon
+    e = electron
 
     @property
     def short(self) -> str:
         """One letter synonym for a long name.
 
-        Returns:
-            the fires letter of the name
+        Returns
+        -------
+        the first letter of the name
         """
         return self.name[0]
 
@@ -28,11 +29,13 @@ class ParticleKind(IntEnum):
     def heating_reactions(self) -> str:
         """MCNP specified heating reactions for neutrons and photons.
 
-        Returns:
-            reaction specification for neutron or photon particle
+        Returns
+        -------
+        reaction specification for neutron or photon particle
 
-        Raises:
-            ValueError: if there's no specification for the particle
+        Raises
+        ------
+        ValueError: if there's no specification for the particle
         """
         if self is self.n:
             return "1 -4"
