@@ -665,14 +665,8 @@ class FMesh:
                         print(row, file=stream)
 
         if self._totals:
-<<<<<<< Updated upstream
             if self._totals_err is None:
                 raise ValueError
-||||||| Stash base
-=======
-            if not self._totals_err:
-                raise ValueError
->>>>>>> Stashed changes
             for ix in range(x.size):
                 for iy in range(y.size):
                     for iz in range(z.size):
@@ -697,15 +691,6 @@ class FMesh:
         The new FMesh object with only one energy bin.
         """
         e = np.array([self.e[0], self.e[-1]])
-<<<<<<< Updated upstream
-        if self.totals is None or self.totals_err is None:
-            raise ValueError  # TODO @dvp: on absent totals compute them
-        data = self.totals[np.newaxis, ...]
-        errors = self.totals_err[np.newaxis, ...]
-||||||| Stash base
-        data = self.totals[np.newaxis, ...]
-        errors = self.totals_err[np.newaxis, ...]
-=======
         if self._totals:
             if not self._totals_err:
                 raise ValueError
@@ -714,7 +699,6 @@ class FMesh:
         else:
             data = self.data.sum(axis=0)
             errors = np.sqrt(np.pow(self.data*self.errors, 2).sum(axis=0))
->>>>>>> Stashed changes
         return FMesh(new_name, self.kind, self._geometry_spec, e, data, errors)
 
     def shrink(
@@ -768,15 +752,9 @@ class FMesh:
 
         assert all(np.array_equal(a, b) for a, b in zip(new_bins_list, _, strict=False))
 
-<<<<<<< Updated upstream
         if new_bins_list is None:
             raise ValueError
-||||||| Stash base
-=======
-        if new_bins_list is None:
-            raise ValueError
-        
->>>>>>> Stashed changes
+
         new_ebins, new_xbins, new_ybins, new_zbins = new_bins_list
         if self.totals is None:
             new_totals = None
