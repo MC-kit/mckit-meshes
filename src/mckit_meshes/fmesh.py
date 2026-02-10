@@ -698,7 +698,7 @@ class FMesh:
             errors = self._totals_err[np.newaxis, ...]
         else:
             data = self.data.sum(axis=0)
-            errors = np.sqrt(np.pow(self.data*self.errors, 2).sum(axis=0))
+            errors = np.sqrt(np.pow(self.data * self.errors, 2).sum(axis=0))
         return FMesh(new_name, self.kind, self._geometry_spec, e, data, errors)
 
     def shrink(

@@ -6,7 +6,6 @@ from importlib import metadata as _meta
 from importlib.metadata import PackageNotFoundError, version
 
 if __package__ is not None:
-
     try:
         __version__ = version(__package__)
     except PackageNotFoundError:  # pragma: no cover
