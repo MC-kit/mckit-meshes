@@ -7,12 +7,12 @@ from typing import TYPE_CHECKING, NamedTuple, TextIO
 import sys
 
 from dataclasses import dataclass
-from enum import IntEnum
 
 import numpy as np
 
 import mckit_meshes.mesh.geometry_spec as gs
 
+from mckit_meshes.particle_kind import ParticleKind
 from mckit_meshes.utils import format_floats, print_n
 
 if TYPE_CHECKING:
@@ -27,15 +27,6 @@ Point = np.ndarray
 
 def ensure_float_arrays(*arrays: ArrayLike) -> Generator[np.ndarray]:
     yield from (np.asarray(x, dtype=float) for x in arrays)
-
-
-class Particles(IntEnum):
-    """Particle kind enum."""
-
-    neutron = 0
-    photon = 1
-    n = 0
-    p = 1
 
 
 class MergeSpec(NamedTuple):
@@ -194,8 +185,12 @@ class WgtMesh:
     def count_parts(self) -> int:
         return len(self.weights)
 
-    def part(self, particle: Particles) -> tuple[np.ndarray, np.ndarray]:
-        return self.energies[particle], self.weights[particle]
+    def part(self, particle: ParticleKind) -> tuple[np.ndarray, np.ndarray]:
+        if particle not in (ParticleKind.neutron, ParticleKind.photon):
+            msg = "Weight particle is to be either 'neutron' or 'photon'"
+            raise ValueError(msg)
+        idx = particle.value - 1
+        return self.energies[idx], self.weights[idx]
 
     def __hash__(self):
         return hash(
