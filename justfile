@@ -37,7 +37,6 @@ export JUST_LOG := log
       ".cache"
       ".eggs"
       ".mypy_cache"
-      ".nox"
       ".pytest_cache"
       ".ruff_cache"
       ".venv"
