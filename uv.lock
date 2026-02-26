@@ -676,7 +676,7 @@ wheels = [
 
 [[package]]
 name = "esbonio"
-version = "1.0.0"
+version = "1.1.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiosqlite" },
@@ -685,9 +685,9 @@ dependencies = [
     { name = "pygls" },
     { name = "websockets" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b5/85/03b0944176b7eca5174959dc6f6606ddd87e054a91e8174a593eb8723e06/esbonio-1.0.0.tar.gz", hash = "sha256:9d1c3d3e074b3f7fe285147cd713fbda0290472864756772020aebf19f5935c0", size = 123653, upload-time = "2025-10-28T20:03:15.425Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c3/72/9fe15777287679f3898ee67c06755b5703731b3998af81f3957f12db5484/esbonio-1.1.0.tar.gz", hash = "sha256:9000192d8a71e0e244e5143f7f6d74dcd1ec59a06b8dda4b13a6dbf6ac0e9190", size = 124101, upload-time = "2026-02-19T21:27:47.904Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/73/a6/e1368fc807e7abe7ca7ef224e9c13f96be7c943be364e6ff869e96d7e633/esbonio-1.0.0-py3-none-any.whl", hash = "sha256:049aa76d5d637f0f79c86d690de4b74bc2be302c68425c4fe6c83b241ac0634c", size = 118424, upload-time = "2025-10-28T20:03:13.855Z" },
+    { url = "https://files.pythonhosted.org/packages/09/5c/e78e79b637cdb8e4862936d0440a80e43facdcc215a2166e7da8aa916937/esbonio-1.1.0-py3-none-any.whl", hash = "sha256:753e96d17848c4d5b6fd830bb8875de3fc039513bef122c0e56c2644a6c23d05", size = 118160, upload-time = "2026-02-19T21:27:46.15Z" },
 ]
 
 [[package]]
