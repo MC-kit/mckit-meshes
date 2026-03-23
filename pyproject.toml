@@ -31,7 +31,6 @@ dependencies = [
   "pyevtk>=1.4",
   "toolz>=0.11",
 ]
-
 optional-dependencies.plot = [
   "jupyterlab>=4.4.10",
   "jupytext>=1.18.1",
@@ -56,7 +55,7 @@ test = [
   "pytest-emoji>=0.2",
   "pytest-mock>=3.14",
   "xdoctest>=1.2",
-  { include-group = "coverage" }, # coverage may be used on its own, see GHA test
+  { include-group = "coverage" },  # coverage may be used on its own, see GHA test
 ]
 docs = [
   "esbonio>=0.16.5",
@@ -66,6 +65,17 @@ docs = [
   "sphinx-autodoc-typehints>=3.2",
   "sphinx-togglebutton>=0.3.2",
 ]
+analyze = [ "jupyterlab>=4.2.5", "jupytext>=1.16.4" ]
+coverage = [ "coverage[toml]>=7.9.2" ]
+lint = [ "pylint", "pylint-per-file-ignores" ]
+mypy = [ "mypy>=1.2", "pep8-naming>=0.12.1", "types-setuptools>=80.9.0.20250529" ]
+pre_commit = [
+  "pre-commit>=4.3",
+  "pre-commit-uv>=4.2",
+  { include-group = "ruff" },
+]
+pyright = [ "pyright>=1.1.406" ]
+ruff = [ "ruff>=0.0.259" ]
 style = [
   { include-group = "lint" },
   { include-group = "mypy" },
@@ -73,51 +83,36 @@ style = [
   { include-group = "pyright" },
   { include-group = "ruff" },
 ]
-pre_commit = [
-  "pre-commit>=4.3",
-  "pre-commit-uv>=4.2",
-  { include-group = "ruff" },
-]
-ruff = [ "ruff>=0.0.259" ]
-mypy = [ "mypy>=1.2", "pep8-naming>=0.12.1", "types-setuptools>=80.9.0.20250529" ]
-lint = [ "pylint", "pylint-per-file-ignores" ]
-pyright = [ "pyright>=1.1.406" ]
-coverage = [ "coverage[toml]>=7.9.2" ]
 # environments not in dev
 typeguard = [ "typeguard>=4.1.5" ]
-analyze = [ "jupyterlab>=4.2.5", "jupytext>=1.16.4" ]
 
-[tool.coverage.paths]
-source = [ "src", ".nox/*/site-packages" ]
-
-[tool.coverage.run]
-branch = true
-source = [ "src" ]
-omit = [ "*_tab.py", "**/__init__.py", "tools/*.py" ]
-parallel = true
-
-[tool.coverage.report]
-show_missing = true
-skip_covered = true
-fail_under = 80                                        # TODO dvp: increase limit to 100 with code maturing
-omit = [ "*_tab.py", "**/__init__.py", "**/types.py" ]
+[tool.coverage]
+run.branch = true
+run.omit = [ "**/__init__.py", "*_tab.py", "tools/*.py" ]
+run.parallel = true
+run.source = [ "src" ]
+paths.source = [ "src", ".nox/*/site-packages" ]
 # Regexes for lines to exclude from consideration
-exclude_lines = [
-  # Have to re-enable the standard pragma
-  "pragma: no cover",
+report.exclude_lines = [
   # Don't complain about missing debug-only code:
   "def __repr__",
+  "if __name__ == .__main__.:",
+  # Don't complain if non-runnable code isn't run:
+  "if 0:",
   "if self.debug",
+  "if TYPE_CHECKING:",
+  # Have to re-enable the standard pragma
+  "pragma: no cover",
   # Don't complain if tests don't hit defensive assertion code:
   "raise AssertionError",
   "raise NotImplementedError",
-  # Don't complain if non-runnable code isn't run:
-  "if 0:",
-  "if __name__ == .__main__.:",
-  "if TYPE_CHECKING:",
 ]
-ignore_errors = true
-sort = "Cover"
+report.fail_under = 80  # TODO dvp: increase limit to 100 with code maturing
+report.ignore_errors = true
+report.omit = [ "**/__init__.py", "**/types.py", "*_tab.py" ]
+report.show_missing = true
+report.skip_covered = true
+report.sort = "Cover"
 
 # MyPy config
 # See https://mypy.readthedocs.io/en/stable/config_file.html#using-a-pyproject-toml-file
@@ -192,4 +187,4 @@ sections = [ "project.dependencies" ]
 
 [tool.rstcheck]
 report_level = "ERROR"
-ignore_messages = "(Unknown directive type \"(todo.*|automodule)\".$)"
+ignore_messages = '(Unknown directive type "(todo.*|automodule)".$)'
