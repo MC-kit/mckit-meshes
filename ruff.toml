@@ -2,7 +2,6 @@ target-version = "py312"
 line-length = 100
 src = ["src", "tests"]
 exclude = [
-  "*.egg-info",
   ".cache",
   ".direnv",
   ".eggs",
@@ -96,6 +95,12 @@ parametrize-names-type = "csv"
 
 [lint.flake8-type-checking]
 strict = true
+
+[lint.pep8-naming]
+ignore-names = [
+    "*eV*",
+    "*He*",
+]
 
 # warning: The isort option `isort.split-on-trailing-comma` is incompatible
 # with the formatter `format.skip-magic-trailing-comma=true` option.

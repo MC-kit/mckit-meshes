@@ -17,8 +17,10 @@ norecursedirs = [
 ]
 python_functions = ["test_*", "profile_*"]
 addopts = [
+    "-n=auto",
     "-ra",
     "-q",
+    "--cov-config", "pyproject.toml",
     "--tb=short",
     "--doctest-modules",
     "--strict-markers",
@@ -38,7 +40,6 @@ doctest_optionflags = [
 ]
 testpaths = ["tests", "src", "docs"]
 markers = ["slow: marks tests as slow (deselect with '-m \"not slow\"')"]
-# xfail tests that pass should fail the test suite
 filterwarnings = [
     "error",
     "ignore:.*not typechecking multipledispatch.dispatcher.*UserWarning",
