@@ -118,17 +118,17 @@ export JUST_LOG := log
 # test up to the first fail
 [group: 'test']
 @test-ff *args:
-  pytest -vv -x {{args}}
+  uv run --no-dev --group test pytest -x {{args}}
 
 # test with clean cache
 [group: 'test']
 @test-cache-clear *args:
-  pytest --cache-clear {{args}}
+  uv run --no-dev --group test pytest --cache-clear {{args}}
 
 # test fast
 [group: 'test']
 @test-fast *args:
-  pytest -m "not slow" {{args}}
+  uv run --no-dev --group test pytest -m "not slow" {{args}}
 
 # run all the tests
 [group: 'test']
