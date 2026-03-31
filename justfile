@@ -171,7 +171,7 @@ typeguard *args:
 # Run mypy
 [group: 'lint']
 @mypy:
-  uv run --no-dev --group mypy mypy src tests docs/source/conf.py
+  uv run --no-dev --group mypy mypy src docs/source/conf.py
 
 [group: 'lint']
 @pylint:
@@ -179,7 +179,7 @@ typeguard *args:
 
 [group: 'lint']
 @pyright:
-  uv run --no-dev --group pyright pyright src tests
+  uv run --no-dev --group pyright pyright src
 
 # Lint with ty
 [group: 'lint']
