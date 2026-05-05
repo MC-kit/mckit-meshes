@@ -9,7 +9,6 @@ description = "Python tools to work with MCNP meshtallies and weight meshes."
 readme = "README.rst"
 keywords = [ "MCNP", "mesh", "variance reduction", "weights" ]
 license = { text = "MIT" }
-authors = [ { name = "dvp2015", email = "dmitri_portnov@yahoo.com" } ]
 requires-python = ">=3.12"
 classifiers = [
   "Development Status :: 4 - Beta",
@@ -31,17 +30,23 @@ dependencies = [
   "pyevtk>=1.4",
   "toolz>=0.11",
 ]
-optional-dependencies.plot = [
+[[project.authors]]
+name = "dvp2015"
+email = "dmitri_portnov@yahoo.com"
+[project.optional-dependencies]
+plot = [
   "jupyterlab>=4.4.10",
   "jupytext>=1.18.1",
   "matplotlib>=3.10.7",
   "seaborn>=0.13.2",
 ]
-urls.Changelog = "https://github.com/MC-kit/mckit-meshes/releases"
-urls.documentation = "https://mckit-meshes.readthedocs.io"
-urls.homepage = "https://github.com/MC-kit/mckit-meshes"
-urls.repository = "https://github.com/MC-kit/mckit-meshes"
-scripts.mckit-meshes = "mckit_meshes.__main__:main"
+[project.scripts]
+mckit-meshes = "mckit_meshes.__main__:main"
+[project.urls]
+Changelog = "https://github.com/MC-kit/mckit-meshes/releases"
+documentation = "https://mckit-meshes.readthedocs.io"
+homepage = "https://github.com/MC-kit/mckit-meshes"
+repository = "https://github.com/MC-kit/mckit-meshes"
 
 [dependency-groups]
 dev = [
@@ -86,38 +91,9 @@ style = [
 # environments not in dev
 typeguard = [ "typeguard>=4.1.5" ]
 
-[tool.coverage]
-run.branch = true
-run.omit = [ "**/__init__.py", "*_tab.py", "tools/*.py" ]
-run.parallel = true
-run.source = [ "src" ]
-paths.source = [ "src" ]
-# Regexes for lines to exclude from consideration
-report.exclude_lines = [
-  # Don't complain about missing debug-only code:
-  "def __repr__",
-  "if __name__ == .__main__.:",
-  # Don't complain if non-runnable code isn't run:
-  "if 0:",
-  "if self.debug",
-  "if TYPE_CHECKING:",
-  # Have to re-enable the standard pragma
-  "pragma: no cover",
-  # Don't complain if tests don't hit defensive assertion code:
-  "raise AssertionError",
-  "raise NotImplementedError",
-]
-report.fail_under = 80  # TODO dvp: increase limit to 100 with code maturing
-report.ignore_errors = true
-report.omit = [ "**/__init__.py", "**/types.py", "*_tab.py" ]
-report.show_missing = true
-report.skip_covered = true
-report.sort = "Cover"
-
 # MyPy config
 # See https://mypy.readthedocs.io/en/stable/config_file.html#using-a-pyproject-toml-file
 #     https://dev.to/tusharsadhwani/the-comprehensive-guide-to-mypy-561m
-
 [tool.mypy]
 python_version = "3.13"
 cache_dir = ".cache/mypy"
@@ -133,7 +109,6 @@ warn_return_any = true
 warn_unreachable = true
 warn_unused_configs = true
 warn_unused_ignores = true
-
 [[tool.mypy.overrides]]
 module = [
   "IPython.core.magic",
@@ -165,11 +140,40 @@ module = [
   "xdoctest",
 ]
 ignore_missing_imports = true
-
 [[tool.mypy.overrides]]
 module = [ "tomllib" ]
 allow_redefinition = true
 disable_error_code = "no-redef"
+
+[tool.coverage]
+[tool.coverage.paths]
+source = [ "src" ]
+[tool.coverage.report]
+exclude_lines = [
+  # Don't complain about missing debug-only code:
+  "def __repr__",
+  "if __name__ == .__main__.:",
+  # Don't complain if non-runnable code isn't run:
+  "if 0:",
+  "if self.debug",
+  "if TYPE_CHECKING:",
+  # Have to re-enable the standard pragma
+  "pragma: no cover",
+  # Don't complain if tests don't hit defensive assertion code:
+  "raise AssertionError",
+  "raise NotImplementedError",
+]
+fail_under = 80  # TODO dvp: increase limit to 100 with code maturing
+ignore_errors = true
+omit = [ "**/__init__.py", "**/types.py", "*_tab.py" ]
+show_missing = true
+skip_covered = true
+sort = "Cover"
+[tool.coverage.run]
+branch = true
+omit = [ "**/__init__.py", "*_tab.py", "tools/*.py" ]
+parallel = true
+source = [ "src" ]
 
 [tool.xdoctest]
 quiet = true
