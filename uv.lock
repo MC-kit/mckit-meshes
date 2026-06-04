@@ -2408,14 +2408,14 @@ wheels = [
 
 [[package]]
 name = "pyevtk"
-version = "1.6.0"
+version = "1.7.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "numpy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/44/dd/d20c1a0c0105611b831536d2c6d9132bb83d70ed80f4b6d328c04acfeb0d/pyevtk-1.6.0.tar.gz", hash = "sha256:1f6be7876a3a005c8258861551da4fe7e44ff1a2e7ff2a93d6dc51deedfda5f4", size = 38980, upload-time = "2023-06-05T15:25:27.522Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/7d/18/2bc8ae16ac487d25a5d020b81a849ee1f3ac3b4e3636648c26baa71ab9aa/pyevtk-1.7.0.tar.gz", hash = "sha256:21ad3b1905b06bf288166629f0002d13a9c664eb42bcbed624d2032d7b8bcf52", size = 42708, upload-time = "2026-05-28T08:00:38.061Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/06/da/d57b07c565cc5f8705da436cfcc44754343416c1187d83f04d5443d5cc1a/pyevtk-1.6.0-py3-none-any.whl", hash = "sha256:057415512ab902785c72251df8f8450e4bbc9eab16677f091a4b8ee53b9cc775", size = 20521, upload-time = "2023-06-05T15:25:25.625Z" },
+    { url = "https://files.pythonhosted.org/packages/46/25/39ef0a3a2f03b4bc4118bcc6493aee41785b87dd4cace5fc073d291f7843/pyevtk-1.7.0-py3-none-any.whl", hash = "sha256:2ccf414b3c2210d633b26f9d56c121d95ea3935c40922658b2de60384b16e64c", size = 20389, upload-time = "2026-05-28T08:00:37.065Z" },
 ]
 
 [[package]]
