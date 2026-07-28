@@ -2,6 +2,7 @@ target-version = "py312"
 line-length = 100
 src = ["src", "tests"]
 exclude = [
+  "*.egg-info",
   ".cache",
   ".direnv",
   ".eggs",
@@ -14,8 +15,6 @@ exclude = [
   ".pytest_cache",
   ".pytype",
   ".ruff_cache",
-  ".svn",
-  ".tox",
   ".venv",
   ".vscode",
   "__pycache__",
@@ -26,7 +25,6 @@ exclude = [
   "data",
   "dist",
   "docs/source/conf.py",
-  "node_modules",
   "notebooks",
   "site-packages",
   "tests/data",
@@ -35,7 +33,7 @@ exclude = [
 ]
 
 [lint]
-select = ["ALL"]
+select = [ "ALL" ]
 ignore = [
   "ANN001", # ANN001 Missing type annotation for function argument: doesn't allow to use functools dispatching
   "ANN002", # ANN002 Missing type annotation for *drop_items: ... as above
@@ -44,12 +42,13 @@ ignore = [
   "ANN204", # ANN204 Missing return type annotation for special method
   "C901",   # too complex - ...
   "COM812",
+  "CPY001", # Missing copyright notice at top of file
   "D100",   # Missing docstring in public module
   "D101",   # Missing docstring in public class
   "D102",   # Missing docstring in public method
   "D103",   # Missing docstring in public function
-  "D105",   # D105 Missing docstring in magic method (__hash__, __eq__)
   "D104",   # Missing docstring in public package
+  "D105",   # D105 Missing docstring in magic method (__hash__, __eq__)
   "D106",   # Missing docstring in public nested class
   "D107",   # Missing docstring in __init__
   "D203",
@@ -65,10 +64,10 @@ ignore = [
   "ISC001", # may cause conflicts when used with the ruff formatter
 
   "PLE1205", # logging-too-many-args - we use loguru with '{' style of placeholders
-
   "PLR0912", # Too many branches (15 > 12)
   "PLR0913", # Too many arguments to function call (6 > 5)
   "PLR0915", # Too many statements (65 > 50)
+  "PLR0917", # Too many positional arguments 
   "PLR2004", # magic number - don't want to declare 0.0 as constant
   "PT019",   # Fixture `_bin` without value is injected as parameter (false positive?)
   "S101",    # Use of `assert` detected
