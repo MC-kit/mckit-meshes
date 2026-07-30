@@ -343,7 +343,7 @@ def meta(
 ):
     toml_cfg = cyclopts.config.Toml(
         config,
-        root_keys=["tool", "character-counter"],
+        root_keys=["tool", "mckit-meshes"],
         search_parents=True,
     )
     env_cfg = cyclopts.config.Env(prefix=pkg_name)
