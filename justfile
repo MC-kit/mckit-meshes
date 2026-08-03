@@ -16,7 +16,7 @@ alias t := test
 alias c := check
 set dotenv-load
 
-default_python := "3.13"
+default_python := "3.14"
 TITLE := `uv version`
 VERSION := `uv version --short`
 log := "warn"
