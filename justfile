@@ -113,7 +113,6 @@ export JUST_LOG := log
 [group('dev')]
 @up-tools:
     pre-commit autoupdate
-    uv self update
     pre-commit run -a 
 
 # update dependencies
