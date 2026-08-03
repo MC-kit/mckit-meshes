@@ -358,6 +358,7 @@ def main():  # pragma: no cover
         app.meta()
     except Exception:  # noqa: BLE001
         write_traceback(exc_info=sys.exc_info())
+        console.print_exception()
         sys.exit(1)
 
 
