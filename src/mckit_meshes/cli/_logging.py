@@ -37,7 +37,7 @@ from rich.traceback import install
 
 if TYPE_CHECKING:
     # noinspection protected-member,package-requirements
-    from rich import Console
+    from rich.console import Console
 
 NAME: Final[str] = "mckit_meshes"
 PREFIX: Final[Path] = Path(NAME)
