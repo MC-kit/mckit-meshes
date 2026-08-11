@@ -28,6 +28,7 @@ dependencies = [
   "matplotlib>=3.10.7", # TODO @dvp: move to optional deps (doctest needs this here)
   "numpy>=2.4",
   "pyevtk>=1.4",
+  "rich>=15",
   "toolz>=0.11",
 ]
 [[project.authors]]

@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from typing import Annotated, Final, cast
+from typing import Annotated, Final
 
-import logging
 import sys
 
 from dataclasses import dataclass
@@ -11,13 +10,11 @@ from pathlib import Path
 import cyclopts
 
 from cyclopts import App, Parameter, types  # noqa: TC002
-from eliot import start_task, to_file, write_traceback
-from eliot.stdlib import EliotHandler
+from eliot import start_task
 from rich.console import Console
-from rich.logging import RichHandler
 
-from mckit_meshes import __name__ as pkg_name
 from mckit_meshes import __version__
+from mckit_meshes.cli import NAME, PREFIX, init_logging
 from mckit_meshes.cli.addnpz import add as do_add
 from mckit_meshes.cli.invwgt import invwgt as do_invwgt
 from mckit_meshes.cli.merge_weights import merge_weights as do_merge_weights
@@ -28,14 +25,25 @@ from mckit_meshes.cli.npz2vtk import npz2vtk as do_npz2vtk
 from mckit_meshes.cli.split_mesh_file import split as do_split
 from mckit_meshes.cli.wgt_drop_ebins import wgt_drop_ebins as do_wgt_drop_ebins
 
-NAME: Final[str] = pkg_name.replace("_", "-")
-PREFIX: Final[Path] = Path(NAME)
-DEFAULT_CONFIG_PATH: Final[Path] = PREFIX.with_suffix(".toml")
+DEFAULT_CONFIG_PATH: Final[Path] = Path("mckit.toml")
 DEFAULT_ELIOT_LOG_PATH: Final[Path] = PREFIX.with_suffix(".log")
 DEFAULT_NPZ = Path("npz")
 
 console = Console()
-app = App(name=NAME, version=__version__, console=console)
+app = App(
+    name=NAME,
+    version=__version__,
+    console=console,
+    config=[
+        cyclopts.config.Toml(
+            DEFAULT_CONFIG_PATH,
+            root_keys=["tool", NAME],
+            search_parents=True,
+        ),
+        cyclopts.config.Env(prefix=NAME),
+    ],
+    help_format="restructuredtext",
+)
 
 
 @Parameter(name="*")  # https://cyclopts.readthedocs.io/en/latest/cookbook/sharing_parameters.html
@@ -56,6 +64,7 @@ class Common:
             self.prefix = Path.cwd()
 
 
+# noinspection incorrect-docstring
 @app.command
 def mesh2npz(*mesh_tallies: types.ResolvedExistingFile, common: Common | None = None) -> None:
     """Convert mesh files to npz files.
@@ -317,49 +326,36 @@ def wgt_drop_ebins(
     )
 
 
-def init_logging(eliot_log: Path | None = None) -> None:
-    logging.basicConfig(
-        level="NOTSET",
-        format="%(message)s",
-        datefmt="[%X]",
-        handlers=[
-            RichHandler(console=app.console, rich_tracebacks=True, tracebacks_suppress=[cyclopts])
-        ],
-    )
-    if not eliot_log and "pytest" not in sys.modules:
-        eliot_log = PREFIX.with_suffix(".log")
-    if eliot_log:
-        to_file(eliot_log.open(mode="a"))
-        # Add Eliot Handler to root Logger. You may wish to only route specific
-        # Loggers to Eliot.
-        logging.getLogger().addHandler(EliotHandler())
-
-
 @app.meta.default
 def meta(
     *tokens: Annotated[str, Parameter(show=False, allow_leading_hyphen=True)],
-    config: types.TomlPath = DEFAULT_CONFIG_PATH,
     eliot_log: Path = DEFAULT_ELIOT_LOG_PATH,
+    console_log_level: str = "INFO",
 ):
-    toml_cfg = cyclopts.config.Toml(
-        config,
-        root_keys=["tool", "mckit-meshes"],
-        search_parents=True,
-    )
-    env_cfg = cyclopts.config.Env(prefix=pkg_name)
-    app.config = cast("tuple[str, ...]", (toml_cfg, env_cfg))
-    init_logging(eliot_log)
+    """Transfer meta information from STP to MCNP.
+
+    Parameters
+    ----------
+    eliot_log
+        file for structured eliot logging, by default mapstp.log, optional
+    console_log_level
+        logging level for console logging
+    """
+    _console = app.console
+    init_logging(_console, eliot_log=eliot_log, console_log_level=console_log_level)
     with start_task(action_type=NAME, version=__version__, working_dir=Path.cwd().absolute()):
-        app(tokens)
+        _console.rule("🏁 Start", style="bold yellow1", align="left")
+        _console.print(NAME, __version__, style="bold dark_olive_green3")
+        _console.print("eliot log: ", eliot_log.absolute(), style="dim")
+        if "pytest" in sys.modules:
+            app(tokens, result_action="return_value")
+        else:
+            app(tokens)  # pragma: no cover
+        _console.rule("✨ Done :smiley:", style="bold yellow1", align="left")
 
 
 def main():  # pragma: no cover
-    try:
-        app.meta()
-    except Exception:  # noqa: BLE001
-        write_traceback(exc_info=sys.exc_info())
-        console.print_exception()
-        sys.exit(1)
+    app.meta()
 
 
 if __name__ == "__main__":
