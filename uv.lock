@@ -1702,7 +1702,7 @@ wheels = [
 
 [[package]]
 name = "mckit-meshes"
-version = "0.5.0"
+version = "0.5.1.dev1"
 source = { editable = "." }
 dependencies = [
     { name = "cyclopts" },
