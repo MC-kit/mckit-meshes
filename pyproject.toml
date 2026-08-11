@@ -1,16 +1,15 @@
 [build-system]
 build-backend = "uv_build"
-requires = [ "uv-build>=0.9.2,<0.10" ]
+requires = [ "uv-build>=0.12,<0.13" ]
 
 [project]
 name = "mckit-meshes"
-version = "0.4.0"
+version = "0.5.0"
 description = "Python tools to work with MCNP meshtallies and weight meshes."
 readme = "README.rst"
 keywords = [ "MCNP", "mesh", "variance reduction", "weights" ]
 license = { text = "MIT" }
-authors = [ { name = "dvp2015", email = "dmitri_portnov@yahoo.com" } ]
-requires-python = ">=3.12,<3.15"
+requires-python = ">=3.12"
 classifiers = [
   "Development Status :: 4 - Beta",
   "Environment :: Console",
@@ -29,20 +28,26 @@ dependencies = [
   "matplotlib>=3.10.7", # TODO @dvp: move to optional deps (doctest needs this here)
   "numpy>=2.4",
   "pyevtk>=1.4",
+  "rich>=15",
   "toolz>=0.11",
 ]
-
-optional-dependencies.plot = [
+[[project.authors]]
+name = "dvp2015"
+email = "dmitri_portnov@yahoo.com"
+[project.optional-dependencies]
+plot = [
   "jupyterlab>=4.4.10",
   "jupytext>=1.18.1",
   "matplotlib>=3.10.7",
   "seaborn>=0.13.2",
 ]
-urls.Changelog = "https://github.com/MC-kit/mckit-meshes/releases"
-urls.documentation = "https://mckit-meshes.readthedocs.io"
-urls.homepage = "https://github.com/MC-kit/mckit-meshes"
-urls.repository = "https://github.com/MC-kit/mckit-meshes"
-scripts.mckit-meshes = "mckit_meshes.__main__:main"
+[project.scripts]
+mckit-meshes = "mckit_meshes.__main__:main"
+[project.urls]
+Changelog = "https://github.com/MC-kit/mckit-meshes/releases"
+documentation = "https://mckit-meshes.readthedocs.io"
+homepage = "https://github.com/MC-kit/mckit-meshes"
+repository = "https://github.com/MC-kit/mckit-meshes"
 
 [dependency-groups]
 dev = [
@@ -52,97 +57,57 @@ dev = [
 ]
 test = [
   "pytest>=9",
-  "pytest-durations>=1.5.2",
-  "pytest-emoji>=0.2",
-  "pytest-mock>=3.14",
-  "xdoctest>=1.2",
-  { include-group = "coverage" }, # coverage may be used on its own, see GHA test
+  "pytest-cov>=7.1",
+  "pytest-mock>=3.15",
+  "pytest-xdist[psutil]>=3.8",
+  "xdoctest>=1.3",
 ]
 docs = [
-  "esbonio>=0.16.5",
+  "esbonio>=2",
   "rstcheck[sphinx,toml]>=6.2.5",
   "sphinx>=9.1",
   "sphinx-autobuild>=2025.8.25",
-  "sphinx-autodoc-typehints>=3.2",
-  "sphinx-togglebutton>=0.3.2",
+  "sphinx-autodoc-typehints>=3.10",
+  "sphinx-togglebutton>=0.4",
 ]
+analyze = [ "jupyterlab>=4.5", "jupytext>=1.19" ]
+lint = [ "pylint", "pylint-per-file-ignores" ]
+mypy = [ "mypy>=1.2", "pep8-naming>=0.12.1", "types-setuptools>=80.9.0.20250529" ]
+pre_commit = [
+  "pre-commit>=4.3",
+  { include-group = "ruff" },
+]
+pyright = [ "pyright>=1.1.406" ]
+ruff = [ "ruff>=0.0.259" ]
 style = [
+  "basedpyright>=1.39.9",
+  "pyrefly>=1.1.1",
+  "ty>=0.0.70",
   { include-group = "lint" },
   { include-group = "mypy" },
   { include-group = "pre_commit" },
   { include-group = "pyright" },
   { include-group = "ruff" },
 ]
-pre_commit = [
-  "pre-commit>=4.3",
-  "pre-commit-uv>=4.2",
-  { include-group = "ruff" },
-]
-ruff = [ "ruff>=0.0.259" ]
-mypy = [ "mypy>=1.2", "pep8-naming>=0.12.1", "types-setuptools>=80.9.0.20250529" ]
-lint = [ "pylint", "pylint-per-file-ignores" ]
-pyright = [ "pyright>=1.1.406" ]
-coverage = [ "coverage[toml]>=7.9.2" ]
-# environments not in dev
-typeguard = [ "typeguard>=4.1.5" ]
-analyze = [ "jupyterlab>=4.2.5", "jupytext>=1.16.4" ]
-
-[tool.coverage.paths]
-source = [ "src", ".nox/*/site-packages" ]
-
-[tool.coverage.run]
-branch = true
-source = [ "src" ]
-omit = [ "*_tab.py", "**/__init__.py", "tools/*.py" ]
-parallel = true
-
-[tool.coverage.report]
-show_missing = true
-skip_covered = true
-fail_under = 80                                        # TODO dvp: increase limit to 100 with code maturing
-omit = [ "*_tab.py", "**/__init__.py", "**/types.py" ]
-# Regexes for lines to exclude from consideration
-exclude_lines = [
-  # Have to re-enable the standard pragma
-  "pragma: no cover",
-  # Don't complain about missing debug-only code:
-  "def __repr__",
-  "if self.debug",
-  # Don't complain if tests don't hit defensive assertion code:
-  "raise AssertionError",
-  "raise NotImplementedError",
-  # Don't complain if non-runnable code isn't run:
-  "if 0:",
-  "if __name__ == .__main__.:",
-  "if TYPE_CHECKING:",
-]
-ignore_errors = true
-sort = "Cover"
-
-# MyPy config
-# See https://mypy.readthedocs.io/en/stable/config_file.html#using-a-pyproject-toml-file
-#     https://dev.to/tusharsadhwani/the-comprehensive-guide-to-mypy-561m
+typeguard = [ "typeguard>=4.5" ]
 
 [tool.mypy]
-python_version = "3.13"
-cache_dir = ".cache/mypy"
-disallow_untyped_defs = true
 files = "src/**/*.py"
 follow_imports = "silent"
-pretty = true
-# strict = true     # TODO dvp: uncomment this to get strict control
-show_error_codes = true
-show_error_context = true
+python_version = "3.14"
+disallow_untyped_defs = true
 warn_redundant_casts = true
+warn_unused_ignores = true
 warn_return_any = true
 warn_unreachable = true
+# strict = true  # TODO dvp: uncomment this to get strict control
+show_error_context = true
+pretty = true
+cache_dir = ".cache/mypy"
 warn_unused_configs = true
-warn_unused_ignores = true
-
+show_error_codes = true
 [[tool.mypy.overrides]]
 module = [
-  "IPython.core.magic",
-  "IPython.core.magic_arguments",
   "click",
   "click.testing",
   "cyclopts",
@@ -150,6 +115,8 @@ module = [
   "duckdb",
   "eliot",
   "eliot.*",
+  "IPython.core.magic",
+  "IPython.core.magic_arguments",
   "loguru",
   "mckit_nuclides.*",
   "msgspec",
@@ -176,9 +143,38 @@ module = [ "tomllib" ]
 allow_redefinition = true
 disable_error_code = "no-redef"
 
+[tool.coverage]
+[tool.coverage.paths]
+source = [ "src" ]
+[tool.coverage.report]
+exclude_lines = [
+  "def __repr__",
+  "if __name__ == .__main__.:",
+  "if 0:",
+  "if TYPE_CHECKING:",
+  "if self.debug",
+  "pragma: no cover",
+  "raise AssertionError",
+  "raise NotImplementedError",
+]
+fail_under = 80  # TODO dvp: increase limit to 100 with code maturing
+ignore_errors = true
+omit = [ "**/__init__.py", "**/types.py", "*_tab.py" ]
+show_missing = true
+skip_covered = true
+sort = "Cover"
+[tool.coverage.run]
+branch = true
+omit = [ "**/__init__.py", "*_tab.py", "tools/*.py", "**/plot/*.py" ]
+parallel = true
+source = [ "src" ]
+
+[tool.marimo.runtime]
+pythonpath = [ "notebooks", "notebooks/common" ]
+
 [tool.xdoctest]
-quiet = true
 options = ""
+quiet = true
 
 [tool.jupytext]
 # https://jupytext.readthedocs.io/en/latest/config.html
@@ -186,10 +182,11 @@ options = ""
 formats = "ipynb,py:percent"
 
 [tool.creosote]
-paths = [ "src" ]
 deps-file = "pyproject.toml"
+paths = [ "src" ]
 sections = [ "project.dependencies" ]
+venvs = [ ".venv" ]
 
 [tool.rstcheck]
 report_level = "ERROR"
-ignore_messages = "(Unknown directive type \"(todo.*|automodule)\".$)"
+ignore_messages = '(Unknown directive type "(todo.*|automodule)".$)'

@@ -12,7 +12,7 @@
 Description
 -----------
 
-The module implements methods to read and manipulate (merge, inverse, scale, etc.)
+The module implements methods to read and manipulate (merge, inverse, add, scale, etc.)
 MCNP mesh tallies and weight meshes.
 
 More details in documentation_.

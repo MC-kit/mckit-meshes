@@ -21,6 +21,7 @@ def add(
     out: Path | None = None,
     comment: str | None = None,
     number: int = 1,
+    scale: float | None = None,
     override: bool = False,
 ) -> None:
     """Convert MCNP meshtal file to a number of npz files, one for each mesh tally.
@@ -41,6 +42,8 @@ def add(
         if not provided, then the comment from the first mesh is used
     number
         ... to assign to resulting mesh
+    scale
+        multiplication factor for resulting mesh, use on averaging several meshes
     npz_files
         files to process, optional
     override
@@ -82,10 +85,15 @@ def add(
                         totals += mesh.totals
                         tot_errors += np.power(mesh.totals * mesh.totals_err, 2)
 
-        _back_to_relative_values(data, errors)
+        if data is not None:
+            _back_to_relative_values(data, errors)
+            if scale is not None:
+                data *= scale
 
         if totals is not None:
             _back_to_relative_values(totals, tot_errors)
+            if scale is not None:
+                totals *= scale
 
         if _sum is None or data is None or errors is None:
             msg = "No npz-files found."

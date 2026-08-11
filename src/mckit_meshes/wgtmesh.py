@@ -645,7 +645,7 @@ def produce_strings(stream, format_spec) -> list[str]:
 
 
 def parse_coordinates(inp: list[str]) -> np.ndarray:
-    def iter_over_coarse_mesh() -> Generator[tuple[float, int], None, None]:
+    def iter_over_coarse_mesh() -> Generator[tuple[float, int]]:
         is_first = True
         i = 0
         length = len(inp)
@@ -664,7 +664,7 @@ def parse_coordinates(inp: list[str]) -> np.ndarray:
                 i += 1
             yield coordinate, fine_bins
 
-    def iter_over_fine_mesh(_iter_over_coarse_mesh) -> Generator[float, None, None]:
+    def iter_over_fine_mesh(_iter_over_coarse_mesh) -> Generator[float]:
         prev_coordinate: float | None = None
         prev_fine_bins: int | None = None
         for coordinate, fine_bins in _iter_over_coarse_mesh:

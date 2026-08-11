@@ -315,7 +315,7 @@ def _select_numbers(line: str) -> NDArray:
 
 
 def _select_part_in_parenthesis(line: str) -> str:
-    return line.split("(")[1].split(")")[0].strip()
+    return line.split("(")[1].split(")", maxsplit=1)[0].strip()
 
 
 def _parse_us_date(string: str) -> dt.datetime:
