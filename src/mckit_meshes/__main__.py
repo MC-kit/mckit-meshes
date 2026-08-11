@@ -347,7 +347,7 @@ def meta(
     eliot_log: Path = DEFAULT_ELIOT_LOG_PATH,
     console_log_level: str = "INFO",
 ) -> None:
-    """Transfer meta information from STP to MCNP.
+    """Convert and process MCNP meshtally and weight files.
 
     Parameters
     ----------
@@ -355,6 +355,17 @@ def meta(
         file for structured eliot logging, by default mapstp.log, optional
     console_log_level
         logging level for console logging
+
+    Configuration
+    -------------
+    Uses TOML and environment variables configuration provided by cyclopts package.
+    TOML file by default is 'mckit.toml', this may be specified with environment variable
+    MCKIT_CONFIG.
+    Config sections start with
+    [tool.mckit_meshes.<command>]
+    followed with CLI parameters.
+    Environment variables start with "MCKIT_MESHES_<COMMAND>_" prefix.
+    Here <command> and  <COMMAND> is one of mckit_meshes commands (see mckit_meshes --help).
     """
     _console = app.console
     init_logging(_console, eliot_log=eliot_log, console_log_level=console_log_level)
