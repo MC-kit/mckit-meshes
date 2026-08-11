@@ -85,9 +85,10 @@ def add(
                         totals += mesh.totals
                         tot_errors += np.power(mesh.totals * mesh.totals_err, 2)
 
-        _back_to_relative_values(data, errors)
-        if scale is not None:
-            data *= scale
+        if data is not None:
+            _back_to_relative_values(data, errors)
+            if scale is not None:
+                data *= scale
 
         if totals is not None:
             _back_to_relative_values(totals, tot_errors)

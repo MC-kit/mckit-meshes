@@ -1,3 +1,20 @@
+# noinspection GrazieInspection
+"""Logging configuration code.
+
+The mckit_meshes CLI application uses Rich for human-readable console logging,
+and eliot for structured file logging.
+
+The mckit_meshes library uses standard logging.
+
+.. note::
+
+    By default, logging is disabled, if ``mckit_meshes`` is used as library.
+    To enable it, you can either use :func:`init_logging`,
+    which is used in CLI module :mod:`__main__`.
+    Or provide own initialization for ``mapstp`` logger.
+
+"""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Final
@@ -11,10 +28,15 @@ import cyclopts
 
 from eliot import to_file
 from eliot.stdlib import EliotHandler
+
+# noinspection package-requirements
 from rich.logging import RichHandler
+
+# noinspection package-requirements
 from rich.traceback import install
 
 if TYPE_CHECKING:
+    # noinspection protected-member,package-requirements
     from rich import Console
 
 NAME: Final[str] = "mckit_meshes"
@@ -39,7 +61,7 @@ def init_logging(
         logging level for console logging
     """  # Use Rich as the default traceback handler for all uncaught exceptions
     install(show_locals=True)
-    logging.getLogger(NAME).disabled = False
+    get_logger().disabled = False
     logging.basicConfig(
         level=console_log_level,
         format="%(message)s",

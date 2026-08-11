@@ -82,6 +82,7 @@ ruff = [ "ruff>=0.0.259" ]
 style = [
   "basedpyright>=1.39.9",
   "pyrefly>=1.1.1",
+  "ty>=0.0.70",
   { include-group = "lint" },
   { include-group = "mypy" },
   { include-group = "pre_commit" },
@@ -164,7 +165,7 @@ skip_covered = true
 sort = "Cover"
 [tool.coverage.run]
 branch = true
-omit = [ "**/__init__.py", "*_tab.py", "tools/*.py" ]
+omit = [ "**/__init__.py", "*_tab.py", "tools/*.py", "**/plot/*.py" ]
 parallel = true
 source = [ "src" ]
 

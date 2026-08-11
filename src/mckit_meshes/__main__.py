@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from typing import Annotated, Final
+from typing import Annotated, Final, cast
 
+import os
 import sys
 
 from dataclasses import dataclass
@@ -11,6 +12,8 @@ import cyclopts
 
 from cyclopts import App, Parameter, types  # noqa: TC002
 from eliot import start_task
+
+# noinspection package-requirements
 from rich.console import Console
 
 from mckit_meshes import __version__
@@ -25,7 +28,7 @@ from mckit_meshes.cli.npz2vtk import npz2vtk as do_npz2vtk
 from mckit_meshes.cli.split_mesh_file import split as do_split
 from mckit_meshes.cli.wgt_drop_ebins import wgt_drop_ebins as do_wgt_drop_ebins
 
-DEFAULT_CONFIG_PATH: Final[Path] = Path("mckit.toml")
+DEFAULT_CONFIG_PATH: Final[Path] = Path(os.getenv("MCKIT_CONFIG", "mckit.toml"))
 DEFAULT_ELIOT_LOG_PATH: Final[Path] = PREFIX.with_suffix(".log")
 DEFAULT_NPZ = Path("npz")
 
@@ -40,7 +43,7 @@ app = App(
             root_keys=["tool", NAME],
             search_parents=True,
         ),
-        cyclopts.config.Env(prefix=NAME),
+        cyclopts.config.Env(prefix=NAME.upper() + "_"),
     ],
     help_format="restructuredtext",
 )
@@ -55,7 +58,7 @@ class Common:
     override: bool = False
     "Override existing output files"
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Initialize prefix, if not specified."""
         # Should be initialized here, not at field definition,
         # to be set to current directory when the Common instance
@@ -69,8 +72,8 @@ class Common:
 def mesh2npz(*mesh_tallies: types.ResolvedExistingFile, common: Common | None = None) -> None:
     """Convert mesh files to npz files.
 
-    By default output folder (prefix) is "npz".
-    If there are many input meshtally files, than meshtally stem is added to prefix.
+    By default, output folder (prefix) is "npz".
+    If there are many input meshtally files, then meshtally stem is added to prefix.
 
     Parameters
     ----------
@@ -79,11 +82,12 @@ def mesh2npz(*mesh_tallies: types.ResolvedExistingFile, common: Common | None = 
     """
     if common is None:
         common = Common(prefix=Path("npz"))
-    if common.prefix is None:
+    elif common.prefix is None:
         common.prefix = Path("npz")
-    do_mesh2npz(*mesh_tallies, prefix=common.prefix, override=common.override)
+    do_mesh2npz(*mesh_tallies, prefix=cast("Path", common.prefix), override=common.override)
 
 
+# noinspection incorrect-docstring
 @app.command
 def npz2vtk(*npz_files: types.ResolvedExistingFile, common: Common | None = None) -> None:
     """Convert npz files to VTK files.
@@ -95,17 +99,19 @@ def npz2vtk(*npz_files: types.ResolvedExistingFile, common: Common | None = None
     """
     if common is None:
         common = Common(prefix=Path("vtk"))
-    if common.prefix is None:
+    elif common.prefix is None:
         common.prefix = Path("vtk")
-    do_npz2vtk(*npz_files, prefix=common.prefix, override=common.override)
+    do_npz2vtk(*npz_files, prefix=cast("Path", common.prefix), override=common.override)
 
 
+# noinspection incorrect-docstring
 @app.command
 def add(
     *npz_files: types.ResolvedExistingFile,
     out: Annotated[types.ResolvedFile | None, Parameter(name=["--out", "-o"])] = None,
     comment: Annotated[str | None, Parameter(name=["--comment", "-c"])] = None,
     number: Annotated[int, Parameter(name=["--number", "-n"])] = 1,
+    scale: types.PositiveFloat | None = None,
     common: Common | None = None,
 ) -> None:
     """Add meshes from npz files.
@@ -113,19 +119,23 @@ def add(
     Parameters
     ----------
     out
-        output file for created meshtally,
-        if not specified, then it's constructed
-        from the input files stems
-    comment, optional
-        comment for meshtally, default the comment from the first mesh
-    number, optional
-        number of created meshtally
+        ... file for created meshtally,   default: computed from the input files stems
+    comment
+        ... for meshtally, default the comment from the first mesh
+    number
+        ... of created meshtally
+    scale
+        multiplication factor for resulting mesh, use on averaging several meshes,
+        default: no scaling
     """
     if common is None:
         common = Common()
-    do_add(*npz_files, out=out, comment=comment, number=number, override=common.override)
+    do_add(
+        *npz_files, out=out, comment=comment, number=number, scale=scale, override=common.override
+    )
 
 
+# noinspection incorrect-docstring
 @app.command
 def split(meshtally_file: types.ResolvedExistingFile, *, common: Common | None = None) -> None:
     """Split MCNP meshtally file to a number of meshtally files, one for each meshtally.
@@ -140,6 +150,7 @@ def split(meshtally_file: types.ResolvedExistingFile, *, common: Common | None =
     do_split(meshtally_file, prefix=common.prefix, override=common.override)
 
 
+# noinspection incorrect-docstring
 @app.command
 def invwgt(
     wgtfile: types.ResolvedExistingPath,
@@ -158,7 +169,7 @@ def invwgt(
 
     Features:
         - Zero values remain zeros.
-        - After all normalises the resulting weights, so at given point the weight is 1.0.
+        - After all normalizes the resulting weights, so at given point the weight is 1.0.
 
     Multiple energy bins are not implemented yet.
 
@@ -185,6 +196,7 @@ def invwgt(
     )
 
 
+# noinspection incorrect-docstring
 @app.command
 def merge_weights(
     *wwinp_files: types.ResolvedExistingFile,
@@ -208,6 +220,7 @@ def merge_weights(
     do_merge_weights(*wwinp_files, out=out, merge_spec=merge_spec, override=common.override)
 
 
+# noinspection incorrect-docstring
 @app.command
 def mesh2wgt(
     mesh_file: types.ResolvedExistingFile,
@@ -238,7 +251,7 @@ def mesh2wgt(
         ),
     ] = None,
     common: Common | None = None,
-):
+) -> None:
     """Convert mesh tally file to weight mesh file.
 
     This can be used for GVR weights computing.
@@ -256,6 +269,7 @@ def mesh2wgt(
     )
 
 
+# noinspection incorrect-docstring
 @app.command
 def normalize_weights(
     weight_file: types.ResolvedExistingPath,
@@ -264,7 +278,7 @@ def normalize_weights(
     normalization_value: float = 1 / 3,
     energy_bin: int = 1,
     common: Common | None = None,
-):
+) -> None:
     """Normalize weights file.
 
     Parameters
@@ -272,12 +286,12 @@ def normalize_weights(
     weight_file
         weights file
     out
-        output file, optional
-    normalization_point, optional
+        output file
+    normalization_point
         coordinates to normalize the weights at, by default "610, 0, 57"
-    normalization_value, optional
+    normalization_value
         value to set, by default 1/3
-    energy_bin, optional
+    energy_bin
         at which energy bin, by default 1
     """
     if common is None:
@@ -292,6 +306,7 @@ def normalize_weights(
     )
 
 
+# noinspection incorrect-docstring
 @app.command
 def wgt_drop_ebins(
     wgtfile: types.ResolvedExistingPath,
@@ -309,11 +324,11 @@ def wgt_drop_ebins(
     wgtfile
         input weights file
     output
-        output weights file
+        ... weights file
     min_energy
         Min energy upper boundary.
     part
-        "Part: 0 - neutron, 1 - photon [default=0]
+        0 - neutron, 1 - photon [default=0]
     """
     if common is None:
         common = Common()
@@ -331,7 +346,7 @@ def meta(
     *tokens: Annotated[str, Parameter(show=False, allow_leading_hyphen=True)],
     eliot_log: Path = DEFAULT_ELIOT_LOG_PATH,
     console_log_level: str = "INFO",
-):
+) -> None:
     """Transfer meta information from STP to MCNP.
 
     Parameters
@@ -354,7 +369,7 @@ def meta(
         _console.rule("✨ Done :smiley:", style="bold yellow1", align="left")
 
 
-def main():  # pragma: no cover
+def main() -> None:  # pragma: no cover
     app.meta()
 
 
