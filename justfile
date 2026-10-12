@@ -191,16 +191,16 @@ typeguard *args:
 
 [group('style')]
 @pylint:
-    uv run --no-dev --group lint pylint --recursive=y --output-format colorized src tests
+    uv run --no-dev --group pylint pylint --recursive=y --output-format colorized src tests
 
 [group('style')]
 @pyright:
     uv run --no-dev --group pyright pyright src tests
 
-# Lint with ty
+# Check typing with ty
 [group('style')]
 @ty:
-    uv run --no-dev --group style ty check 
+    uv run --no-dev --group ty ty check
 
 [group('style')]
 @basedpyright:

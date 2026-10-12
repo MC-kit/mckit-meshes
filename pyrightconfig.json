@@ -3,7 +3,8 @@
   "venv": ".venv",
   "typeCheckingMode": "basic",
   "include": [
-    "src"
+    "src",
+    "tests"
   ],
   "exclude": [
     "**/data",
@@ -14,7 +15,7 @@
   ],
   "reportMissingImports": "error",
   "reportMissingTypeStubs": false,
-  "pythonVersion": "3.13",
+  "pythonVersion": "3.14",
   "pythonPlatform": "Linux",
   "useLibraryCodeForTypes": true
 }

@@ -9,7 +9,7 @@ description = "Python tools to work with MCNP meshtallies and weight meshes."
 readme = "README.rst"
 keywords = [ "MCNP", "mesh", "variance reduction", "weights" ]
 license = { text = "MIT" }
-requires-python = ">=3.12"
+requires-python = ">=3.12,<4"
 classifiers = [
   "Development Status :: 4 - Beta",
   "Environment :: Console",
@@ -20,13 +20,14 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.15",
   "Topic :: Scientific/Engineering :: Physics",
 ]
 dependencies = [
   "cyclopts>=3.24",
   "eliot>=1.17.5",
   "matplotlib>=3.10.7", # TODO @dvp: move to optional deps (doctest needs this here)
-  "numpy>=2.4",
+  "numpy>=2.5",
   "pyevtk>=1.4",
   "rich>=15",
   "toolz>=0.11",
@@ -36,8 +37,6 @@ name = "dvp2015"
 email = "dmitri_portnov@yahoo.com"
 [project.optional-dependencies]
 plot = [
-  "jupyterlab>=4.4.10",
-  "jupytext>=1.18.1",
   "matplotlib>=3.10.7",
   "seaborn>=0.13.2",
 ]
@@ -59,7 +58,7 @@ test = [
   "pytest>=9",
   "pytest-cov>=7.1",
   "pytest-mock>=3.15",
-  "pytest-xdist[psutil]>=3.8",
+#  "pytest-xdist[psutil]>=3.8",
   "xdoctest>=1.3",
 ]
 docs = [
@@ -71,7 +70,7 @@ docs = [
   "sphinx-togglebutton>=0.4",
 ]
 analyze = [ "jupyterlab>=4.5", "jupytext>=1.19" ]
-lint = [ "pylint", "pylint-per-file-ignores" ]
+pylint = [ "pylint", "pylint-per-file-ignores" ]
 mypy = [ "mypy>=1.2", "pep8-naming>=0.12.1", "types-setuptools>=80.9.0.20250529" ]
 pre_commit = [
   "pre-commit>=4.3",
@@ -82,13 +81,14 @@ ruff = [ "ruff>=0.0.259" ]
 style = [
   "basedpyright>=1.39.9",
   "pyrefly>=1.1.1",
-  "ty>=0.0.70",
-  { include-group = "lint" },
   { include-group = "mypy" },
   { include-group = "pre_commit" },
+  { include-group = "pylint" },
   { include-group = "pyright" },
   { include-group = "ruff" },
+  { include-group = "ty" },
 ]
+ty = [ "ty>=0.0.84" ]
 typeguard = [ "typeguard>=4.5" ]
 
 [tool.mypy]
@@ -170,16 +170,11 @@ parallel = true
 source = [ "src" ]
 
 [tool.marimo.runtime]
-pythonpath = [ "notebooks", "notebooks/common" ]
+pythonpath = [ "notebooks", "notebooks/nb_common" ]
 
 [tool.xdoctest]
 options = ""
 quiet = true
-
-[tool.jupytext]
-# https://jupytext.readthedocs.io/en/latest/config.html
-# Pair ipynb notebooks to py:percent text notebooks
-formats = "ipynb,py:percent"
 
 [tool.creosote]
 deps-file = "pyproject.toml"
@@ -188,5 +183,5 @@ sections = [ "project.dependencies" ]
 venvs = [ ".venv" ]
 
 [tool.rstcheck]
+ignore_messages = '(Unknown directive type \"cyclopts|todo|(auto(module|class|function))\"\.)'
 report_level = "ERROR"
-ignore_messages = '(Unknown directive type "(todo.*|automodule)".$)'
