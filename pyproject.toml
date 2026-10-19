@@ -1,6 +1,6 @@
 [build-system]
 build-backend = "uv_build"
-requires = [ "uv-build>=0.12,<0.13" ]
+requires = [ "uv-build>=0.13,<0.14" ]
 
 [project]
 name = "mckit-meshes"
@@ -24,13 +24,13 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Physics",
 ]
 dependencies = [
-  "cyclopts>=3.24",
+  "cyclopts>=5.2",
   "eliot>=1.17.5",
   "matplotlib>=3.10.7", # TODO @dvp: move to optional deps (doctest needs this here)
   "numpy>=2.5",
   "pyevtk>=1.4",
   "rich>=15",
-  "toolz>=0.11",
+  "toolz>=1.2",
 ]
 [[project.authors]]
 name = "dvp2015"
@@ -57,8 +57,8 @@ dev = [
 test = [
   "pytest>=9",
   "pytest-cov>=7.1",
-  "pytest-mock>=3.15",
-#  "pytest-xdist[psutil]>=3.8",
+  "pytest-mock>=3.17",
+  # "pytest-xdist[psutil]>=3.8",
   "xdoctest>=1.3",
 ]
 docs = [
@@ -66,21 +66,21 @@ docs = [
   "rstcheck[sphinx,toml]>=6.2.5",
   "sphinx>=9.1",
   "sphinx-autobuild>=2025.8.25",
-  "sphinx-autodoc-typehints>=3.10",
+  "sphinx-autodoc-typehints>=3.17.2",
   "sphinx-togglebutton>=0.4",
 ]
 analyze = [ "jupyterlab>=4.5", "jupytext>=1.19" ]
-pylint = [ "pylint", "pylint-per-file-ignores" ]
-mypy = [ "mypy>=1.2", "pep8-naming>=0.12.1", "types-setuptools>=80.9.0.20250529" ]
+mypy = [ "mypy>=2.4", "pep8-naming>=0.12.1", "types-setuptools>=80.9.0.20250529" ]
 pre_commit = [
-  "pre-commit>=4.3",
+  "pre-commit>=4.7",
   { include-group = "ruff" },
 ]
+pylint = [ "pylint", "pylint-per-file-ignores" ]
 pyright = [ "pyright>=1.1.406" ]
 ruff = [ "ruff>=0.0.259" ]
 style = [
-  "basedpyright>=1.39.9",
-  "pyrefly>=1.1.1",
+  "basedpyright>=1.40.2",
+  "pyrefly>=1.4",
   { include-group = "mypy" },
   { include-group = "pre_commit" },
   { include-group = "pylint" },
@@ -88,7 +88,7 @@ style = [
   { include-group = "ruff" },
   { include-group = "ty" },
 ]
-ty = [ "ty>=0.0.84" ]
+ty = [ "ty>=0.0.89" ]
 typeguard = [ "typeguard>=4.5" ]
 
 [tool.mypy]
